@@ -1,0 +1,37 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" rx="50" fill="#0A0A0B"/>
+  
+  <g filter="url(#glow)">
+    <!-- Main blade shape -->
+    <path d="M128 28L160 134L128 228L96 134L128 28Z" fill="url(#blade_grad)"/>
+    
+    <!-- Inner bright edge -->
+    <path d="M128 40L144 134L128 210L112 134L128 40Z" fill="#E0F7FA"/>
+    
+    <!-- Crossguard / Accents -->
+    <path d="M60 134L196 134L160 146L96 146L60 134Z" fill="url(#guard_grad)"/>
+    <path d="M128 110L148 134L128 158L108 134L128 110Z" fill="#00D2FF"/>
+  </g>
+  
+  <defs>
+    <filter id="glow" x="20" y="0" width="216" height="256" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <linearGradient id="blade_grad" x1="128" y1="28" x2="128" y2="228" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00D2FF"/>
+      <stop offset="50%" stop-color="#804CF9"/>
+      <stop offset="100%" stop-color="#1A0B2E"/>
+    </linearGradient>
+    
+    <linearGradient id="guard_grad" x1="60" y1="134" x2="196" y2="134" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1A0B2E"/>
+      <stop offset="50%" stop-color="#00D2FF"/>
+      <stop offset="100%" stop-color="#1A0B2E"/>
+    </linearGradient>
+  </defs>
+</svg>

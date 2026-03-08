@@ -1,0 +1,199 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+  body {
+    background-color: #0d0d0d;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background-image: 
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 210, 255, 0.12) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(176, 38, 255, 0.08) 0%, transparent 40%),
+      linear-gradient(rgba(0, 210, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 210, 255, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    background-position: center, center, 0 0, 0 0;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: 0.05em;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  /* Universal Scrollbar Removal */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+  
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+}
+
+/* Scanline overlay - bold CRT effects */
+.scanlines::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 210, 255, 0.05) 3px,
+    rgba(0, 0, 0, 0.1) 4px
+  );
+  pointer-events: none;
+  z-index: 99999;
+}
+
+@layer components {
+  .system-panel {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(24px);
+    border-radius: 1rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s ease;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 0 0 1px rgba(0, 210, 255, 0.03);
+  }
+
+  .system-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    background: linear-gradient(135deg, rgba(0, 210, 255, 0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .system-panel:hover {
+    border-color: rgba(0, 210, 255, 0.15);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 0 40px rgba(0, 210, 255, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .system-panel:hover::before {
+    @apply opacity-100;
+  }
+
+  .glow-text {
+    text-shadow: 0 0 10px rgba(0, 210, 255, 0.7), 0 0 30px rgba(0, 210, 255, 0.4);
+  }
+
+  .glow-text-gold {
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.7), 0 0 30px rgba(255, 215, 0, 0.3);
+  }
+
+  .btn-holographic {
+    padding: 0.625rem 1rem;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 210, 255, 0.6);
+    color: #00d2ff;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 0.5rem;
+    backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 0 0 rgba(0, 210, 255, 0);
+  }
+
+  .btn-holographic:hover {
+    background-color: #00d2ff;
+    color: #000;
+    box-shadow: 0 0 25px rgba(0, 210, 255, 0.6), 0 0 50px rgba(0, 210, 255, 0.3);
+    transform: translateY(-1px);
+  }
+
+  /* Animated progress bar */
+  .progress-bar {
+    position: relative;
+    overflow: hidden;
+    border-radius: 9999px;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 9999px;
+    transition: all 0.7s ease-out;
+  }
+
+  .progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      transparent 100%
+    );
+    animation: progress-shine 2s ease-in-out infinite;
+  }
+
+  /* Card tilt effect on hover */
+  .card-3d {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+
+  .card-3d-inner {
+    transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+}
+
+@keyframes progress-shine {
+  0% { transform: translateX(-100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+/* Text reveal animation */
+@keyframes text-reveal {
+  0% {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+
+/* Rarity pulse for legendary items */
+@keyframes rarity-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(249, 115, 22, 0.7);
+  }
+}
+
+/* System boot animation */
+@keyframes boot-flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    opacity: 1;
+  }
+  20%, 24%, 55% {
+    opacity: 0.3;
+  }
+}
+
+.animate-boot {
+  animation: boot-flicker 1.5s steps(1) infinite;
+}
