@@ -2,8 +2,8 @@ services:
   - type: web
     name: anto-verse-backend
     runtime: python
-    rootDir: backend
-    buildCommand: pip install -r requirements.txt
+    rootDir: solo_leveling_tracker/backend
+    buildCommand: pip install -r requirements.txt || pip install -r solo_leveling_tracker/backend/requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: CORS_ORIGINS
