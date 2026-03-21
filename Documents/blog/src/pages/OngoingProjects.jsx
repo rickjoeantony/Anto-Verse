@@ -75,7 +75,7 @@ const OngoingProjects = () => {
         role: "Team Leader",
         linkedin: "https://www.linkedin.com/in/rickjoe-antony-j-83208b37a",
         image: "/images/rickjoe.png",
-        imageStyle: { objectFit: 'contain', objectPosition: 'center center', transform: 'scale(1.1)' },
+        imageStyle: { objectFit: 'contain', objectPosition: 'center 75%', transform: 'scale(1.15)' },
         founderCompany: "Leukquant"
       },
       members: [
