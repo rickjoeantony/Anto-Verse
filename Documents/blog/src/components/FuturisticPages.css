@@ -1,0 +1,709 @@
+/* ==========================================================
+   Premium Futuristic & Antigravity Styles
+   ========================================================== */
+
+/* Base futuristic container */
+.futuristic-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  color: #F8FAFC;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  text-align: center;
+  position: relative;
+}
+
+/* Staggered Entrance Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.futuristic-title {
+  font-size: 2.7rem;
+  font-weight: 700;
+  margin-bottom: 4rem;
+  letter-spacing: -0.02em;
+  color: transparent;
+  background: linear-gradient(135deg, #F8FAFC 0%, #94A3B8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  display: inline-block;
+  position: relative;
+}
+
+.futuristic-title::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1, #3b82f6), #6366f1;
+  border-radius: 4px;
+}
+
+/* Glassmorphism Panel */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  /* Sleek thin border */
+  border-radius: 24px;
+  padding: 4rem 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  transition: transform 0.4s ease, border-color 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Internal subtle glow for panels */
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.05) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+.glass-panel:hover {
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Card Styling - Neat & Premium Portrait */
+.futuristic-card.portrait-card {
+  border-radius: 20px;
+  width: 240px;
+  /* Shrunk for better alignment */
+  height: 360px;
+  margin: 0 auto;
+  text-align: center;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  position: relative;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8);
+  /* The core intense gradient matching the reference */
+  background: linear-gradient(180deg, rgba(88, 28, 135, 0.8) 0%, rgba(99, 102, 241, 0.8) 50%, rgba(6, 182, 212, 0.9) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+  /* To clip the image and overlay */
+}
+
+/* Base intense glow around the card */
+.futuristic-card.portrait-card::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  background: linear-gradient(180deg, #a855f7, #3b82f6, #06b6d4);
+  filter: blur(20px);
+  opacity: 0.6;
+  border-radius: 22px;
+  transition: opacity 0.4s ease;
+}
+
+.futuristic-card.portrait-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.futuristic-card.portrait-card:hover::before {
+  opacity: 1;
+}
+
+.card-top-info {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.2rem 0.8rem;
+  z-index: 3;
+  text-align: center;
+  /* subtle dark gradient to ensure text readability over bright background */
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, transparent 100%);
+}
+
+.card-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0 0 0.3rem 0;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  transition: color 0.3s ease;
+}
+
+.card-role {
+  font-size: 0.75rem;
+  color: #E2E8F0;
+  font-weight: 600;
+  margin: 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.card-image-wrapper {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 80%;
+  /* Takes up mostly the bottom */
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  transition: all 0.5s ease;
+}
+
+/* Premium Founder Card Styling Tier */
+.founder-card {
+  border: 1px solid #FFD700;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.4), inset 0 0 20px rgba(255, 215, 0, 0.2);
+  transform: scale(1.02);
+}
+
+.founder-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 15px 40px rgba(255, 215, 0, 0.6), inset 0 0 30px rgba(255, 215, 0, 0.3);
+  border-color: #FFF;
+}
+
+/* Internal Gold Aura */
+.founder-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top center, rgba(255, 215, 0, 0.15) 0%, transparent 60%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.founder-badge {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 90%;
+  background: linear-gradient(135deg, #FFD700, #ff8c00);
+  color: #000;
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 4px 10px;
+  border-radius: 8px;
+  letter-spacing: 1.5px;
+  z-index: 20;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.6);
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .founder-badge {
+    font-size: 0.55rem;
+    padding: 3px 8px;
+    letter-spacing: 1px;
+    top: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .founder-badge {
+    font-size: 0.45rem;
+    padding: 2px 6px;
+    letter-spacing: 0.5px;
+    border-radius: 6px;
+    top: 6px;
+  }
+}
+
+.person-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  /* Universally aligns portrait faces safely to avoid top-clipping */
+  filter: drop-shadow(0 -5px 15px rgba(0, 0, 0, 0.4));
+  transition: transform 0.5s ease;
+}
+
+/* LinkedIn Overlay */
+.linkedin-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  padding: 1.2rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
+}
+
+.futuristic-card.portrait-card:hover .linkedin-overlay {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Fade out image slightly on hover to give focus to overlay, though overlay covers it */
+.futuristic-card.portrait-card:hover .card-image-wrapper {
+  opacity: 0;
+  transform: scale(0.95) translateY(10px);
+}
+
+.futuristic-card.portrait-card:hover .card-top-info {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.linkedin-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.8rem;
+}
+
+.linkedin-header span {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.05em;
+}
+
+.linkedin-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.overlay-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.2rem 0;
+}
+
+.overlay-role {
+  font-size: 0.85rem;
+  color: #60a5fa;
+  margin: 0 0 0.8rem 0;
+  font-weight: 500;
+}
+
+.card-desc {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  margin: 0 0 1.2rem 0;
+  line-height: 1.5;
+  flex-grow: 1;
+  /* Pushes the button to the bottom */
+  overflow: hidden;
+}
+
+.view-profile-btn {
+  background: #0a66c2;
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+  margin-top: auto;
+}
+
+.view-profile-btn:hover {
+  background: #004182;
+}
+
+/* Organizational Tree Structure */
+.tree-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.tree-level {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  /* Reduced gap to fit branches better */
+  position: relative;
+  padding-top: 3rem;
+  /* Space for the vertical line */
+}
+
+/* Animations for flowing energy */
+@keyframes energy-flow-v {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 0 200%;
+  }
+}
+
+@keyframes energy-flow-h {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Lines connecting nodes: Glowing Energy Conduits */
+.tree-level::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 3rem;
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.1) 0%, rgba(99, 102, 241, 0.9) 50%, rgba(6, 182, 212, 0.1) 100%);
+  background-size: 100% 200%;
+  animation: energy-flow-v 3s linear infinite reverse;
+  /* reverse makes energy flow DOWN */
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.8);
+  border-radius: 4px;
+}
+
+.tree-level.level-1::before {
+  display: none;
+}
+
+/* Horizontal line: Neat glowing spine */
+.tree-sibling-connector {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(6, 182, 212, 0.9) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: energy-flow-h 4s linear infinite;
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.8);
+  border-radius: 4px;
+  z-index: 0;
+}
+
+/* Nodes specific positioning for branches */
+.tree-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Glowing junction point (circuit board style dot) */
+.tree-node::before {
+  content: '';
+  position: absolute;
+  top: -1.5rem;
+  /* align exactly where the top line ends */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  background: #06b6d4;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #06b6d4, 0 0 20px #6366f1;
+  z-index: 5;
+}
+
+/* Vertical line dropping to children from a single node */
+.tree-node.has-children::after {
+  content: '';
+  position: absolute;
+  bottom: -3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 3rem;
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.1) 0%, rgba(99, 102, 241, 0.9) 50%, rgba(6, 182, 212, 0.1) 100%);
+  background-size: 100% 200%;
+  animation: energy-flow-v 3s linear infinite reverse;
+  /* flow down */
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.8);
+  border-radius: 4px;
+}
+
+/* Vertical line dropping to children from a multi-node level (Level 1 Staff) */
+.tree-level.has-children-center::after {
+  content: '';
+  position: absolute;
+  bottom: -3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 3rem;
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.1) 0%, rgba(99, 102, 241, 0.9) 50%, rgba(6, 182, 212, 0.1) 100%);
+  background-size: 100% 200%;
+  animation: energy-flow-v 3s linear infinite reverse;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.8);
+  border-radius: 4px;
+}
+
+/* Glowing junction point specifically for dropping lines */
+.tree-node.has-children>a::after,
+.tree-level.has-children-center::before {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  background: #ff00ff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ff00ff, 0 0 20px #6366f1;
+  z-index: 5;
+}
+
+.tree-level.has-children-center::before {
+  bottom: -10px;
+  /* level pseudo is on container, offset from bottom appropriately */
+  top: auto;
+  /* reset default tree-level::before top */
+}
+
+/* Projects Grid */
+.projects-grid {
+  display: flex;
+  flex-direction: column;
+  /* Stacked looks neater than wide gaps */
+  gap: 5rem;
+  margin-top: 3rem;
+}
+
+.project-section {
+  position: relative;
+}
+
+.project-header {
+  margin-bottom: 3.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.project-title {
+  font-size: 2.2rem;
+  color: #F8FAFC;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+  letter-spacing: -0.01em;
+}
+
+.project-desc {
+  color: #94A3B8;
+  font-size: 1.05rem;
+  max-width: 760px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* Light Theme overrides for the refined sleek look */
+body.light-theme .futuristic-container {
+  color: #1E293B;
+}
+
+body.light-theme .futuristic-title {
+  background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+body.light-theme .glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .futuristic-card.portrait-card {
+  background: linear-gradient(180deg, rgba(238, 242, 255, 0.9) 0%, rgba(224, 231, 255, 0.9) 50%, rgba(207, 250, 254, 0.9) 100%);
+  border-color: rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .futuristic-card.portrait-card::before {
+  background: linear-gradient(180deg, #c4b5fd, #93c5fd, #67e8f9);
+}
+
+body.light-theme .futuristic-card.portrait-card:hover {
+  border-color: rgba(99, 102, 241, 0.2);
+  box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.15);
+}
+
+body.light-theme .card-top-info {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, transparent 100%);
+}
+
+body.light-theme .card-name {
+  color: #0f172a;
+  text-shadow: none;
+}
+
+body.light-theme .card-role {
+  color: #4f46e5;
+  text-shadow: none;
+}
+
+body.light-theme .linkedin-overlay {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+body.light-theme .linkedin-header span,
+body.light-theme .overlay-name {
+  color: #0f172a;
+}
+
+body.light-theme .overlay-role {
+  color: #2563eb;
+}
+
+body.light-theme .card-desc,
+body.light-theme .project-desc {
+  color: #475569;
+}
+
+body.light-theme .project-title {
+  color: #1e293b;
+}
+
+/* ==========================================================
+   Media Queries & Responsive Design
+   ========================================================== */
+:root {
+  --tree-card-width: 240px;
+  --tree-card-gap: 2rem;
+}
+
+@media (max-width: 900px) {
+  .futuristic-title {
+    font-size: 2rem;
+  }
+
+  .glass-panel {
+    padding: 2.5rem 1rem;
+  }
+
+  /* Keeping tree horizontal! No flex-direction column. */
+  .tree-level {
+    gap: var(--tree-card-gap);
+  }
+
+  .projects-grid {
+    gap: 3rem;
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --tree-card-width: 22vw;
+    --tree-card-gap: 1.5vw;
+  }
+
+  .futuristic-container {
+    padding: 2rem 0; /* Remove horizontal padding entirely to maximize screen width */
+    overflow-x: hidden;
+  }
+
+  /* Force tree horizontal, restrict width to 100vw perfectly */
+  .tree-level {
+    flex-wrap: nowrap;
+    width: 100%;
+    margin: 0 auto;
+    padding-top: 2rem;
+    gap: var(--tree-card-gap);
+    justify-content: center;
+  }
+
+  .futuristic-card.portrait-card {
+    min-width: var(--tree-card-width);
+    max-width: var(--tree-card-width);
+    width: var(--tree-card-width);
+    height: 35vw;
+    margin: 0;
+    border-radius: 6px;
+    border-width: 0.5px;
+  }
+  
+  /* Restoring the Tree Lines! */
+  .tree-sibling-connector,
+  .tree-node::before,
+  .tree-level::before,
+  .tree-node.has-children::after, 
+  .tree-level.has-children-center::after {
+    display: block !important;
+  }
+
+  /* Scale DOWN the lines safely */
+  .tree-node::before {
+    width: 6px; height: 6px; top: -1rem; 
+  }
+  .tree-level::before, .tree-node.has-children::after, .tree-level.has-children-center::after {
+    height: 2rem;
+  }
+  .tree-node.has-children::after, .tree-level.has-children-center::after {
+    bottom: -2rem;
+  }
+  .tree-level {
+    padding-top: 2rem;
+  }
+  
+  /* Extremely compact typography to fit on tiny cards */
+  .card-top-info { padding: 0.2rem; }
+  .card-name { font-size: 2vw; margin-bottom: 2px; text-shadow: none; white-space: normal; line-height: 1.1; }
+  .card-role { font-size: 1.6vw; text-shadow: none; white-space: normal; line-height: 1.1; }
+  .founder-badge { font-size: 1.6vw; padding: 1px 4px; letter-spacing: 0; border-radius: 4px; border: none; top: 4px; }
+  .linkedin-overlay { padding: 0.2rem; }
+  .linkedin-header { margin-bottom: 0.2rem; padding-bottom: 0.2rem; }
+  .linkedin-header span { font-size: 2vw; }
+  .overlay-name { font-size: 2.3vw; margin-bottom: 1px; }
+  .overlay-role { font-size: 1.8vw; margin-bottom: 0.2rem; }
+  .card-desc { display: none; }
+  .view-profile-btn { padding: 0.2rem; font-size: 1.8vw; border-radius: 3px; }
+}

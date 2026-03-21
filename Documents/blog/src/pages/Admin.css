@@ -1,0 +1,83 @@
+/* ADMIN PAGE - Works for both login and portal views */
+.admin-page {
+  max-width: 860px; margin: 0 auto;
+  animation: floatUp 0.5s ease both;
+}
+
+.login-view { max-width: 480px; }
+
+/* PAGE HEADER */
+.page-header { margin-bottom: 40px; }
+
+.page-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 0.78rem;
+  color: var(--c-pink); letter-spacing: 0.08em;
+  text-transform: uppercase; margin-bottom: 14px;
+}
+
+.page-title { font-size: 2.4rem; font-weight: 800; color: var(--c-text); margin-bottom: 8px; }
+
+.page-title span { color: var(--c-accent); }
+
+.page-sub { font-size: 0.95rem; color: var(--c-text-dim); }
+
+.header-divider { height: 1px; background: linear-gradient(90deg, var(--c-border-bright), transparent); margin: 24px 0; }
+
+/* HEADER ROW (auth view only) */
+.header-row { display: flex; justify-content: space-between; align-items: flex-start; }
+
+/* FORM CARD */
+.form-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  padding: 40px;
+}
+
+.form-card form { display: flex; flex-direction: column; gap: 24px; }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+.field { display: flex; flex-direction: column; gap: 8px; }
+
+.field label {
+  font-size: 0.82rem; font-weight: 600; font-family: var(--font-head);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--c-text-dim); display: flex; align-items: center; gap: 7px;
+}
+
+.field input, .field textarea {
+  background: var(--c-surface2);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  color: var(--c-text);
+  font-family: var(--font-body); font-size: 1rem;
+  padding: 12px 16px;
+  outline: none; transition: all 0.2s ease;
+}
+
+.field input:focus, .field textarea:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px var(--c-accent-glow);
+}
+
+.field textarea { resize: vertical; line-height: 1.6; min-height: 240px; }
+
+.form-actions { display: flex; justify-content: flex-end; padding-top: 4px; }
+
+/* ERROR BANNER */
+.error-message {
+  background: rgba(255, 77, 141, 0.08);
+  border: 1px solid rgba(255, 77, 141, 0.3);
+  color: var(--c-pink);
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  font-size: 0.88rem; font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 700px) {
+  .field-row { grid-template-columns: 1fr; }
+  .form-card { padding: 24px; }
+  .header-row { flex-direction: column; gap: 16px; }
+}
