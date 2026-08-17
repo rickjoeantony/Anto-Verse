@@ -5,8 +5,8 @@
 **Canonical Directory:** `C:\Users\rickj\.cache\ht\docs\`  
 **Target Repository Revisions:**
 - `Honey-tech\Ghost-Net`: `37f0a01`
-- `middle-man-1`: `1989edc`
-- `middle-man-3`: `9f3f206`
+- `middle-man-1`: `be5be11`
+- `middle-man-3`: `4a2171a`
 - `DASHBOARD`: `a0f27f6`
 - `ADMIN-DASHBOARD`: `337ef86`
 - `LEUKQUANT`: `21f785a`
