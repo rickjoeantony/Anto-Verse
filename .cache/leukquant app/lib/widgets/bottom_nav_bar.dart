@@ -1,0 +1,94 @@
+// lib/widgets/bottom_nav_bar.dart
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../core/theme/app_colors.dart';
+
+/// Global bottom navigation bar for the app shell.
+/// Uses Material 3 style with glassmorphic background matching
+/// the design in `MainShellScreen`.
+class BottomNavBar extends ConsumerWidget {
+  const BottomNavBar({super.key});
+
+  static const _navItems = [
+    {'label': 'Overview', 'icon': Icons.grid_view_rounded, 'path': '/overview'},
+    {'label': 'Events', 'icon': Icons.stream_rounded, 'path': '/events'},
+    {'label': 'Incidents', 'icon': Icons.shield_rounded, 'path': '/incidents'},
+    {'label': 'Reports', 'icon': Icons.description_rounded, 'path': '/reports'},
+    {'label': 'Settings', 'icon': Icons.settings_rounded, 'path': '/settings'},
+  ];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = AppColors.of(context);
+    final router = GoRouter.of(context);
+    final location = GoRouterState.of(context).uri.toString();
+    int currentIndex = _navItems.indexWhere((i) => location.startsWith(i['path'] as String));
+    if (currentIndex == -1) currentIndex = 0;
+
+    return SafeArea(
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(18, 0, 18, 14),
+        height: 66,
+        decoration: BoxDecoration(
+          color: colors.surface.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.82 : 0.88),
+          borderRadius: BorderRadius.circular(34),
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white.withOpacity(0.12)
+                : Colors.white.withOpacity(0.85),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.black54 : const Color(0x182563EB),
+              blurRadius: 32,
+              spreadRadius: -2,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(34),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Row(
+              children: List.generate(_navItems.length, (index) {
+                final item = _navItems[index];
+                final selected = index == currentIndex;
+                return Expanded(
+                  child: InkWell(
+                    onTap: () => router.go(item['path'] as String),
+                    borderRadius: BorderRadius.circular(24),
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          item['icon'] as IconData,
+                          size: 21,
+                          color: selected ? colors.brandPrimary : colors.textSecondary.withOpacity(0.8),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          item['label'] as String,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                            color: selected ? colors.brandPrimary : colors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
