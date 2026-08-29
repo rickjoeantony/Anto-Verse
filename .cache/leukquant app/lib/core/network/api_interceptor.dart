@@ -18,6 +18,14 @@ class ApiInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    // Do not send Authorization header on /api/auth/login
+    if (options.path.contains('/api/auth/login')) {
+      if (kDebugMode) {
+        debugPrint('[API] -> ${options.method} ${options.path}');
+      }
+      return handler.next(options);
+    }
+
     // Attach in-memory JWT if available — never persisted to disk
     final token = _tokenProvider();
     if (token != null && token.isNotEmpty) {
