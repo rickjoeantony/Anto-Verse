@@ -22,7 +22,7 @@ final incidentsProvider =
       final highRiskEvents = events.where((e) => e.threatLevel >= 4).toList();
 
       if (highRiskEvents.isEmpty) {
-        return ApiServiceUnavailable('Incident service awaiting backend endpoint.');
+        return ApiEmpty();
       }
 
       final List<Incident> derivedIncidents = highRiskEvents.map((e) {
