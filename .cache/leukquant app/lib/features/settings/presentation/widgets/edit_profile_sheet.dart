@@ -77,14 +77,28 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          backgroundColor: const Color(0xFF1E293B),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           content: Row(
             children: const [
-              Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
-              SizedBox(width: 8),
-              Text('Profile and Company updated successfully!'),
+              Icon(Icons.check_circle_rounded, color: Color(0xFF30D158), size: 18),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Profile and company updated successfully',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13.5,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
           ),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
