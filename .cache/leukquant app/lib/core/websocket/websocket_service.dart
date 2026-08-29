@@ -2,12 +2,15 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../features/events/domain/security_event.dart';
 import '../config/app_config.dart';
 import '../network/api_client.dart';
+import '../services/notification_service.dart';
 
 /// Connection states for real-time WebSocket telemetry.
 enum WsConnectionState {
@@ -27,12 +30,13 @@ enum WsConnectionState {
   sessionExpired,
 }
 
-/// WebSocket state notifier managing middle-man-3 real-time telemetry stream.
+/// Robust, multi-protocol WebSocket state notifier managing middle-man-3 real-time telemetry.
 class WebSocketNotifier extends StateNotifier<WsConnectionState> {
   final Ref _ref;
   WebSocketChannel? _channel;
   StreamSubscription? _subscription;
   Timer? _reconnectTimer;
+  Timer? _heartbeatTimer;
   int _reconnectAttempts = 0;
   bool _isDisposed = false;
 
@@ -45,7 +49,7 @@ class WebSocketNotifier extends StateNotifier<WsConnectionState> {
 
   WebSocketNotifier(this._ref) : super(WsConnectionState.disconnected);
 
-  /// Connect to the middle-man-3 WebSocket endpoint.
+  /// Connect to the middle-man-3 WebSocket endpoint with heartbeat & fallback support.
   Future<void> connect() async {
     if (_isDisposed) {
       state = WsConnectionState.disconnected;
@@ -73,23 +77,38 @@ class WebSocketNotifier extends StateNotifier<WsConnectionState> {
       final cleanBase = rawBase.endsWith('/') ? rawBase.substring(0, rawBase.length - 1) : rawBase;
       final path = (cleanBase.endsWith('/api/ws') || cleanBase.endsWith('/ws')) ? '' : '/api/ws';
       final token = _ref.read(inMemoryTokenProvider);
+      
+      // Try URL with token query or clean URL
       final query = (token != null && token.isNotEmpty) ? '?token=$token' : '';
-
       final wsUri = Uri.parse('$cleanBase$path$query');
 
       if (kDebugMode) {
-        debugPrint('[WebSocket] -> Connecting to $cleanBase$path?token=[REDACTED]');
+        debugPrint('[WebSocket] -> Connecting to $cleanBase$path');
       }
 
-      _channel = WebSocketChannel.connect(wsUri);
+      // Connect with ticket subprotocols
+      final protocols = (token != null && token.isNotEmpty)
+          ? ['leukquant-ticket', token]
+          : null;
+
+      final ioCustomChannel = IOWebSocketChannel.connect(
+        wsUri,
+        protocols: protocols,
+        pingInterval: const Duration(seconds: 15),
+      );
+
+      _channel = ioCustomChannel;
       await _channel!.ready;
 
       state = WsConnectionState.connected;
       _reconnectAttempts = 0;
 
       if (kDebugMode) {
-        debugPrint('[WebSocket] <- Connected to telemetry stream');
+        debugPrint('[WebSocket] <- Live connection established to telemetry stream');
       }
+
+      // Start 15s application-layer heartbeat
+      _startHeartbeat();
 
       _subscription = _channel!.stream.listen(
         _handleIncomingMessage,
@@ -97,14 +116,35 @@ class WebSocketNotifier extends StateNotifier<WsConnectionState> {
         onDone: () => _handleDisconnect(),
       );
     } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[WebSocket] Handshake failed: $e. Retrying in background...');
+      }
       _handleDisconnect(error: e);
     }
+  }
+
+  void _startHeartbeat() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (state == WsConnectionState.connected && _channel != null) {
+        try {
+          _channel!.sink.add(jsonEncode({'type': 'ping'}));
+        } catch (_) {}
+      }
+    });
   }
 
   void _handleIncomingMessage(dynamic rawMessage) {
     try {
       final decoded = jsonDecode(rawMessage.toString());
       if (decoded is Map<String, dynamic>) {
+        final type = decoded['type']?.toString().toLowerCase();
+
+        // Discard heartbeat / status frames
+        if (type == 'ping' || type == 'pong' || type == 'heartbeat' || type == 'status' || type == 'connected') {
+          return;
+        }
+
         final Map<String, dynamic> eventData =
             (decoded['data'] is Map<String, dynamic>)
                 ? decoded['data']
@@ -112,12 +152,16 @@ class WebSocketNotifier extends StateNotifier<WsConnectionState> {
 
         final event = SecurityEvent.fromJson(eventData);
 
+        // Deduplicate: ring-buffer of last 200 event IDs
         if (!_recentEventIds.contains(event.id)) {
           _recentEventIds.add(event.id);
           if (_recentEventIds.length > 200) {
             _recentEventIds.remove(_recentEventIds.first);
           }
           _eventStreamController.add(event);
+          
+          // Trigger immediate audio & push notification
+          NotificationService.instance.showAttackNotification(event);
         }
       }
     } catch (_) {
@@ -153,13 +197,15 @@ class WebSocketNotifier extends StateNotifier<WsConnectionState> {
     _reconnectTimer?.cancel();
     _reconnectAttempts++;
 
-    final delaySeconds = (_reconnectAttempts * 2).clamp(2, 30);
+    final delaySeconds = (_reconnectAttempts * 2).clamp(2, 20);
     _reconnectTimer = Timer(Duration(seconds: delaySeconds), () {
       if (!_isDisposed) connect();
     });
   }
 
   void _cleanSubscription() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
     _subscription?.cancel();
     _subscription = null;
     _channel?.sink.close();
