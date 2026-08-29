@@ -479,44 +479,52 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
 
             const SizedBox(height: 14),
 
-            SecurityActivityLineChart(
-              dataPoints: summary.activityTrendData,
-            ).animate(target: isReducedMotion ? 0 : 1).fadeIn(duration: 400.ms, delay: 170.ms).slideY(begin: 0.05, end: 0, duration: 400.ms),
+            RepaintBoundary(
+              child: SecurityActivityLineChart(
+                dataPoints: summary.activityTrendData,
+              ).animate(target: isReducedMotion ? 0 : 1).fadeIn(duration: 400.ms, delay: 170.ms).slideY(begin: 0.05, end: 0, duration: 400.ms),
+            ),
 
             const SizedBox(height: 14),
 
-            ThreatDistributionDonutChart(
-              threatData: summary.threatDistribution,
-            ).animate(target: isReducedMotion ? 0 : 1).fadeIn(duration: 400.ms, delay: 210.ms).slideY(begin: 0.05, end: 0, duration: 400.ms),
+            RepaintBoundary(
+              child: ThreatDistributionDonutChart(
+                threatData: summary.threatDistribution,
+              ).animate(target: isReducedMotion ? 0 : 1).fadeIn(duration: 400.ms, delay: 210.ms).slideY(begin: 0.05, end: 0, duration: 400.ms),
+            ),
 
             const SizedBox(height: 14),
 
-            ProtocolActivityBarChart(
-              protocolData: summary.protocolActivity,
-            ).animate(target: isReducedMotion ? 0 : 1).fadeIn(duration: 400.ms, delay: 250.ms).slideY(begin: 0.05, end: 0, duration: 400.ms),
+            RepaintBoundary(
+              child: ProtocolActivityBarChart(
+                protocolData: summary.protocolActivity,
+              ).animate(target: isReducedMotion ? 0 : 1).fadeIn(duration: 400.ms, delay: 250.ms).slideY(begin: 0.05, end: 0, duration: 400.ms),
+            ),
 
             const SizedBox(height: 14),
 
-            RecentActivityList(
-              activities: () {
-                final live = ref.watch(eventsNotifierProvider).valueOrNull ?? [];
-                if (live.isNotEmpty) {
-                  return live.take(5).map((e) {
-                    final timeStr = _formatRelativeTime(e.timestamp);
-                    return OverviewActivityItem(
-                      id: e.id,
-                      title: _formatEventType(e.type.isNotEmpty ? e.type : e.classification),
-                      protocol: e.protocol,
-                      timestamp: timeStr,
-                      severity: e.severity,
-                      description: '${e.sourceIp} â€¢ ${e.country}',
-                    );
-                  }).toList();
-                }
-                return summary.recentActivities;
-              }(),
-              isBackendConnected: true,
-            ).animate(target: isReducedMotion ? 0 : 1).fadeIn(duration: 400.ms, delay: 290.ms).slideY(begin: 0.05, end: 0, duration: 400.ms),
+            RepaintBoundary(
+              child: RecentActivityList(
+                activities: () {
+                  final live = ref.watch(eventsNotifierProvider).valueOrNull ?? [];
+                  if (live.isNotEmpty) {
+                    return live.take(5).map((e) {
+                      final timeStr = _formatRelativeTime(e.timestamp);
+                      return OverviewActivityItem(
+                        id: e.id,
+                        title: _formatEventType(e.type.isNotEmpty ? e.type : e.classification),
+                        protocol: e.protocol,
+                        timestamp: timeStr,
+                        severity: e.severity,
+                        description: '${e.sourceIp} â€¢ ${e.country}',
+                      );
+                    }).toList();
+                  }
+                  return summary.recentActivities;
+                }(),
+                isBackendConnected: true,
+              ).animate(target: isReducedMotion ? 0 : 1).fadeIn(duration: 400.ms, delay: 290.ms).slideY(begin: 0.05, end: 0, duration: 400.ms),
+            ),
           ],
         );
       },
@@ -584,11 +592,11 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
           ],
         ),
         const SizedBox(height: 16),
-        const SecurityActivityLineChart(dataPoints: null),
+        const RepaintBoundary(child: SecurityActivityLineChart(dataPoints: null)),
         const SizedBox(height: 16),
-        const ThreatDistributionDonutChart(threatData: null),
+        const RepaintBoundary(child: ThreatDistributionDonutChart(threatData: null)),
         const SizedBox(height: 16),
-        const ProtocolActivityBarChart(protocolData: null),
+        const RepaintBoundary(child: ProtocolActivityBarChart(protocolData: null)),
       ],
     );
   }

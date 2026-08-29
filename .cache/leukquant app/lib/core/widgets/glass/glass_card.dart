@@ -1,4 +1,4 @@
-// lib/core/widgets/glass/glass_card.dart
+﻿// lib/core/widgets/glass/glass_card.dart
 
 import 'package:flutter/material.dart';
 import 'liquid_glass_card.dart';
@@ -26,7 +26,7 @@ class GlassCard extends StatelessWidget {
     this.onTap,
     this.customFillColor,
     this.customBorderColor,
-    this.blurSigma = 20.0,
+    this.blurSigma = 8.0,
     this.intensity = 1.0,
     this.enableBlur = true,
     this.isStrongGlass = false,

@@ -177,15 +177,14 @@ class EventsScreen extends ConsumerWidget {
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
                             final event = events[index];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12.0),
-                              child: EventCard(
-                                event: event,
-                                onTap: () => EventDetailsSheet.show(context, event),
-                              )
-                                  .animate()
-                                  .fadeIn(duration: 250.ms, delay: ((index % 6) * 30).ms)
-                                  .slideY(begin: 0.04, end: 0, duration: 250.ms),
+                            return RepaintBoundary(
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 12.0),
+                                child: EventCard(
+                                  event: event,
+                                  onTap: () => EventDetailsSheet.show(context, event),
+                                ),
+                              ),
                             );
                           },
                           childCount: events.length,

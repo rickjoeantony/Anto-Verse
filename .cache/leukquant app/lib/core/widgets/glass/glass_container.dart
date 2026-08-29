@@ -1,4 +1,4 @@
-// lib/core/widgets/glass/glass_container.dart
+﻿// lib/core/widgets/glass/glass_container.dart
 
 import 'package:flutter/material.dart';
 import 'liquid_glass_container.dart';
@@ -26,7 +26,7 @@ class GlassContainer extends StatelessWidget {
     this.padding,
     this.margin,
     this.borderRadius = 24.0,
-    this.blurSigma = 20.0,
+    this.blurSigma = 8.0,
     this.enableBackdropBlur = true,
     this.customFillColor,
     this.customBorderColor,
