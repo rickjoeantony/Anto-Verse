@@ -285,60 +285,30 @@ class EventDetailsSheet extends ConsumerWidget {
                 _buildDetailRow('Threat Level', '${event.threatLevel} / 5', colors),
                 _buildDetailRow('Abuse Score', '${event.abuseScore.toStringAsFixed(1)} %', colors),
                 _buildDetailRow('Honeypot Sensor', event.honeypot, colors),
-                _buildDetailRow('Reviewed Status', event.reviewed ? 'Reviewed' : 'Pending SOC Review', colors),
                 const SizedBox(height: 20),
 
-                // 5. Actions: View IP Sessions + Toggle Reviewed (Zero Overflow Guaranteed)
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          IpSessionsSheet.show(context, event.sourceIp);
-                        },
-                        icon: const Icon(Icons.history_edu_rounded, size: 16),
-                        label: const FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text('IP Sessions'),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                        ),
-                      ),
+                // 5. Action: View IP Sessions & Forensics
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      IpSessionsSheet.show(context, event.sourceIp);
+                    },
+                    icon: const Icon(Icons.history_edu_rounded, size: 18),
+                    label: const Text(
+                      'View IP Sessions & Forensics',
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          final newStatus = !event.reviewed;
-                          await ref.read(eventsNotifierProvider.notifier).markReviewed(event.id, newStatus);
-                          if (context.mounted) {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                        icon: Icon(
-                          event.reviewed ? Icons.undo_rounded : Icons.check_circle_outline_rounded,
-                          size: 16,
-                        ),
-                        label: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            event.reviewed ? 'Unreviewed' : 'Mark Reviewed',
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: event.reviewed ? colors.brandSecondary : colors.brandPrimary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                          elevation: 0,
-                        ),
-                      ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.brandPrimary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
                     ),
-                  ],
+                  ),
                 ),
                 const SizedBox(height: 10),
               ],
