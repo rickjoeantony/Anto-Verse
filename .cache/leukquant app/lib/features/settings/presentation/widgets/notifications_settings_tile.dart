@@ -15,37 +15,27 @@ class NotificationsSettingsTile extends ConsumerWidget {
   const NotificationsSettingsTile({super.key});
 
   Future<void> _playAlertSound(AlertTone tone) async {
-    // 1. Play real system alert sound
-    await SystemSound.play(SystemSoundType.alert);
+    final toneName = tone == AlertTone.cyberRadar
+        ? 'cyberRadar'
+        : (tone == AlertTone.tacticalPulse
+            ? 'tacticalPulse'
+            : (tone == AlertTone.enterprisePing ? 'enterprisePing' : 'hapticOnly'));
 
-    // 2. Play tactile vibration tone according to selected tone
-    switch (tone) {
-      case AlertTone.cyberRadar:
-        await HapticFeedback.heavyImpact();
-        await Future.delayed(const Duration(milliseconds: 120));
-        await HapticFeedback.mediumImpact();
-        break;
-      case AlertTone.tacticalPulse:
-        await HapticFeedback.heavyImpact();
-        await Future.delayed(const Duration(milliseconds: 100));
-        await HapticFeedback.heavyImpact();
-        break;
-      case AlertTone.enterprisePing:
-        await HapticFeedback.lightImpact();
-        break;
-      case AlertTone.hapticOnly:
-        await HapticFeedback.vibrate();
-        break;
-    }
+    await NotificationService.instance.playTone(toneName);
   }
 
   void _triggerTestAlert(BuildContext context, AlertTone tone) {
     final colors = AppColors.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final toneName = tone == AlertTone.cyberRadar
+        ? 'cyberRadar'
+        : (tone == AlertTone.tacticalPulse
+            ? 'tacticalPulse'
+            : (tone == AlertTone.enterprisePing ? 'enterprisePing' : 'hapticOnly'));
+
     // Trigger audible tone, vibration, and Android system notification
-    unawaited(_playAlertSound(tone));
-    unawaited(NotificationService.instance.sendTestNotification());
+    unawaited(NotificationService.instance.sendTestNotification(toneName));
 
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(

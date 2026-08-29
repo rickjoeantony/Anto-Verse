@@ -1,6 +1,7 @@
 ﻿// lib/core/services/notification_service.dart
 
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../features/events/domain/security_event.dart';
@@ -10,10 +11,11 @@ class NotificationService {
   NotificationService._();
   static final NotificationService instance = NotificationService._();
 
+  static const MethodChannel _nativeChannel = MethodChannel('com.leukquant.app/audio_alerts');
   final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
 
-  static const String _channelId = 'leukquant_threat_telemetry_v3';
+  static const String _channelId = 'leukquant_threat_telemetry_v10';
   static const String _channelName = 'Critical Security Alerts';
   static const String _channelDescription =
       'Real-time audible alerts when honeypot sensors or decoy traps detect unauthorized ingress.';
@@ -21,63 +23,75 @@ class NotificationService {
   Future<void> init() async {
     if (_isInitialized) return;
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initSettings = InitializationSettings(android: androidSettings);
+    try {
+      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const initSettings = InitializationSettings(android: androidSettings);
 
-    await _plugin.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: (details) {
-        // In-app deep link or navigation
-      },
-    );
-
-    final androidImpl = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-
-    if (androidImpl != null) {
-      // 1. Explicitly request runtime POST_NOTIFICATIONS permission for Android 13+ / 16
-      await androidImpl.requestNotificationsPermission();
-
-      // 2. Register high-priority notification channel with audio sound and tactile vibration
-      final vibrationPattern = Int64List.fromList([0, 300, 150, 300]);
-      final channel = AndroidNotificationChannel(
-        _channelId,
-        _channelName,
-        description: _channelDescription,
-        importance: Importance.max,
-        enableVibration: true,
-        vibrationPattern: vibrationPattern,
-        playSound: true,
-        enableLights: true,
-        showBadge: true,
+      await _plugin.initialize(
+        initSettings,
+        onDidReceiveNotificationResponse: (details) {
+          // In-app deep link or navigation
+        },
       );
-      await androidImpl.createNotificationChannel(channel);
+
+      final androidImpl = _plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+
+      if (androidImpl != null) {
+        await androidImpl.requestNotificationsPermission();
+
+        final vibrationPattern = Int64List.fromList([0, 300, 150, 300]);
+        final channel = AndroidNotificationChannel(
+          _channelId,
+          _channelName,
+          description: _channelDescription,
+          importance: Importance.max,
+          enableVibration: true,
+          vibrationPattern: vibrationPattern,
+          playSound: true,
+          enableLights: true,
+          showBadge: true,
+        );
+        await androidImpl.createNotificationChannel(channel);
+      }
+    } catch (e) {
+      debugPrint('[NotificationService] Init error: $e');
     }
 
     _isInitialized = true;
   }
 
-  /// Request runtime permission explicitly
-  Future<bool> requestPermission() async {
-    final androidImpl = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    if (androidImpl != null) {
-      final granted = await androidImpl.requestNotificationsPermission();
-      return granted ?? false;
+  /// Play audible alert sound via native Android audio bridge
+  Future<void> playTone(String type) async {
+    try {
+      await _nativeChannel.invokeMethod('playAlertTone', {'type': type});
+    } catch (_) {
+      await SystemSound.play(SystemSoundType.alert);
+      await HapticFeedback.heavyImpact();
     }
-    return true;
   }
 
   /// Trigger real-time mobile notification when an attack is logged
   Future<void> showAttackNotification(SecurityEvent event) async {
     try {
-      if (!_isInitialized) await init();
-
       final int notifId = event.id.hashCode & 0x7fffffff;
       final typeStr = _formatEventType(event.type.isNotEmpty ? event.type : event.classification);
-      final title = 'ðŸš¨ Alert: $typeStr';
+      final title = 'âš¡ Attack Alert: $typeStr';
       final portStr = event.destinationPort.isNotEmpty ? event.destinationPort : (event.protocol.isNotEmpty ? event.protocol : '22');
-      final body = 'Attacker IP: ${event.sourceIp} (${event.country.isNotEmpty ? event.country : "Unknown"}) â€¢ Port/Proto: $portStr â€¢ Severity: ${event.severity.name.toUpperCase()}';
+      final body = 'Attacker IP: ${event.sourceIp} (${event.country.isNotEmpty ? event.country : "Unknown"}) â€¢ Port: $portStr â€¢ Severity: ${event.severity.name.toUpperCase()}';
+
+      // 1. Post via native Android bridge
+      try {
+        await _nativeChannel.invokeMethod('postAlertNotification', {
+          'id': notifId,
+          'title': title,
+          'body': body,
+        });
+        return;
+      } catch (_) {}
+
+      // 2. Fallback via FlutterLocalNotificationsPlugin
+      if (!_isInitialized) await init();
 
       final vibrationPattern = Int64List.fromList([0, 300, 150, 300]);
       final androidDetails = AndroidNotificationDetails(
@@ -100,26 +114,37 @@ class NotificationService {
         ),
       );
 
-      final notifDetails = NotificationDetails(android: androidDetails);
-
       await _plugin.show(
         notifId,
         title,
         body,
-        notifDetails,
+        NotificationDetails(android: androidDetails),
         payload: event.id,
       );
 
-      // Also trigger system audio feedback
-      await SystemSound.play(SystemSoundType.alert);
-    } catch (_) {
-      // Graceful fallback
+      await playTone('cyberRadar');
+    } catch (e) {
+      debugPrint('[NotificationService] Show attack notification error: $e');
     }
   }
 
   /// Trigger a live test alert with full sound, vibration, and system tray banner
-  Future<void> sendTestNotification() async {
+  Future<void> sendTestNotification([String toneType = 'cyberRadar']) async {
     try {
+      const title = 'âš¡ Test Alert: SSH Decoy Ingress';
+      const body = 'Target: SSH Decoy (Port 22) â€¢ Attacker IP: 192.168.1.105 (US) â€¢ Action: Isolated & Logged';
+
+      // 1. Dispatch via native Android bridge
+      try {
+        await _nativeChannel.invokeMethod('postAlertNotification', {
+          'id': 88888,
+          'title': title,
+          'body': body,
+        });
+        return;
+      } catch (_) {}
+
+      // 2. Fallback via FlutterLocalNotificationsPlugin
       if (!_isInitialized) await init();
 
       final vibrationPattern = Int64List.fromList([0, 350, 150, 350]);
@@ -137,27 +162,23 @@ class NotificationService {
         enableLights: true,
         channelShowBadge: true,
         styleInformation: const BigTextStyleInformation(
-          'Target: SSH Decoy (Port 22) â€¢ Attacker IP: 192.168.1.105 (US) â€¢ Action: Isolated & Logged',
-          contentTitle: 'ðŸš¨ Test Alert: SSH Decoy Ingress',
+          body,
+          contentTitle: title,
           summaryText: 'LeukQuant Telemetry Live',
         ),
       );
 
-      final notifDetails = NotificationDetails(android: androidDetails);
-
       await _plugin.show(
         88888,
-        'ðŸš¨ Test Alert: SSH Decoy Ingress',
-        'Target: SSH Decoy (Port 22) â€¢ Attacker IP: 192.168.1.105 (US) â€¢ Action: Isolated & Logged',
-        notifDetails,
+        title,
+        body,
+        NotificationDetails(android: androidDetails),
         payload: 'test_alert',
       );
 
-      // Play system alert sound & heavy haptic feedback
-      await SystemSound.play(SystemSoundType.alert);
-      await HapticFeedback.heavyImpact();
-    } catch (_) {
-      // Graceful fallback
+      await playTone(toneType);
+    } catch (e) {
+      debugPrint('[NotificationService] Send test notification error: $e');
     }
   }
 
