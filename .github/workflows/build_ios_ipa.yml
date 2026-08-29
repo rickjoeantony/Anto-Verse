@@ -1,0 +1,47 @@
+﻿name: Build iOS IPA Package
+
+on:
+  push:
+    branches: [ mobile, main ]
+  workflow_dispatch:
+
+jobs:
+  build-ipa:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        working-directory: .cache/leukquant app
+        run: flutter pub get
+
+      - name: Build iOS (Release No Code Sign)
+        working-directory: .cache/leukquant app
+        run: |
+          flutter build ios --release --no-codesign \
+            --dart-define=API_BASE_URL=https://api.leukquant.com \
+            --dart-define=WS_BASE_URL=wss://api.leukquant.com \
+            --dart-define=APP_ENV=production
+
+      - name: Package Payload into LeukQuant-Release.ipa
+        working-directory: .cache/leukquant app
+        run: |
+          mkdir -p build/ios/iphoneos/Payload
+          cp -r build/ios/iphoneos/Runner.app build/ios/iphoneos/Payload/
+          cd build/ios/iphoneos
+          zip -r -y LeukQuant-Release.ipa Payload
+          cd ../../..
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LeukQuant-iOS-IPA
+          path: .cache/leukquant app/build/ios/iphoneos/LeukQuant-Release.ipa
