@@ -1,16 +1,23 @@
 ﻿package com.leukquant.app.leukquant_mobile
 
+import android.app.KeyguardManager
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.RingtoneManager
 import android.media.ToneGenerator
 import android.os.Build
+import android.os.Bundle
+import android.os.PowerManager
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.view.WindowManager
 import androidx.annotation.NonNull
 import androidx.core.app.NotificationCompat
 import io.flutter.embedding.android.FlutterActivity
@@ -20,6 +27,28 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.leukquant.app/audio_alerts"
     private val NOTIF_CHANNEL_ID = "leukquant_threat_telemetry_v10"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        unlockAndTurnScreenOn()
+    }
+
+    private fun unlockAndTurnScreenOn() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+            val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+            keyguardManager.requestDismissKeyguard(this, null)
+        } else {
+            @Suppress("DEPRECATION")
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            )
+        }
+    }
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -64,6 +93,7 @@ class MainActivity : FlutterActivity() {
                 setSound(soundUri, audioAttributes)
                 enableLights(true)
                 setShowBadge(true)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             }
 
             val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -73,12 +103,10 @@ class MainActivity : FlutterActivity() {
 
     private fun playNativeAlertTone(type: String) {
         try {
-            // 1. Play loud audible system ringtone
             val ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             val ringtone = RingtoneManager.getRingtone(applicationContext, ringtoneUri)
             ringtone?.play()
 
-            // 2. Play acoustic synthesizer tone based on tone type
             val toneType = when (type.lowercase()) {
                 "cyberradar" -> ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK
                 "tacticalpulse" -> ToneGenerator.TONE_PROP_BEEP2
@@ -88,22 +116,21 @@ class MainActivity : FlutterActivity() {
 
             try {
                 val toneGen = ToneGenerator(AudioManager.STREAM_ALARM, 100)
-                toneGen.startTone(toneType, 350)
+                toneGen.startTone(toneType, 400)
             } catch (_: Exception) {}
 
-            // 3. Trigger hardware vibration
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
                 val vibrator = vibratorManager.defaultVibrator
-                vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 250, 100, 250), -1))
+                vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 300, 150, 300), -1))
             } else {
                 @Suppress("DEPRECATION")
                 val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 250, 100, 250), -1))
+                    vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 300, 150, 300), -1))
                 } else {
                     @Suppress("DEPRECATION")
-                    vibrator.vibrate(longArrayOf(0, 250, 100, 250), -1)
+                    vibrator.vibrate(longArrayOf(0, 300, 150, 300), -1)
                 }
             }
         } catch (e: Exception) {
@@ -113,22 +140,45 @@ class MainActivity : FlutterActivity() {
 
     private fun postNativeNotification(id: Int, title: String, body: String) {
         try {
+            // 1. Wake up the locked screen immediately
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            @Suppress("DEPRECATION")
+            val wakeLock = powerManager.newWakeLock(
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE,
+                "leukquant:attack_alert_wake"
+            )
+            wakeLock.acquire(8000)
+
+            // 2. Full-Screen & Lock-Screen Intent
+            val notifyIntent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val pendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                notifyIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+            )
+
             val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             val builder = NotificationCompat.Builder(this, NOTIF_CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(body))
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setSound(soundUri)
                 .setVibrate(longArrayOf(0, 300, 150, 300))
+                .setFullScreenIntent(pendingIntent, true)
+                .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
 
             val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.notify(id, builder.build())
 
-            // Also play loud native audio tone
+            // 3. Play loud audible alarm tone
             playNativeAlertTone("cyberRadar")
         } catch (e: Exception) {
             e.printStackTrace()
