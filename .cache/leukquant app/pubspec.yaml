@@ -1,4 +1,4 @@
-name: leukquant_mobile
+﻿name: leukquant_mobile
 description: "LeukQuant Mobile Client - Autonomous Decoy & Honeytoken Security Monitoring"
 publish_to: 'none'
 version: 1.0.0+1
@@ -21,6 +21,7 @@ dependencies:
   fl_chart: ^0.69.0
   shared_preferences: ^2.3.3
   google_fonts: ^6.2.1
+  flutter_local_notifications: ^17.2.3
 
 dev_dependencies:
   flutter_test:

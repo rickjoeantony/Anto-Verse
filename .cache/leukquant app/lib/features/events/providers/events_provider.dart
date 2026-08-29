@@ -1,4 +1,5 @@
-﻿// lib/features/events/providers/events_provider.dart
+﻿import '../../../core/services/notification_service.dart';
+// lib/features/events/providers/events_provider.dart
 
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -114,11 +115,13 @@ class EventsNotifier extends StateNotifier<AsyncValue<List<SecurityEvent>>> {
     }
   }
 
-  /// Prepend live event from WebSocket
+  /// Prepend live event from WebSocket and notify user on mobile
   void prependLiveEvent(SecurityEvent liveEvent) {
     final currentList = state.valueOrNull ?? [];
     if (!currentList.any((e) => e.id == liveEvent.id)) {
       state = AsyncValue.data([liveEvent, ...currentList]);
+      // Trigger instant mobile push/local notification for live attack
+      NotificationService.instance.showAttackNotification(liveEvent);
     }
   }
 

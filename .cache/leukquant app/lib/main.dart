@@ -1,3 +1,4 @@
+﻿import 'core/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,6 +12,9 @@ void main() async {
 
   // Initialize persistent storage for theme preferences
   final sharedPreferences = await SharedPreferences.getInstance();
+
+  // Initialize Real-time Attack Notification Service
+  await NotificationService.instance.init();
 
   runApp(
     ProviderScope(
