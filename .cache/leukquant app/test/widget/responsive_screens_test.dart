@@ -38,7 +38,7 @@ void main() {
         );
 
         await tester.pump();
-        expect(find.text('Ghost-Net Deployment'), findsOneWidget);
+        expect(find.text('Perimeter Posture'), findsOneWidget);
         expect(find.text('Awaiting Signals'), findsOneWidget);
         expect(tester.takeException(), isNull);
       });

@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 /// Interactive 3D floating animation wrapper giving continuous smooth bobbing physics.

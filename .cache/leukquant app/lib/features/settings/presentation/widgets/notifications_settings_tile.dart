@@ -1,17 +1,49 @@
 // lib/features/settings/presentation/widgets/notifications_settings_tile.dart
 
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/glass/glass_card.dart';
+import '../../../../core/widgets/ios26_switch.dart';
 import '../../providers/settings_provider.dart';
 
-/// Interactive Alert & Notification configuration card with live Alert Simulator.
+/// Interactive Alert & Notification configuration card with system sound & permission prompt in frosted glass.
 class NotificationsSettingsTile extends ConsumerWidget {
   const NotificationsSettingsTile({super.key});
+
+  Future<void> _playAlertSound(AlertTone tone) async {
+    // 1. Play real system alert sound
+    await SystemSound.play(SystemSoundType.alert);
+
+    // 2. Play tactile vibration tone according to selected tone
+    switch (tone) {
+      case AlertTone.cyberRadar:
+        await HapticFeedback.heavyImpact();
+        await Future.delayed(const Duration(milliseconds: 120));
+        await HapticFeedback.mediumImpact();
+        break;
+      case AlertTone.tacticalPulse:
+        await HapticFeedback.heavyImpact();
+        await Future.delayed(const Duration(milliseconds: 100));
+        await HapticFeedback.heavyImpact();
+        break;
+      case AlertTone.enterprisePing:
+        await HapticFeedback.lightImpact();
+        break;
+      case AlertTone.hapticOnly:
+        await HapticFeedback.vibrate();
+        break;
+    }
+  }
 
   void _triggerTestAlert(BuildContext context, AlertTone tone) {
     final colors = AppColors.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Trigger audible tone and vibration
+    unawaited(_playAlertSound(tone));
 
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -58,17 +90,21 @@ class NotificationsSettingsTile extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          '🚨 CRITICAL CANARY ALERT',
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w800,
-                            color: colors.critical,
-                            letterSpacing: 0.5,
+                        Expanded(
+                          child: Text(
+                            '🚨 CRITICAL CANARY ALERT',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w800,
+                              color: colors.critical,
+                              letterSpacing: 0.5,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        const SizedBox(width: 8),
                         Text(
                           'Tone: ${tone.title}',
                           style: TextStyle(
@@ -98,6 +134,69 @@ class NotificationsSettingsTile extends ConsumerWidget {
     );
   }
 
+  void _requestSystemPermission(BuildContext context, WidgetRef ref) {
+    final colors = AppColors.of(context);
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: colors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: colors.brandPrimary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(Icons.notifications_active_rounded, color: colors.brandPrimary, size: 22),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Allow Notifications?',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'LeukQuant requires notification permission to alert you immediately when a decoy trap or canary credential is triggered by an attacker.',
+          style: TextStyle(fontSize: 13, color: colors.textSecondary, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogCtx).pop();
+              ref.read(notificationAccessProvider.notifier).togglePermission(false);
+            },
+            child: Text('Don\'t Allow', style: TextStyle(color: colors.textSecondary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.brandPrimary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () {
+              Navigator.of(dialogCtx).pop();
+              ref.read(notificationAccessProvider.notifier).togglePermission(true);
+              _playAlertSound(AlertTone.enterprisePing);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('✅ Notification permission granted. Canary alerts are active.'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
+            child: const Text('Allow'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppColors.of(context);
@@ -106,23 +205,9 @@ class NotificationsSettingsTile extends ConsumerWidget {
     final hasNotificationAccess = ref.watch(notificationAccessProvider);
     final currentTone = ref.watch(alertToneProvider);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: isDark ? colors.border.withValues(alpha: 0.85) : colors.border,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isDark ? Colors.black.withValues(alpha: 0.35) : const Color(0x0C2563EB),
-            blurRadius: 18,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(18),
+    return GlassCard(
+      borderRadius: 24.0,
+      padding: const EdgeInsets.all(18.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -132,11 +217,10 @@ class NotificationsSettingsTile extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: colors.brandPrimary.withValues(alpha: 0.1),
+                  color: colors.brandPrimary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: colors.brandPrimary.withValues(alpha: 0.2)),
                 ),
-                child: Icon(Icons.notifications_active_outlined, size: 20, color: colors.brandPrimary),
+                child: Icon(Icons.notifications_active_outlined, size: 18, color: colors.brandPrimary),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -144,7 +228,7 @@ class NotificationsSettingsTile extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Alerts & Notification Access',
+                      'Alerts & Notifications',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: colors.textPrimary,
@@ -170,9 +254,9 @@ class NotificationsSettingsTile extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: colors.surfaceMuted,
+              color: colors.surfaceMuted.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: colors.border.withValues(alpha: 0.6)),
+              border: Border.all(color: colors.border.withValues(alpha: 0.5)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -191,21 +275,25 @@ class NotificationsSettingsTile extends ConsumerWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        hasNotificationAccess ? 'Permission granted' : 'Notifications disabled',
+                        hasNotificationAccess ? 'Permission granted' : 'Tap switch to allow',
                         style: TextStyle(
                           fontSize: 11,
-                          color: hasNotificationAccess ? colors.success : colors.textSecondary,
+                          color: hasNotificationAccess ? colors.success : colors.warning,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Switch(
+                Ios26Switch(
                   value: hasNotificationAccess,
-                  activeColor: colors.brandPrimary,
+                  activeColor: colors.success,
                   onChanged: (val) {
-                    ref.read(notificationAccessProvider.notifier).togglePermission(val);
+                    if (val) {
+                      _requestSystemPermission(context, ref);
+                    } else {
+                      ref.read(notificationAccessProvider.notifier).togglePermission(false);
+                    }
                   },
                 ),
               ],
@@ -231,39 +319,51 @@ class NotificationsSettingsTile extends ConsumerWidget {
               margin: const EdgeInsets.only(bottom: 8),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? colors.brandPrimary.withValues(alpha: isDark ? 0.12 : 0.06)
-                    : colors.surfaceMuted.withValues(alpha: 0.5),
+                    ? colors.brandPrimary.withValues(alpha: isDark ? 0.14 : 0.08)
+                    : colors.surfaceMuted.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isSelected
-                      ? colors.brandPrimary.withValues(alpha: 0.4)
+                      ? colors.brandPrimary.withValues(alpha: 0.45)
                       : colors.border.withValues(alpha: 0.4),
                   width: 1,
                 ),
               ),
-              child: ListTile(
-                dense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                leading: Icon(
-                  isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                  color: isSelected ? colors.brandPrimary : colors.textSecondary,
-                  size: 18,
-                ),
-                title: Text(
-                  tone.title,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: colors.textPrimary,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Material(
+                  color: Colors.transparent,
+                  child: ListTile(
+                    dense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                    leading: Icon(
+                      isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                      color: isSelected ? colors.brandPrimary : colors.textSecondary,
+                      size: 18,
+                    ),
+                    title: Text(
+                      tone.title,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                    subtitle: Text(
+                      tone.description,
+                      style: TextStyle(fontSize: 11, color: colors.textSecondary),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.volume_up_rounded, size: 18, color: isSelected ? colors.brandPrimary : colors.textSecondary),
+                      tooltip: 'Play sample sound',
+                      onPressed: () => _playAlertSound(tone),
+                    ),
+                    onTap: () {
+                      ref.read(alertToneProvider.notifier).setTone(tone);
+                      _playAlertSound(tone);
+                    },
                   ),
                 ),
-                subtitle: Text(
-                  tone.description,
-                  style: TextStyle(fontSize: 11, color: colors.textSecondary),
-                ),
-                onTap: () {
-                  ref.read(alertToneProvider.notifier).setTone(tone);
-                },
               ),
             );
           }),
@@ -277,14 +377,14 @@ class NotificationsSettingsTile extends ConsumerWidget {
               onPressed: () => _triggerTestAlert(context, currentTone),
               icon: const Icon(Icons.play_circle_fill_rounded, size: 18),
               label: const Text(
-                'Test Alert Simulation',
+                'Test Alert Simulation (Audio + Banner)',
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: colors.brandPrimary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 2,
+                elevation: 1,
               ),
             ),
           ),

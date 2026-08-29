@@ -50,7 +50,8 @@ void main() {
     test('Parsed events have masked credentials only', () {
       for (final event in events) {
         expect(
-          event.maskedCredentials.contains('***') ||
+          event.maskedCredentials.contains('••••••••') ||
+              event.maskedCredentials.contains('***') ||
               event.maskedCredentials.startsWith('N/A'),
           isTrue,
           reason: 'Event ${event.id} credentials must be masked',

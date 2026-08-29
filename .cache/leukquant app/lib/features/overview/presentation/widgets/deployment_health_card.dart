@@ -2,8 +2,10 @@
 
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/glass/liquid_glass_card.dart';
+import '../../../../core/widgets/glass/liquid_glass_badge.dart';
 
-/// Customer-friendly status card answering: "Is my protection active?"
+/// Customer-friendly status card answering: "Is my protection active?" in Liquid Glass.
 class DeploymentHealthCard extends StatelessWidget {
   final bool isBackendConnected;
   final bool hasActiveIncident;
@@ -23,7 +25,7 @@ class DeploymentHealthCard extends StatelessWidget {
     final colors = AppColors.of(context);
     final theme = Theme.of(context);
 
-    // 1. Determine title, subtitle, badge, and color based strictly on verified backend state
+    // Determine title, subtitle, badge, and color based strictly on verified backend state
     final (String cardTitle, String statusLabel, String description, Color accentColor) = () {
       if (hasActiveIncident) {
         return (
@@ -51,26 +53,8 @@ class DeploymentHealthCard extends StatelessWidget {
       );
     }();
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: hasActiveIncident
-              ? colors.critical.withValues(alpha: 0.4)
-              : colors.border,
-          width: hasActiveIncident ? 1.5 : 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: hasActiveIncident
-                ? colors.critical.withValues(alpha: 0.08)
-                : Colors.black.withValues(alpha: 0.03),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+    return LiquidGlassCard(
+      cornerRadius: 24,
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,11 +62,17 @@ class DeploymentHealthCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 10,
-                height: 10,
+                width: 8,
+                height: 8,
                 decoration: BoxDecoration(
                   color: accentColor,
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: accentColor.withValues(alpha: 0.65),
+                      blurRadius: 7,
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(width: 10),
@@ -96,21 +86,11 @@ class DeploymentHealthCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: accentColor.withValues(alpha: 0.25)),
-                ),
-                child: Text(
-                  statusLabel,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: accentColor,
-                  ),
-                ),
+              LiquidGlassBadge(
+                label: statusLabel,
+                color: accentColor,
+                showDot: false,
+                fontSize: 11,
               ),
             ],
           ),

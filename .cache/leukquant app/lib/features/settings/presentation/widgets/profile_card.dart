@@ -3,9 +3,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/glass/glass_card.dart';
 import '../../domain/user_profile.dart';
 
-/// Clean enterprise profile card in Settings.
+/// Clean enterprise profile card in Settings with iOS frosted glass.
 class ProfileCard extends StatelessWidget {
   final UserProfile profile;
 
@@ -18,42 +19,30 @@ class ProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final theme = Theme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final hasEmail = profile.email != null;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark ? colors.border.withValues(alpha: 0.85) : colors.border,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isDark ? Colors.black.withValues(alpha: 0.35) : const Color(0x0C2563EB),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
+    return GlassCard(
+      borderRadius: 24.0,
+      padding: const EdgeInsets.all(18.0),
       child: Row(
         children: [
-          // User Avatar Circle
+          // User Avatar Box
           Container(
-            width: 46,
-            height: 46,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               color: colors.brandPrimary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: colors.brandPrimary.withValues(alpha: 0.25)),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: colors.brandPrimary.withValues(alpha: 0.25),
+                width: 1,
+              ),
             ),
             child: Center(
               child: Icon(
                 Icons.person_outline_rounded,
                 color: colors.brandPrimary,
-                size: 22,
+                size: 24,
               ),
             ),
           ),
@@ -69,7 +58,7 @@ class ProfileCard extends StatelessWidget {
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: colors.textPrimary,
-                    fontSize: 15,
+                    fontSize: 15.5,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -77,25 +66,29 @@ class ProfileCard extends StatelessWidget {
                   profile.email ?? 'Sign in with corporate identity',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colors.textSecondary,
-                    fontSize: 11.5,
+                    fontSize: 12,
                   ),
                 ),
-                const SizedBox(height: 5),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: colors.surfaceMuted,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: colors.border),
-                  ),
-                  child: Text(
-                    hasEmail ? 'Authenticated' : 'Pending Profile Sync',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: hasEmail ? colors.brandPrimary : colors.textSecondary,
-                      fontWeight: FontWeight.w600,
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                      decoration: BoxDecoration(
+                        color: colors.brandPrimary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: colors.brandPrimary.withValues(alpha: 0.25)),
+                      ),
+                      child: Text(
+                        hasEmail ? 'Plan: ${profile.planDisplayName}' : 'Pending Profile Sync',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          color: hasEmail ? colors.brandPrimary : colors.textSecondary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),

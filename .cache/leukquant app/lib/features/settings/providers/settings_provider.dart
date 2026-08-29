@@ -52,7 +52,7 @@ final userProfileProvider = Provider<UserProfile>((ref) {
     return UserProfile(
       name: authState.email!.split('@').first,
       email: authState.email,
-      role: 'SOC Analyst',
+      plan: 'growth',
       organisation: 'Enterprise Workspace',
       workspaceId: 'WS-STAGING-01',
       isBackendConnected: true,

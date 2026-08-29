@@ -8,6 +8,8 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../../../core/widgets/custom_app_bar.dart';
+import '../../../core/widgets/glass/liquid_glass_card.dart';
+import '../../../core/widgets/ios26_switch.dart';
 import '../../auth/providers/auth_state_provider.dart';
 import '../providers/settings_provider.dart';
 import 'widgets/profile_card.dart';
@@ -82,25 +84,29 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 14),
 
             // Notification & Alerts Preferences
-            Container(
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: colors.border, width: 1),
-              ),
-              padding: const EdgeInsets.all(16),
+            LiquidGlassCard(
+              cornerRadius: 24.0,
+              padding: const EdgeInsets.all(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.notifications_outlined, size: 20, color: colors.brandPrimary),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: colors.brandPrimary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.notifications_outlined, size: 18, color: colors.brandPrimary),
+                      ),
                       const SizedBox(width: 10),
                       Text(
                         'Notifications & Alerts',
                         style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           color: colors.textPrimary,
+                          fontSize: 15,
                         ),
                       ),
                     ],
@@ -132,9 +138,8 @@ class SettingsScreen extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      Switch(
+                      Ios26Switch(
                         value: inAppAlerts,
-                        activeThumbColor: colors.brandPrimary,
                         onChanged: (val) {
                           ref.read(inAppAlertsProvider.notifier).setInAppAlerts(val);
                         },
@@ -208,21 +213,18 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 14),
 
             // Application Information
-            Container(
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: colors.border, width: 1),
-              ),
-              padding: const EdgeInsets.all(16),
+            LiquidGlassCard(
+              cornerRadius: 24.0,
+              padding: const EdgeInsets.all(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Application Information',
                     style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: colors.textPrimary,
+                      fontSize: 15,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -253,7 +255,7 @@ class SettingsScreen extends ConsumerWidget {
                   side: BorderSide(color: colors.critical.withValues(alpha: 0.4)),
                   backgroundColor: colors.critical.withValues(alpha: 0.04),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
               ),
@@ -284,7 +286,7 @@ class SettingsScreen extends ConsumerWidget {
     ThemeData theme,
   ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

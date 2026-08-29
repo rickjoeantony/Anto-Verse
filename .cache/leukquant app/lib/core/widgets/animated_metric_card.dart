@@ -1,9 +1,11 @@
 // lib/core/widgets/animated_metric_card.dart
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
+import 'glass/glass_container.dart';
 
-/// Clean, highly premium enterprise metric card for dashboard overview.
+/// Premium metric card with Plus Jakarta Sans typography and bare status indicator.
 class AnimatedMetricCard extends StatelessWidget {
   final String title;
   final int? count;
@@ -27,97 +29,136 @@ class AnimatedMetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final displayValue = isPending
-        ? '—'
-        : (count != null ? count.toString() : (stringValue ?? '—'));
+    final bool hasData = !isPending && (count != null || stringValue != null);
+    final String displayValue =
+        hasData ? (count != null ? count.toString() : stringValue!) : '—';
+    final String displaySubtitle = hasData ? subtitle : 'No data';
+    final bool isAlert = hasData && count != null && count! > 0;
+    final bool isLiveTime = hasData &&
+        stringValue != null &&
+        displayValue.toLowerCase().contains('just now');
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDark
-              ? colors.border.withValues(alpha: 0.8)
-              : colors.border,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isDark
-                ? Colors.black.withValues(alpha: 0.4)
-                : const Color(0x0C2563EB),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(18),
+    final double valueFontSize = displayValue.length > 5
+        ? (displayValue.length > 8 ? 19.0 : 21.0)
+        : 30.0;
+
+    return GlassContainer(
+      borderRadius: 22.0,
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
         children: [
+          // ── Top row: bare icon left, live indicator / alert dot right ──
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: accentColor.withValues(alpha: 0.25),
-                    width: 1,
-                  ),
-                ),
-                child: Icon(icon, size: 18, color: accentColor),
+              Icon(
+                icon,
+                size: 20,
+                color: accentColor.withValues(alpha: isDark ? 0.85 : 0.75),
               ),
-              if (!isPending && count != null && count! > 0)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-                  decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: accentColor.withValues(alpha: 0.3)),
-                  ),
-                  child: Text(
-                    'Active',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: accentColor,
+              if (isLiveTime)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: colors.success,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: colors.success.withValues(alpha: 0.65),
+                            blurRadius: 5,
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 4.5),
+                    Text(
+                      'Live',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: colors.success,
+                        letterSpacing: 0.1,
+                      ),
+                    ),
+                  ],
+                )
+              else if (isAlert)
+                Container(
+                  width: 7,
+                  height: 7,
+                  decoration: BoxDecoration(
+                    color: accentColor,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: accentColor.withValues(alpha: 0.60),
+                        blurRadius: 6,
+                        spreadRadius: 0,
+                      ),
+                    ],
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 14),
-          Text(
-            displayValue,
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              fontSize: 26,
-              color: colors.textPrimary,
-              letterSpacing: -0.6,
+
+          const SizedBox(height: 12),
+
+          // ── Large numeral or styled string value ──────────────────────
+          SizedBox(
+            height: 34,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                displayValue,
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w800,
+                  fontSize: valueFontSize,
+                  color: isLiveTime ? colors.brandPrimary : colors.textPrimary,
+                  letterSpacing: displayValue.length > 5 ? -0.3 : -0.8,
+                  height: 1.0,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
-          const SizedBox(height: 4),
+
+          const SizedBox(height: 6),
+
+          // ── Card label ────────────────────────────────────────────────
           Text(
             title,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
-              color: colors.textPrimary,
+            style: GoogleFonts.plusJakartaSans(
+              fontWeight: FontWeight.w600,
+              fontSize: 12.5,
+              color: colors.textPrimary.withValues(alpha: 0.88),
+              letterSpacing: -0.1,
+              height: 1.2,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
+
           const SizedBox(height: 2),
+
+          // ── Subtitle ──────────────────────────────────────────────────
           Text(
-            subtitle,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colors.textSecondary,
+            displaySubtitle,
+            style: GoogleFonts.plusJakartaSans(
+              color: colors.textSecondary.withValues(alpha: 0.70),
               fontSize: 11,
+              fontWeight: FontWeight.w400,
+              letterSpacing: 0.0,
+              height: 1.3,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

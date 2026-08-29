@@ -1,3 +1,5 @@
+// lib/core/widgets/onboarding_illustrations.dart
+
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
@@ -47,32 +49,20 @@ class _ObservePainter extends CustomPainter {
 
     // 1. Soft ambient background circle
     final bgPaint = Paint()
-      ..color = isDark ? primary.withOpacity(0.08) : soft.withOpacity(0.4)
+      ..color = isDark ? primary.withValues(alpha: 0.08) : soft.withValues(alpha: 0.4)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, radius, bgPaint);
 
     // 2. Concentric radar sweep rings
     final ringPaint = Paint()
-      ..color = primary.withOpacity(isDark ? 0.2 : 0.25)
+      ..color = primary.withValues(alpha: isDark ? 0.2 : 0.25)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
     canvas.drawCircle(center, radius * 0.75, ringPaint);
     canvas.drawCircle(center, radius * 0.5, ringPaint);
     canvas.drawCircle(center, radius * 0.25, ringPaint);
 
-    // 3. Radar sweep arc
-    final sweepPaint = Paint()
-      ..shader = SweepGradient(
-        colors: [
-          primary.withOpacity(0.0),
-          primary.withOpacity(0.3),
-        ],
-        startAngle: 0.0,
-        endAngle: math.pi / 2,
-      ).createShader(Rect.fromCircle(center: center, radius: radius * 0.75));
-    canvas.drawCircle(center, radius * 0.75, sweepPaint);
-
-    // 4. Central Ghost-Net Decoy Node
+    // 3. Central Ghost-Net Decoy Node
     final nodePaint = Paint()
       ..color = primary
       ..style = PaintingStyle.fill;
@@ -83,15 +73,15 @@ class _ObservePainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, 6, innerDot);
 
-    // 5. Decoy sensor perimeter nodes
+    // 4. Decoy sensor perimeter nodes
     final angles = [0.0, math.pi * 0.6, math.pi * 1.2, math.pi * 1.7];
     for (int i = 0; i < angles.length; i++) {
       final angle = angles[i];
       final nodePos = center + Offset(math.cos(angle) * radius * 0.65, math.sin(angle) * radius * 0.65);
-      
+
       // Connector ray
       final rayPaint = Paint()
-        ..color = secondary.withOpacity(0.5)
+        ..color = secondary.withValues(alpha: 0.5)
         ..strokeWidth = 1.5
         ..style = PaintingStyle.stroke;
       canvas.drawLine(center, nodePos, rayPaint);
@@ -166,13 +156,13 @@ class _UnderstandPainter extends CustomPainter {
       const Radius.circular(28),
     );
     final bgPaint = Paint()
-      ..color = isDark ? primary.withOpacity(0.08) : soft.withOpacity(0.4)
+      ..color = isDark ? primary.withValues(alpha: 0.08) : soft.withValues(alpha: 0.4)
       ..style = PaintingStyle.fill;
     canvas.drawRRect(bgRRect, bgPaint);
 
     // 2. Timeline cards stack
     final cardW = w * 0.68;
-    final cardH = 34.0;
+    const cardH = 34.0;
 
     final cards = [
       {'offsetY': -40.0, 'color': primary, 'label': 'SSH Anomaly Detected', 'badge': secondary},
@@ -195,7 +185,7 @@ class _UnderstandPainter extends CustomPainter {
 
       // Card border
       final borderPaint = Paint()
-        ..color = (card['color'] as Color).withOpacity(0.4)
+        ..color = (card['color'] as Color).withValues(alpha: 0.4)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.2;
       canvas.drawRRect(cardRect, borderPaint);
@@ -219,7 +209,7 @@ class _UnderstandPainter extends CustomPainter {
 
       // Right tag
       final tagPaint = Paint()
-        ..color = (card['badge'] as Color).withOpacity(0.2)
+        ..color = (card['badge'] as Color).withValues(alpha: 0.2)
         ..style = PaintingStyle.fill;
       canvas.drawRRect(
         RRect.fromRectAndRadius(
@@ -280,11 +270,10 @@ class _ActPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width * 0.5, size.height * 0.5);
     final w = size.width;
-    final h = size.height;
 
     // 1. Soft background concentric shield geometry
     final bgPaint = Paint()
-      ..color = isDark ? primary.withOpacity(0.08) : soft.withOpacity(0.4)
+      ..color = isDark ? primary.withValues(alpha: 0.08) : soft.withValues(alpha: 0.4)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, w * 0.44, bgPaint);
 
@@ -309,7 +298,7 @@ class _ActPainter extends CustomPainter {
 
     // Inner shield fill
     final fillPaint = Paint()
-      ..color = primary.withOpacity(isDark ? 0.2 : 0.1)
+      ..color = primary.withValues(alpha: isDark ? 0.2 : 0.1)
       ..style = PaintingStyle.fill;
     canvas.drawPath(shieldPath, fillPaint);
 
@@ -330,7 +319,7 @@ class _ActPainter extends CustomPainter {
 
     // 4. Broadcasting verified pulses
     final pulsePaint = Paint()
-      ..color = secondary.withOpacity(0.4)
+      ..color = secondary.withValues(alpha: 0.4)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 

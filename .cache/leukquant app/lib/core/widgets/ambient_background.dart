@@ -1,7 +1,16 @@
+// lib/core/widgets/ambient_background.dart
+
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
-/// Ambient canvas background rendering soft blue waves and subtle dot grid matrices.
+/// Original "Liquid Glass" static ambient background canvas.
+///
+/// Principles:
+/// - "Light behind glass" effect with layered static radial gradients
+/// - Blurred large glow circles behind top, mid-card, and bottom areas
+/// - Very subtle static micro-grid pattern for depth perception
+/// - RepaintBoundary cached with zero continuous GPU movement
+/// - No particles, no matrix, no neon
 class AmbientBackground extends StatelessWidget {
   final Widget child;
 
@@ -14,85 +23,183 @@ class AmbientBackground extends StatelessWidget {
 
     return Stack(
       children: [
+        // ── GPU-Cached Static Liquid Glass Ambient Background ─────────
         Positioned.fill(
-          child: CustomPaint(
-            painter: _AmbientWavePainter(
-              waveColor: isDark
-                  ? const Color(0xFF1E293B).withOpacity(0.5)
-                  : const Color(0xFFDBEAFE).withOpacity(0.55),
-              dotColor: isDark
-                  ? const Color(0xFF334155).withOpacity(0.4)
-                  : const Color(0xFF93C5FD).withOpacity(0.4),
+          child: RepaintBoundary(
+            child: Stack(
+              children: [
+                // 1. Base Gradient Canvas (Calm & Clean)
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: isDark
+                            ? const [
+                                Color(0xFF0B1020), // Deep Navy Base
+                                Color(0xFF0E1428),
+                                Color(0xFF0B1020),
+                              ]
+                            : const [
+                                Color(0xFFF2F6FF), // Very Light Blue Base
+                                Color(0xFFEFF4FE),
+                                Color(0xFFF2F6FF),
+                              ],
+                        stops: const [0.0, 0.5, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 2. Top-Left Primary Blue Ambient Glow Circle (#2563EB)
+                Positioned(
+                  top: -90,
+                  left: -70,
+                  width: 440,
+                  height: 440,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          colors.backgroundGlow1,
+                          colors.backgroundGlow1.withValues(alpha: 0.0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 3. Top-Right Secondary Teal Ambient Glow Circle
+                Positioned(
+                  top: 70,
+                  right: -90,
+                  width: 400,
+                  height: 400,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          colors.backgroundGlow2,
+                          colors.backgroundGlow2.withValues(alpha: 0.0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 4. Center-Behind-Cards Soft Ambient Light Fill
+                Positioned(
+                  top: 240,
+                  left: 20,
+                  right: 20,
+                  height: 380,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.circular(120),
+                      gradient: RadialGradient(
+                        radius: 0.9,
+                        colors: [
+                          colors.backgroundGlow1.withValues(
+                            alpha: isDark ? 0.09 : 0.06,
+                          ),
+                          colors.backgroundGlow1.withValues(alpha: 0.0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 5. Bottom-Left Soft Indigo Accent Glow Circle
+                Positioned(
+                  bottom: 80,
+                  left: -80,
+                  width: 380,
+                  height: 380,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          (isDark
+                                  ? const Color(0xFF60A5FA)
+                                  : const Color(0xFF2563EB))
+                              .withValues(alpha: isDark ? 0.08 : 0.05),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 6. Bottom-Right Teal Soft Orb
+                Positioned(
+                  bottom: -60,
+                  right: -60,
+                  width: 340,
+                  height: 340,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          colors.backgroundGlow2.withValues(
+                            alpha: isDark ? 0.09 : 0.06,
+                          ),
+                          colors.backgroundGlow2.withValues(alpha: 0.0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 7. Very Subtle Static Pattern Grid (Depth Cue)
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: _SubtleStaticPatternPainter(
+                      dotColor: isDark
+                          ? Colors.white.withValues(alpha: 0.025)
+                          : const Color(0xFF2563EB).withValues(alpha: 0.03),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
+
+        // ── Content Layer ──────────────────────────────────────────
         child,
       ],
     );
   }
 }
 
-class _AmbientWavePainter extends CustomPainter {
-  final Color waveColor;
+class _SubtleStaticPatternPainter extends CustomPainter {
   final Color dotColor;
 
-  _AmbientWavePainter({
-    required this.waveColor,
-    required this.dotColor,
-  });
+  _SubtleStaticPatternPainter({required this.dotColor});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-
-    // 1. Top-left corner organic blue curve
-    final topLeftPath = Path()
-      ..moveTo(0, 0)
-      ..lineTo(w * 0.45, 0)
-      ..cubicTo(w * 0.35, h * 0.12, w * 0.15, h * 0.18, 0, h * 0.15)
-      ..close();
-
-    final wavePaint = Paint()
-      ..color = waveColor
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(topLeftPath, wavePaint);
-
-    // 2. Bottom-right corner organic blue wave
-    final botRightPath = Path()
-      ..moveTo(w, h * 0.72)
-      ..cubicTo(w * 0.75, h * 0.78, w * 0.65, h * 0.9, w * 0.60, h)
-      ..lineTo(w, h)
-      ..close();
-    canvas.drawPath(botRightPath, wavePaint);
-
-    // 3. Subtle decorative dot grid matrix (Top-Right)
-    final dotPaint = Paint()
+    final paint = Paint()
       ..color = dotColor
       ..style = PaintingStyle.fill;
 
-    const dotSpacing = 14.0;
-    const dotRadius = 1.8;
+    const spacing = 28.0;
+    const dotRadius = 1.0;
 
-    // Top-Right Matrix
-    for (int r = 0; r < 4; r++) {
-      for (int c = 0; c < 5; c++) {
-        final x = w - 85 + (c * dotSpacing);
-        final y = 25 + (r * dotSpacing);
-        canvas.drawCircle(Offset(x, y), dotRadius, dotPaint);
-      }
-    }
-
-    // Bottom-Left Matrix
-    for (int r = 0; r < 4; r++) {
-      for (int c = 0; c < 4; c++) {
-        final x = 25 + (c * dotSpacing);
-        final y = h - 110 + (r * dotSpacing);
-        canvas.drawCircle(Offset(x, y), dotRadius, dotPaint);
+    for (double x = 0; x < size.width; x += spacing) {
+      for (double y = 0; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), dotRadius, paint);
       }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _AmbientWavePainter oldDelegate) => false;
+  bool shouldRepaint(_SubtleStaticPatternPainter oldDelegate) =>
+      oldDelegate.dotColor != dotColor;
 }

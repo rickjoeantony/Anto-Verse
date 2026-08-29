@@ -1,5 +1,8 @@
+// lib/features/overview/presentation/widgets/decoy_fleet_table.dart
+
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/glass/glass_card.dart';
 
 class DecoyNodeData {
   final String name;
@@ -31,25 +34,10 @@ class DecoyFleetTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.12) : Colors.white.withOpacity(0.9),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isDark ? Colors.black54 : const Color(0x102563EB),
-            blurRadius: 28,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(18),
+    return GlassCard(
+      borderRadius: 24.0,
+      padding: const EdgeInsets.all(18.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -62,7 +50,7 @@ class DecoyFleetTable extends StatelessWidget {
                   Text(
                     'Controlled Decoy Fleet Matrix',
                     style: TextStyle(
-                      fontSize: 14.5,
+                      fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: colors.textPrimary,
                     ),
@@ -80,7 +68,7 @@ class DecoyFleetTable extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: colors.brandPrimary.withOpacity(0.12),
+                  color: colors.brandPrimary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -97,9 +85,10 @@ class DecoyFleetTable extends StatelessWidget {
           const SizedBox(height: 14),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
             child: DataTable(
-              headingRowColor: MaterialStateProperty.all(
-                colors.brandPrimary.withOpacity(0.06),
+              headingRowColor: WidgetStateProperty.all(
+                colors.brandPrimary.withValues(alpha: 0.08),
               ),
               horizontalMargin: 12,
               columnSpacing: 18,
@@ -168,9 +157,9 @@ class DecoyFleetTable extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: colors.success.withOpacity(0.12),
+                          color: colors.success.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: colors.success.withOpacity(0.3)),
+                          border: Border.all(color: colors.success.withValues(alpha: 0.3)),
                         ),
                         child: Text(
                           node.status,

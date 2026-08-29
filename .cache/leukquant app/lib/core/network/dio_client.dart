@@ -6,8 +6,8 @@ import 'package:dio/dio.dart';
 final dio = Dio(
   BaseOptions(
     baseUrl: 'https://apix.leukquant.com',
-    connectTimeout: Duration(seconds: 8),
-    receiveTimeout: Duration(seconds: 8),
+    connectTimeout: const Duration(seconds: 8),
+    receiveTimeout: const Duration(seconds: 8),
     // Additional default headers can be added here if needed.
   ),
 );

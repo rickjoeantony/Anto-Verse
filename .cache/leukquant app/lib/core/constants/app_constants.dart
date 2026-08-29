@@ -10,7 +10,6 @@ class AppConstants {
   // Storage keys
   static const String themeModeKey = 'leukquant_theme_mode';
   static const String inAppAlertsKey = 'leukquant_in_app_alerts';
-  static const String demoModeKey = 'leukquant_demo_mode';
   static const String onboardingCompletedKey = 'leukquant_onboarding_completed';
 
   // Status Strings

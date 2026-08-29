@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/ambient_background.dart';
 import '../../../core/widgets/floating_3d_wrapper.dart';
+import '../../../core/widgets/glass/glass_card.dart';
 import '../../../core/widgets/leukquant_logo.dart';
 import '../../../core/widgets/onboarding_illustrations.dart';
 import '../providers/onboarding_provider.dart';
@@ -65,7 +66,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void _nextPage() {
     if (_currentPage < _pages.length - 1) {
       _pageController.nextPage(
-        duration: const Duration(milliseconds: 400),
+        duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOutCubic,
       );
     } else {
@@ -76,7 +77,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void _prevPage() {
     if (_currentPage > 0) {
       _pageController.previousPage(
-        duration: const Duration(milliseconds: 400),
+        duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOutCubic,
       );
     }
@@ -86,7 +87,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final theme = Theme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final progress = (_currentPage + 1) / _pages.length;
 
     return Scaffold(
@@ -121,7 +121,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
               ),
 
-              // 3D Animated Card Carousel
+              // Floating Glass Illustration Card Carousel
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
@@ -136,29 +136,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     final imagePath = page['imagePath'] as String;
 
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 6.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: colors.surface,
-                          borderRadius: BorderRadius.circular(28),
-                          border: Border.all(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.12)
-                                : Colors.white.withValues(alpha: 0.9),
-                            width: 1.5,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: isDark
-                                  ? Colors.black54
-                                  : const Color(0x142563EB),
-                              blurRadius: 32,
-                              spreadRadius: -4,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+                      child: GlassCard(
+                        borderRadius: 32.0,
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
                         child: LayoutBuilder(
                           builder: (context, constraints) {
                             return SingleChildScrollView(
@@ -169,11 +150,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      // 3D Illustration
+                                      // Floating Vector Illustration
                                       SizedBox(
-                                        height: math.min(constraints.maxHeight * 0.42, 170.0),
+                                        height: math.min(constraints.maxHeight * 0.45, 170.0),
                                         child: Floating3DWrapper(
-                                          floatDistance: 5.0,
+                                          floatDistance: 4.0,
                                           duration: const Duration(milliseconds: 2600),
                                           child: Center(
                                             child: ClipRRect(
@@ -188,48 +169,51 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(height: 12),
+                                      const SizedBox(height: 16),
 
                                       // Stage Category Pill
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3.5),
                                         decoration: BoxDecoration(
-                                          color: colors.brandPrimary.withValues(alpha: 0.1),
+                                          color: colors.brandPrimary.withValues(alpha: 0.12),
                                           borderRadius: BorderRadius.circular(16),
+                                          border: Border.all(
+                                            color: colors.brandPrimary.withValues(alpha: 0.25),
+                                          ),
                                         ),
                                         child: Text(
                                           page['stage'] as String,
                                           style: TextStyle(
                                             color: colors.brandPrimary,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w700,
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w800,
                                             letterSpacing: 0.8,
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(height: 10),
+                                      const SizedBox(height: 12),
 
                                       // Title
                                       Text(
                                         page['title'] as String,
                                         style: theme.textTheme.headlineMedium?.copyWith(
-                                          fontWeight: FontWeight.w700,
+                                          fontWeight: FontWeight.w800,
                                           color: colors.textPrimary,
-                                          fontSize: 18,
-                                          letterSpacing: -0.3,
+                                          fontSize: 20,
+                                          letterSpacing: -0.4,
                                           height: 1.25,
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
-                                      const SizedBox(height: 6),
+                                      const SizedBox(height: 8),
 
                                       // Description
                                       Text(
                                         page['description'] as String,
                                         style: theme.textTheme.bodyMedium?.copyWith(
                                           color: colors.textSecondary,
-                                          fontSize: 12,
-                                          height: 1.4,
+                                          fontSize: 13,
+                                          height: 1.45,
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
@@ -248,45 +232,47 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
               // Bottom Pagination & Circular Action Button
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 10, 24, 14),
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Back button or placeholder
+                    // Back button
                     if (_currentPage > 0)
                       IconButton(
                         onPressed: _prevPage,
-                        icon: const Icon(Icons.arrow_back_rounded),
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
                         color: colors.textSecondary,
                         tooltip: 'Previous',
                       )
                     else
                       const SizedBox(width: 48),
 
-                    // Active Pill Pagination Dots
+                    // Glass Active Pill Pagination Dots
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: List.generate(_pages.length, (index) {
                         final isActive = index == _currentPage;
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 250),
-                          margin: const EdgeInsets.symmetric(horizontal: 3.5),
-                          width: isActive ? 22 : 6.5,
-                          height: 6.5,
+                          margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                          width: isActive ? 24 : 7,
+                          height: 7,
                           decoration: BoxDecoration(
-                            color: isActive ? colors.brandPrimary : colors.border,
+                            color: isActive
+                                ? colors.brandPrimary
+                                : colors.border.withValues(alpha: 0.8),
                             borderRadius: BorderRadius.circular(4),
                           ),
                         );
                       }),
                     ),
 
-                    // Circular Action Button with Animated Progress Ring
+                    // Circular Progress Next Button
                     GestureDetector(
                       onTap: _nextPage,
                       child: SizedBox(
-                        width: 50,
-                        height: 50,
+                        width: 52,
+                        height: 52,
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
@@ -296,19 +282,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               duration: const Duration(milliseconds: 350),
                               builder: (context, value, child) {
                                 return CustomPaint(
-                                  size: const Size(50, 50),
+                                  size: const Size(52, 52),
                                   painter: _ProgressRingPainter(
                                     progress: value,
                                     color: colors.brandPrimary,
-                                    bgColor: colors.border.withValues(alpha: 0.4),
+                                    bgColor: colors.border.withValues(alpha: 0.3),
                                   ),
                                 );
                               },
                             ),
                             // Inner Button Circle
                             Container(
-                              width: 38,
-                              height: 38,
+                              width: 40,
+                              height: 40,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 gradient: LinearGradient(
@@ -331,7 +317,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 _currentPage == _pages.length - 1
                                     ? Icons.check_rounded
                                     : Icons.arrow_forward_rounded,
-                                size: 17,
+                                size: 18,
                                 color: Colors.white,
                               ),
                             ),

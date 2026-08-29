@@ -1,8 +1,11 @@
+// lib/core/widgets/severity_badge.dart
+
 import 'package:flutter/material.dart';
 import '../../features/events/domain/severity_level.dart';
 import '../theme/app_colors.dart';
+import 'glass/liquid_glass_badge.dart';
 
-/// Standard enterprise severity badge with accessible contrast.
+/// Enterprise Liquid Glass severity badge with glowing indicator dot and accessible contrast.
 class SeverityBadge extends StatelessWidget {
   final SeverityLevel severity;
   final bool compact;
@@ -21,42 +24,15 @@ class SeverityBadge extends StatelessWidget {
     final color = _getSeverityColor(colors);
     final label = customLabel ?? severity.displayName;
 
-    return Container(
+    return LiquidGlassBadge(
+      label: label,
+      color: color,
+      isUppercase: true,
+      fontSize: compact ? 10.5 : 11.5,
+      cornerRadius: 10.0,
       padding: EdgeInsets.symmetric(
         horizontal: compact ? 8 : 10,
         vertical: compact ? 3 : 5,
-      ),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: color.withOpacity(0.35),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: compact ? 6 : 7,
-            height: compact ? 6 : 7,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 5),
-          Text(
-            label.toUpperCase(),
-            style: TextStyle(
-              color: color,
-              fontSize: compact ? 10.5 : 11.5,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.4,
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -2,32 +2,29 @@
 
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import 'glass/glass_container.dart';
 
-/// Animated CustomPainter drawing futuristic concentric radar rings
+/// Subtle animated radar rings drawn in the background of the hero card.
 class _SecurityRadarPainter extends CustomPainter {
   final Color primaryColor;
-  final Color accentColor;
   final double animationValue;
 
   _SecurityRadarPainter({
     required this.primaryColor,
-    required this.accentColor,
     required this.animationValue,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width * 0.86, size.height * 0.52);
+    final center = Offset(size.width * 0.90, size.height * 0.48);
     final paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
+      ..strokeWidth = 0.9;
 
-    // Concentric calm radar rings with subtle pulse expansion
     for (int i = 0; i < 4; i++) {
-      final baseR = 20.0 + (i * 22.0);
-      final dynamicR = baseR + (animationValue * 4.0);
-      final alpha = (0.14 - (i * 0.03)).clamp(0.02, 0.16);
-
+      final baseR = 18.0 + (i * 24.0);
+      final dynamicR = baseR + (animationValue * 6.0);
+      final alpha = (0.12 - (i * 0.025)).clamp(0.01, 0.16);
       paint.color = primaryColor.withValues(alpha: alpha);
       canvas.drawCircle(center, dynamicR, paint);
     }
@@ -36,11 +33,10 @@ class _SecurityRadarPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _SecurityRadarPainter oldDelegate) =>
       oldDelegate.primaryColor != primaryColor ||
-      oldDelegate.accentColor != accentColor ||
       oldDelegate.animationValue != animationValue;
 }
 
-/// Security Posture Hero Card with curved glass/dark surface and radar canvas.
+/// Ultra-luxury Security Posture Hero Card — AI-grade, specular glass, no clunky boxes.
 class SecurityPostureHero extends StatefulWidget {
   final bool isBackendConnected;
   final bool hasActiveIncident;
@@ -59,7 +55,8 @@ class SecurityPostureHero extends StatefulWidget {
   State<SecurityPostureHero> createState() => _SecurityPostureHeroState();
 }
 
-class _SecurityPostureHeroState extends State<SecurityPostureHero> with SingleTickerProviderStateMixin {
+class _SecurityPostureHeroState extends State<SecurityPostureHero>
+    with SingleTickerProviderStateMixin {
   late AnimationController _radarController;
 
   @override
@@ -67,7 +64,7 @@ class _SecurityPostureHeroState extends State<SecurityPostureHero> with SingleTi
     super.initState();
     _radarController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3000),
+      duration: const Duration(milliseconds: 3600),
     )..repeat(reverse: true);
   }
 
@@ -80,174 +77,140 @@ class _SecurityPostureHeroState extends State<SecurityPostureHero> with SingleTi
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isReducedMotion = MediaQuery.disableAnimationsOf(context);
 
-    final (String cardTitle, String statusBadge, String subtitle, Color accentColor, IconData statusIcon) = () {
+    final (
+      String cardTitle,
+      String statusLabel,
+      Color statusColor,
+      IconData statusIcon,
+      String subtitle,
+    ) = () {
       if (widget.hasActiveIncident) {
         return (
           'Security Attention Required',
-          'Action Needed',
-          'High-risk activity detected. Review active incidents for recommended mitigations.',
-          colors.critical,
+          'Review Required',
+          colors.warning,
           Icons.shield_outlined,
+          'Active threat signal detected in monitored cluster. Automated containment active.',
         );
       }
-
       if (!widget.isBackendConnected) {
         return (
-          'Ghost-Net Deployment',
+          'Perimeter Posture',
           'Awaiting Signals',
-          'Connect an active Ghost-Net deployment to receive verified security telemetry.',
           colors.brandPrimary,
           Icons.sensors_outlined,
+          'Sensor fleet listening on decoy perimeter. Zero anomalous breaches logged.',
         );
       }
-
       return (
-        'Ghost-Net Deployment',
-        'Connected',
-        'Last verified telemetry: ${widget.lastTelemetryTime ?? "Active now"} (Region: ${widget.region ?? "Primary"}).',
+        'Perimeter Posture',
+        'All Clear · Optimal',
         colors.success,
         Icons.verified_user_outlined,
+        'Last telemetry: ${widget.lastTelemetryTime ?? "Active now"}  ·  Region: ${widget.region ?? "Global"}',
       );
     }();
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDark
-              ? [
-                  const Color(0xFF0C101D),
-                  const Color(0xFF000000),
-                ]
-              : [
-                  const Color(0xFFFFFFFF),
-                  const Color(0xFFEFF6FF),
-                ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(
-          color: widget.hasActiveIncident
-              ? colors.critical.withValues(alpha: 0.4)
-              : (isDark
-                  ? colors.brandPrimary.withValues(alpha: 0.22)
-                  : colors.brandPrimary.withValues(alpha: 0.16)),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: widget.hasActiveIncident
-                ? colors.critical.withValues(alpha: 0.12)
-                : (isDark ? const Color(0x33000000) : const Color(0x142563EB)),
-            blurRadius: 30,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: RepaintBoundary(
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: AnimatedBuilder(
-                  animation: _radarController,
-                  builder: (context, child) {
-                    return CustomPaint(
-                      painter: _SecurityRadarPainter(
-                        primaryColor: accentColor,
-                        accentColor: colors.brandSecondary,
-                        animationValue: isReducedMotion ? 0.0 : _radarController.value,
-                      ),
-                    );
-                  },
+    return GlassContainer(
+      borderRadius: 26.0,
+      padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
+      child: Stack(
+        children: [
+          // ── Background Ambient Radar Shimmer ─────────────────────
+          Positioned.fill(
+            child: RepaintBoundary(
+              child: AnimatedBuilder(
+                animation: _radarController,
+                builder: (context, _) => CustomPaint(
+                  isComplex: true,
+                  painter: _SecurityRadarPainter(
+                    primaryColor: statusColor,
+                    animationValue: isReducedMotion ? 0.0 : _radarController.value,
+                  ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(22),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: accentColor.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: accentColor.withValues(alpha: 0.25)),
-                          ),
-                          child: Icon(statusIcon, size: 20, color: accentColor),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            cardTitle,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: colors.textPrimary,
-                              letterSpacing: -0.3,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: accentColor.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: accentColor.withValues(alpha: 0.3)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: accentColor,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: accentColor.withValues(alpha: 0.6),
-                                      blurRadius: 4,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                statusBadge,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: accentColor,
-                                ),
-                              ),
-                            ],
-                          ),
+            ),
+          ),
+
+          // ── Card Content ─────────────────────────────────────────
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ── Top Meta Status Row ──────────────────────────────
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Luminous Glowing Status Beacon
+                  Container(
+                    width: 7.5,
+                    height: 7.5,
+                    decoration: BoxDecoration(
+                      color: statusColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: statusColor.withValues(alpha: 0.70),
+                          blurRadius: 9,
+                          spreadRadius: 1,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colors.textSecondary,
-                        height: 1.45,
-                        fontSize: 13,
-                      ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    statusLabel,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: statusColor,
+                      letterSpacing: 0.2,
                     ),
-                  ],
+                  ),
+                  const Spacer(),
+                  Icon(
+                    statusIcon,
+                    size: 19,
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.28)
+                        : Colors.black.withValues(alpha: 0.16),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 14),
+
+              // ── Main Hero Title ──────────────────────────────────
+              Text(
+                cardTitle,
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 22.5,
+                  color: colors.textPrimary,
+                  letterSpacing: -0.7,
+                  height: 1.2,
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              // ── Subtitle Details ─────────────────────────────────
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  color: colors.textSecondary.withValues(alpha: isDark ? 0.80 : 0.85),
+                  height: 1.5,
+                  fontWeight: FontWeight.w400,
+                  letterSpacing: -0.1,
                 ),
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

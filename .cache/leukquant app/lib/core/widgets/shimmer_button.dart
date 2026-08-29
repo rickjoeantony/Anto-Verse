@@ -1,3 +1,5 @@
+// lib/core/widgets/shimmer_button.dart
+
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
@@ -75,7 +77,7 @@ class _ShimmerButtonState extends State<ShimmerButton> with SingleTickerProvider
                 ),
             boxShadow: [
               BoxShadow(
-                color: colors.brandPrimary.withOpacity(0.35),
+                color: colors.brandPrimary.withValues(alpha: 0.35),
                 blurRadius: 18,
                 offset: const Offset(0, 6),
               ),
@@ -98,9 +100,9 @@ class _ShimmerButtonState extends State<ShimmerButton> with SingleTickerProvider
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                Colors.white.withOpacity(0.0),
-                                Colors.white.withOpacity(0.22),
-                                Colors.white.withOpacity(0.0),
+                                Colors.white.withValues(alpha: 0.0),
+                                Colors.white.withValues(alpha: 0.22),
+                                Colors.white.withValues(alpha: 0.0),
                               ],
                               stops: const [0.3, 0.5, 0.7],
                               begin: Alignment.topLeft,

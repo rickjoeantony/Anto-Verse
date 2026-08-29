@@ -2,9 +2,9 @@
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/auth/providers/auth_state_provider.dart';
 import '../config/app_config.dart';
 import '../websocket/websocket_service.dart';
-import '../../features/auth/providers/auth_state_provider.dart';
 
 /// Physical network connectivity state (Wi-Fi/Cellular)
 enum PhysicalNetworkStatus {
@@ -12,14 +12,26 @@ enum PhysicalNetworkStatus {
   unavailable,
 }
 
-/// Staging API reachability state
+/// Middle-Man-3 API reachability state
 enum ApiReachability {
   unconfigured,
   reachable,
   unreachable,
 }
 
-/// Composite application & backend state badge
+/// Unified App Connection States as specified in RULE 5
+enum AppConnectionState {
+  notConfigured,
+  networkOffline,
+  backendUnavailable,
+  sessionExpired,
+  rateLimited,
+  connected,
+  syncing,
+  live,
+}
+
+/// Legacy/Badge compatibility enum
 enum BackendStatusBadge {
   notConfigured,
   networkOffline,
@@ -53,26 +65,57 @@ final apiReachabilityProvider = StateProvider<ApiReachability>((ref) {
   return ApiReachability.reachable;
 });
 
-/// Unified backend badge provider separating physical network from API and WebSocket health.
-final backendStatusBadgeProvider = Provider<BackendStatusBadge>((ref) {
+/// One consistent status source provider across the entire application (RULE 5).
+final appConnectionStateProvider = Provider<AppConnectionState>((ref) {
   if (!AppConfig.isConfigured) {
-    return BackendStatusBadge.notConfigured;
+    return AppConnectionState.notConfigured;
   }
 
   final isNetworkAvailable = ref.watch(isNetworkAvailableProvider);
   if (!isNetworkAvailable) {
-    return BackendStatusBadge.networkOffline;
+    return AppConnectionState.networkOffline;
+  }
+
+  final authState = ref.watch(authProvider);
+  if (authState.isRateLimited) {
+    return AppConnectionState.rateLimited;
+  }
+  if (authState.isSessionExpired) {
+    return AppConnectionState.sessionExpired;
   }
 
   final apiReachability = ref.watch(apiReachabilityProvider);
   if (apiReachability == ApiReachability.unreachable) {
-    return BackendStatusBadge.backendUnavailable;
+    return AppConnectionState.backendUnavailable;
   }
 
   final wsState = ref.watch(webSocketProvider);
   if (wsState == WsConnectionState.connected) {
-    return BackendStatusBadge.live;
+    return AppConnectionState.live;
+  }
+  if (wsState == WsConnectionState.connecting || wsState == WsConnectionState.reconnecting) {
+    return AppConnectionState.syncing;
   }
 
-  return BackendStatusBadge.syncing;
+  return AppConnectionState.connected;
+});
+
+/// Unified backend badge provider separating physical network from API and WebSocket health.
+final backendStatusBadgeProvider = Provider<BackendStatusBadge>((ref) {
+  final appState = ref.watch(appConnectionStateProvider);
+  switch (appState) {
+    case AppConnectionState.notConfigured:
+      return BackendStatusBadge.notConfigured;
+    case AppConnectionState.networkOffline:
+      return BackendStatusBadge.networkOffline;
+    case AppConnectionState.backendUnavailable:
+      return BackendStatusBadge.backendUnavailable;
+    case AppConnectionState.live:
+      return BackendStatusBadge.live;
+    case AppConnectionState.syncing:
+    case AppConnectionState.connected:
+    case AppConnectionState.rateLimited:
+    case AppConnectionState.sessionExpired:
+      return BackendStatusBadge.syncing;
+  }
 });

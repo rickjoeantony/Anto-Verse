@@ -2,12 +2,12 @@
 
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/glass/glass_card.dart';
 import '../../../../core/widgets/protocol_icon.dart';
-import '../../../../core/widgets/severity_badge.dart';
 import '../../domain/security_event.dart';
 import '../../domain/severity_level.dart';
 
-/// Highly premium customer-friendly card representing a single security event.
+/// Premium clean Event Card — no heavy rail bars, AI-grade surface.
 class EventCard extends StatelessWidget {
   final SecurityEvent event;
   final VoidCallback onTap;
@@ -23,142 +23,148 @@ class EventCard extends StatelessWidget {
     final m = dt.minute.toString().padLeft(2, '0');
     final s = dt.second.toString().padLeft(2, '0');
     final d = dt.day.toString().padLeft(2, '0');
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    final month = months[dt.month - 1];
-    return '$h:$m:$s · $d $month';
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return '$h:$m:$s · $d ${months[dt.month - 1]}';
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final timeStr = _formatTime(event.timestamp);
 
     final severityColor = switch (event.severity) {
       SeverityLevel.critical => colors.critical,
-      SeverityLevel.high => colors.high,
-      SeverityLevel.warning => colors.warning,
-      SeverityLevel.low => colors.brandPrimary,
+      SeverityLevel.high     => colors.high,
+      SeverityLevel.warning  => colors.warning,
+      SeverityLevel.low      => colors.brandPrimary,
       SeverityLevel.healthy || SeverityLevel.success => colors.success,
-      SeverityLevel.info => colors.brandSecondary,
+      SeverityLevel.info     => colors.brandSecondary,
     };
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: isDark
-              ? colors.border.withValues(alpha: 0.85)
-              : colors.border,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isDark
-                ? Colors.black.withValues(alpha: 0.35)
-                : const Color(0x0C2563EB),
-            blurRadius: 18,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    final severityLabel = switch (event.severity) {
+      SeverityLevel.critical => 'Critical',
+      SeverityLevel.high     => 'High',
+      SeverityLevel.warning  => 'Warning',
+      SeverityLevel.low      => 'Low',
+      SeverityLevel.healthy || SeverityLevel.success => 'Healthy',
+      SeverityLevel.info     => 'Info',
+    };
+
+    return GlassCard(
+      borderRadius: 22.0,
+      padding: const EdgeInsets.all(16.0),
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Top row: dot + severity + protocol + time ─────────────
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Left Severity Accent Rail
+              // Glowing severity dot
               Container(
-                width: 4.5,
-                color: severityColor,
-              ),
-
-              // Card Content
-              Expanded(
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: onTap,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Header: Severity Badge + Protocol Badge + Timestamp
-                          Row(
-                            children: [
-                              SeverityBadge(
-                                severity: event.severity,
-                                compact: true,
-                              ),
-                              const SizedBox(width: 8),
-                              ProtocolBadge(
-                                protocol: event.protocol,
-                                isCompact: true,
-                              ),
-                              const Spacer(),
-                              Text(
-                                timeStr,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  fontSize: 11,
-                                  color: colors.textSecondary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Plain Language Event Title
-                          Text(
-                            event.classification,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: colors.textPrimary,
-                              fontSize: 15,
-                              letterSpacing: -0.2,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Source Origin & Action Chevron
-                          Row(
-                            children: [
-                              Icon(Icons.public_rounded, size: 14, color: colors.textSecondary),
-                              const SizedBox(width: 6),
-                              Text(
-                                '${event.sourceIp} (${event.country})',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: colors.textSecondary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const Spacer(),
-                              Text(
-                                'View details',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: colors.brandPrimary,
-                                ),
-                              ),
-                              const SizedBox(width: 2),
-                              Icon(Icons.chevron_right_rounded, size: 16, color: colors.brandPrimary),
-                            ],
-                          ),
-                        ],
-                      ),
+                width: 7,
+                height: 7,
+                decoration: BoxDecoration(
+                  color: severityColor,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: severityColor.withValues(alpha: 0.55),
+                      blurRadius: 6,
                     ),
-                  ),
+                  ],
                 ),
+              ),
+              const SizedBox(width: 7),
+
+              // Severity label — plain text, tinted
+              Text(
+                severityLabel,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: severityColor,
+                  letterSpacing: 0.1,
+                ),
+              ),
+              const SizedBox(width: 10),
+
+              // Protocol badge
+              ProtocolBadge(protocol: event.protocol, isCompact: true),
+
+              const Spacer(),
+
+              // Timestamp — right-aligned, muted
+              Text(
+                timeStr,
+                style: TextStyle(
+                  fontSize: 10.5,
+                  color: colors.textSecondary.withValues(alpha: 0.7),
+                  fontWeight: FontWeight.w400,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
-        ),
+
+          const SizedBox(height: 12),
+
+          // ── Event classification title ─────────────────────────────
+          Text(
+            event.classification,
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: colors.textPrimary,
+              fontSize: 15,
+              letterSpacing: -0.3,
+              height: 1.3,
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // ── Bottom row: source + action link ──────────────────────
+          Row(
+            children: [
+              Icon(
+                Icons.public_rounded,
+                size: 13,
+                color: colors.textSecondary.withValues(alpha: 0.6),
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  '${event.sourceIp}  ·  ${event.country}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: colors.textSecondary.withValues(alpha: isDark ? 0.7 : 0.8),
+                    fontWeight: FontWeight.w400,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Details',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: colors.brandPrimary,
+                ),
+              ),
+              const SizedBox(width: 2),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 15,
+                color: colors.brandPrimary,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -1,0 +1,2921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>LeukQuant — Enterprise Cyber Defense Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   LEUKQUANT NEXT-GEN CYBER DESIGN SYSTEM (2026/2030 TOKENS)
+═══════════════════════════════════════════════════════════════ */
+:root {
+  /* Brand Spectrum */
+  --brand:         #2563EB;
+  --brand-light:   #3B82F6;
+  --brand-cyan:    #06B6D4;
+  --brand-neon:    #00F0FF;
+  --brand-dark:    #1D4ED8;
+  --brand-deeper:  #1E40AF;
+  --brand-glow:    rgba(37, 99, 235, 0.4);
+  --brand-glow-lg: 0 0 32px rgba(37, 99, 235, 0.35);
+  --brand-soft:    rgba(37, 99, 235, 0.08);
+  --brand-border:  rgba(37, 99, 235, 0.24);
+
+  /* Surfaces & Glassmorphism (Light Mode) */
+  --bg:            #F4F7FC;
+  --surface:       #FFFFFF;
+  --surface-2:     #F8FAFE;
+  --surface-3:     #EDF2F9;
+  --glass-card:    rgba(255, 255, 255, 0.94);
+  --glass-nav:     rgba(255, 255, 255, 0.92);
+  --glass-hud:     rgba(255, 255, 255, 0.96);
+
+  /* Typography Colors */
+  --t1: #0A1424;
+  --t2: #3E4F69;
+  --t3: #7588A3;
+  --t4: #9EAFCA;
+
+  /* Cyber Borders */
+  --b1: #E1E8F2;
+  --b2: rgba(225, 232, 242, 0.85);
+  --b-glow: rgba(37, 99, 235, 0.35);
+  --b-hi: rgba(255, 255, 255, 0.98);
+
+  /* State Tokens */
+  --ok:        #059669;
+  --ok-glow:   rgba(5, 150, 105, 0.35);
+  --ok-s:      rgba(5, 150, 105, 0.09);
+  --ok-b:      rgba(5, 150, 105, 0.25);
+
+  --hi:        #D97706;
+  --hi-glow:   rgba(217, 119, 6, 0.35);
+  --hi-s:      rgba(217, 119, 6, 0.09);
+  --hi-b:      rgba(217, 119, 6, 0.25);
+
+  --cr:        #DC2626;
+  --cr-glow:   rgba(220, 38, 38, 0.35);
+  --cr-s:      rgba(220, 38, 38, 0.09);
+  --cr-b:      rgba(220, 38, 38, 0.25);
+
+  --in:        #6366F1;
+  --in-glow:   rgba(99, 102, 241, 0.35);
+  --in-s:      rgba(99, 102, 241, 0.09);
+  --in-b:      rgba(99, 102, 241, 0.25);
+
+  --ai:        #8B5CF6;
+  --ai-glow:   rgba(139, 92, 246, 0.4);
+  --ai-s:      rgba(139, 92, 246, 0.1);
+  --ai-b:      rgba(139, 92, 246, 0.3);
+
+  /* Shadows */
+  --sh-xs:    0 1px 3px rgba(10, 20, 36, 0.05);
+  --sh-sm:    0 3px 10px rgba(10, 20, 36, 0.06), 0 1px 2px rgba(10, 20, 36, 0.04);
+  --sh-md:    0 10px 28px -6px rgba(10, 20, 36, 0.08), 0 3px 10px rgba(10, 20, 36, 0.04);
+  --sh-lg:    0 22px 50px -10px rgba(10, 20, 36, 0.12), 0 8px 24px rgba(10, 20, 36, 0.06);
+  --sh-brand: 0 12px 36px -4px rgba(37, 99, 235, 0.42), 0 4px 14px rgba(37, 99, 235, 0.25);
+  --sh-dock:  0 20px 50px rgba(10, 20, 36, 0.15), 0 2px 10px rgba(10, 20, 36, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+
+  /* Radii */
+  --r-xs:  6px;
+  --r-sm:  10px;
+  --r-md:  16px;
+  --r-lg:  22px;
+  --r-xl:  28px;
+  --r-2xl: 36px;
+
+  /* Easing curves */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+
+  /* Fonts */
+  --ff: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --display: 'Space Grotesk', var(--ff);
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+body.dark {
+  --bg:           #030712;
+  --surface:      #091120;
+  --surface-2:    #0F1B30;
+  --surface-3:    #152542;
+  --glass-card:   rgba(9, 17, 32, 0.92);
+  --glass-nav:    rgba(6, 12, 24, 0.95);
+  --glass-hud:    rgba(5, 10, 20, 0.96);
+
+  --t1: #F3F7FD;
+  --t2: #92A6C4;
+  --t3: #586E8F;
+  --t4: #3B4E6B;
+
+  --b1: #182844;
+  --b2: rgba(24, 40, 68, 0.75);
+  --b-glow: rgba(56, 189, 248, 0.35);
+  --b-hi: rgba(255, 255, 255, 0.08);
+
+  --brand:        #38BDF8;
+  --brand-light:  #60A5FA;
+  --brand-cyan:   #22D3EE;
+  --brand-neon:   #00F0FF;
+  --brand-dark:   #2563EB;
+  --brand-glow:   rgba(56, 189, 248, 0.4);
+  --brand-glow-lg: 0 0 35px rgba(56, 189, 248, 0.3);
+  --brand-soft:   rgba(56, 189, 248, 0.12);
+  --brand-border: rgba(56, 189, 248, 0.28);
+
+  --sh-dock: 0 24px 60px rgba(0, 0, 0, 0.75), 0 2px 10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESET & FOUNDATION
+═══════════════════════════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: var(--ff);
+  background: #010408;
+}
+body {
+  color: var(--t1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 14px 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DEVICE TOOLBAR & VIEWPORT SWITCHER
+═══════════════════════════════════════════════════════════════ */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 5px 14px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  flex-shrink: 0;
+  scrollbar-width: none;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+.toolbar::-webkit-scrollbar { display: none; }
+.tb-sep { width: 1px; height: 18px; background: rgba(255, 255, 255, 0.12); margin: 0 4px; flex-shrink: 0; }
+.tb-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-right: 4px;
+  flex-shrink: 0;
+  font-family: var(--mono);
+}
+.tb-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--ff);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.tb-btn:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+.tb-btn.active {
+  color: #FFFFFF;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(6, 182, 212, 0.8));
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DEVICE CONTAINER & CHASSIS
+═══════════════════════════════════════════════════════════════ */
+.frame-container {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: hidden;
+}
+.phone-frame {
+  position: relative;
+  width: 100%;
+  max-width: 412px;
+  height: calc(100vh - 66px);
+  background: var(--bg);
+  border-radius: 46px;
+  border: 8px solid #080D18;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 40px 100px -10px rgba(0, 0, 0, 0.95),
+    0 0 80px rgba(37, 99, 235, 0.14) inset;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: max-width 0.45s var(--ease-spring), border-radius 0.35s var(--ease-out);
+}
+/* Dynamic Island / Speaker Pill */
+.phone-frame::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 112px;
+  height: 6px;
+  background: #080D18;
+  border-radius: 0 0 12px 12px;
+  z-index: 100;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+.phone-frame.tablet { max-width: 768px; border-radius: 32px; }
+.phone-frame.iphone { max-width: 375px; border-radius: 46px; }
+.phone-frame.fluid  { max-width: 100%; border-radius: 0; border: none; height: calc(100vh - 54px); }
+.phone-frame.fluid::before { display: none; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SCREENS & ROOT VIEWS
+═══════════════════════════════════════════════════════════════ */
+.screen {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  animation: screen-enter 0.35s var(--ease-out) forwards;
+}
+.screen.active { display: flex; }
+@keyframes screen-enter {
+  from { opacity: 0; transform: translateY(6px) scale(0.994); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ULTRA-MINIMAL, MODERN & PROFESSIONAL HEADER
+═══════════════════════════════════════════════════════════════ */
+.app-header {
+  height: 52px;
+  background: var(--glass-hud);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--b1);
+  position: relative;
+  z-index: 40;
+  flex-shrink: 0;
+}
+
+.hdr-main {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  gap: 12px;
+}
+
+.hdr-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.hdr-logo-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.hdr-logo-wrap:hover { opacity: 0.85; }
+.hdr-logo {
+  height: 20px;
+  width: auto;
+  object-fit: contain;
+}
+
+.hdr-divider {
+  width: 1px;
+  height: 14px;
+  background: var(--b1);
+  flex-shrink: 0;
+}
+
+.hdr-title-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.hdr-page-title {
+  font-family: var(--ff);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--t1);
+  letter-spacing: -0.3px;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity 0.15s;
+}
+
+.hdr-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Minimal Live Status Chip */
+.live-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: var(--ok-s);
+  border: 1px solid var(--ok-b);
+  cursor: pointer;
+  transition: opacity 0.18s;
+  flex-shrink: 0;
+}
+.live-pill:hover { opacity: 0.85; }
+.live-pulse-dot {
+  width: 5.5px;
+  height: 5.5px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 5px var(--ok);
+  animation: pulse-live 2s infinite;
+}
+@keyframes pulse-live {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.65; }
+}
+.live-pill-text {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--ok);
+  white-space: nowrap;
+}
+
+/* Minimal Action Icon Button */
+.hdr-action-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--b1);
+  background: var(--surface-2);
+  color: var(--t2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s var(--ease-out);
+  flex-shrink: 0;
+}
+.hdr-action-btn:hover {
+  background: var(--surface);
+  color: var(--t1);
+  border-color: var(--brand-border);
+  transform: translateY(-1px);
+}
+.hdr-action-btn:active { transform: scale(0.94); }
+
+/* Minimal Profile Avatar */
+.hdr-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-family: var(--ff);
+  font-size: 11.5px;
+  font-weight: 700;
+  flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  transition: transform 0.15s;
+}
+.hdr-avatar:hover { transform: scale(1.05); }
+.hdr-avatar .avatar-status {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+  border: 1.5px solid var(--surface);
+  box-shadow: 0 0 4px var(--ok);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLLABLE CONTENT AREA (CRITICAL FIX: ZERO OVERLAP / ZERO SQUISH)
+═══════════════════════════════════════════════════════════════ */
+.scroll-area {
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 14px 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-area::-webkit-scrollbar { width: 4px; }
+.scroll-area::-webkit-scrollbar-thumb { background: var(--b1); border-radius: 4px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   HIGH-TECH CARDS (STABILIZED WITH FLEX-SHRINK: 0)
+═══════════════════════════════════════════════════════════════ */
+.card, .metric-grid, .info-box, .health-indicator, .table-container, .btn-danger, .btn-primary, .btn-secondary {
+  flex-shrink: 0 !important;
+  min-height: min-content;
+}
+
+.card {
+  background: var(--glass-card);
+  border: 1px solid var(--b1);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-sm);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.24s var(--ease-spring), box-shadow 0.24s var(--ease-out), border-color 0.24s;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  width: 100%;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent 0%, var(--b-hi) 25%, var(--b-hi) 75%, transparent 100%);
+  z-index: 1;
+}
+.card:hover {
+  border-color: var(--brand-border);
+  box-shadow: var(--sh-md);
+}
+
+.card-body { padding: 16px; }
+.card-sm .card-body { padding: 12px 14px; }
+
+/* Card Accents */
+.card-accent    { border-left: 3.5px solid var(--brand); }
+.card-accent-ok { border-left: 3.5px solid var(--ok); }
+.card-accent-cr { border-left: 3.5px solid var(--cr); }
+.card-accent-hi { border-left: 3.5px solid var(--hi); }
+.card-accent-ai { border-left: 3.5px solid var(--ai); }
+
+/* Card Header */
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.card-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.card-title {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--t1);
+  letter-spacing: -0.3px;
+  line-height: 1.25;
+}
+.card-subtitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--t2);
+  line-height: 1.4;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   METRIC STATS GRID
+═══════════════════════════════════════════════════════════════ */
+.metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+.metric-card {
+  background: var(--glass-card);
+  border: 1px solid var(--b1);
+  border-radius: var(--r-md);
+  padding: 14px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 118px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--sh-xs);
+  transition: transform 0.22s var(--ease-spring), box-shadow 0.22s, border-color 0.22s;
+  cursor: default;
+}
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sh-md);
+  border-color: var(--brand-border);
+}
+.m-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.m-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--sh-xs);
+}
+.m-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--t2);
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+}
+.m-value {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--t1);
+  letter-spacing: -1px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.m-value.pending { font-size: 20px; color: var(--t3); }
+.m-caption {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--t3);
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BADGES, PILLS & CHIPS
+═══════════════════════════════════════════════════════════════ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4.5px;
+  padding: 3px 8px;
+  border-radius: 7px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.badge .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.badge-ok { background: var(--ok-s); border: 1px solid var(--ok-b); color: var(--ok); }
+.badge-ok .dot { background: var(--ok); box-shadow: 0 0 5px var(--ok); }
+
+.badge-hi { background: var(--hi-s); border: 1px solid var(--hi-b); color: var(--hi); }
+.badge-hi .dot { background: var(--hi); box-shadow: 0 0 5px var(--hi); }
+
+.badge-cr { background: var(--cr-s); border: 1px solid var(--cr-b); color: var(--cr); }
+.badge-cr .dot { background: var(--cr); box-shadow: 0 0 6px var(--cr); animation: pulse-dot 1.4s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.3); } }
+
+.badge-in { background: var(--in-s); border: 1px solid var(--in-b); color: var(--in); }
+.badge-in .dot { background: var(--in); }
+
+.badge-br { background: var(--brand-soft); border: 1px solid var(--brand-border); color: var(--brand); }
+.badge-br .dot { background: var(--brand); }
+
+.badge-ai { background: var(--ai-s); border: 1px solid var(--ai-b); color: var(--ai); }
+.badge-ai .dot { background: var(--ai); box-shadow: 0 0 6px var(--ai); }
+
+.badge-neu { background: var(--surface-2); border: 1px solid var(--b1); color: var(--t2); }
+
+/* Filter Pill Chips */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 18px;
+  background: var(--surface-2);
+  border: 1px solid var(--b1);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--t2);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: all 0.18s var(--ease-spring);
+  flex-shrink: 0;
+}
+.pill:hover {
+  border-color: var(--brand-border);
+  color: var(--brand);
+  background: var(--brand-soft);
+  transform: translateY(-1px);
+}
+.pill:active { transform: scale(0.95); }
+.pill.on {
+  border-color: var(--brand);
+  color: var(--brand);
+  background: var(--brand-soft);
+  font-weight: 800;
+  box-shadow: 0 2px 8px var(--brand-soft);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════════════════ */
+.btn-primary {
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--r-md);
+  padding: 12px 18px;
+  font-family: var(--ff);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-shadow: var(--sh-brand);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s var(--ease-spring), box-shadow 0.2s, opacity 0.2s;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -120%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  transform: skewX(-20deg);
+  animation: btn-sheen 3.6s ease-in-out infinite;
+}
+@keyframes btn-sheen { 0% { left: -120%; } 30% { left: 140%; } 100% { left: 140%; } }
+.btn-primary:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 14px 36px -4px rgba(37, 99, 235, 0.5);
+}
+.btn-primary:active { transform: scale(0.97); opacity: 0.92; }
+
+.btn-secondary {
+  background: var(--surface-2);
+  color: var(--t1);
+  border: 1px solid var(--b1);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  font-family: var(--ff);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.18s var(--ease-spring);
+}
+.btn-secondary:hover {
+  border-color: var(--brand-border);
+  color: var(--brand);
+  background: var(--surface);
+  transform: translateY(-1px);
+  box-shadow: var(--sh-xs);
+}
+.btn-secondary:active { transform: scale(0.96); }
+
+.btn-ghost {
+  background: transparent;
+  border: none;
+  color: var(--t2);
+  font-family: var(--ff);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  transition: all 0.18s;
+}
+.btn-ghost:hover { background: var(--surface-2); color: var(--t1); }
+
+.btn-danger {
+  background: var(--cr-s);
+  color: var(--cr);
+  border: 1px solid var(--cr-b);
+  border-radius: var(--r-md);
+  padding: 12px 16px;
+  font-family: var(--ff);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  transition: all 0.18s var(--ease-spring);
+}
+.btn-danger:hover {
+  background: rgba(220, 38, 38, 0.15);
+  border-color: rgba(220, 38, 38, 0.45);
+  transform: translateY(-1px);
+}
+.btn-danger:active { transform: scale(0.97); }
+
+.btn-action {
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 9px 13px;
+  font-family: var(--ff);
+  font-size: 11.5px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  box-shadow: 0 4px 16px -2px rgba(37, 99, 235, 0.4);
+  transition: transform 0.18s var(--ease-spring), box-shadow 0.18s;
+  flex: 1;
+}
+.btn-action:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 8px 24px -2px rgba(37, 99, 235, 0.5);
+}
+.btn-action:active { transform: scale(0.95); }
+
+/* ═══════════════════════════════════════════════════════════════
+   INPUT FIELDS
+═══════════════════════════════════════════════════════════════ */
+.input-field {
+  background: var(--surface-2);
+  border: 1.5px solid var(--b1);
+  border-radius: var(--r-md);
+  padding: 11px 14px;
+  font-family: var(--ff);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--t1);
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.input-field:focus {
+  border-color: var(--brand);
+  background: var(--surface);
+  box-shadow: 0 0 0 3.5px var(--brand-soft);
+}
+.input-field::placeholder { color: var(--t3); }
+.input-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--t2);
+  margin-bottom: 5px;
+  display: block;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA TABLES (PIXEL-PERFECT ALIGNED)
+═══════════════════════════════════════════════════════════════ */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--r-md);
+  border: 1px solid var(--b1);
+  background: var(--surface-2);
+}
+.table-container::-webkit-scrollbar { height: 4px; }
+.table-container::-webkit-scrollbar-thumb { background: var(--b1); border-radius: 2px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  min-width: 440px;
+}
+thead tr { border-bottom: 1px solid var(--b1); }
+thead th {
+  padding: 9px 12px;
+  background: rgba(37, 99, 235, 0.04);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  font-weight: 800;
+  color: var(--t3);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-align: left;
+}
+tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--b1);
+  color: var(--t1);
+  vertical-align: middle;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr { transition: background 0.15s; }
+tbody tr:hover td { background: var(--brand-soft); }
+.td-mono { font-family: var(--mono); font-size: 10px; font-weight: 600; }
+.td-name { font-weight: 800; color: var(--brand); }
+.td-chip {
+  display: inline-flex;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--surface-3);
+  border: 1px solid var(--b1);
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--t1);
+}
+.td-ok { color: var(--ok); font-weight: 700; }
+.td-dim { color: var(--t3); }
+
+/* ═══════════════════════════════════════════════════════════════
+   FORENSIC TIMELINE
+═══════════════════════════════════════════════════════════════ */
+.timeline { display: flex; flex-direction: column; gap: 0; }
+.tl-step { display: flex; gap: 11px; padding-bottom: 14px; position: relative; }
+.tl-step:last-child { padding-bottom: 0; }
+.tl-step::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 20px;
+  bottom: 0;
+  width: 2px;
+  background: var(--b1);
+}
+.tl-step.done::before { background: linear-gradient(180deg, var(--brand), var(--brand-border)); }
+.tl-step:last-child::before { display: none; }
+.tl-node {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--surface-2);
+  border: 2px solid var(--b1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  margin-top: 1px;
+  transition: all 0.2s;
+}
+.tl-step.done .tl-node {
+  background: var(--brand);
+  border-color: var(--brand);
+  box-shadow: 0 0 8px var(--brand-glow);
+}
+.tl-step.done .tl-node svg { stroke: #FFFFFF; }
+.tl-body { flex: 1; min-width: 0; }
+.tl-title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.tl-step-name { font-size: 12px; font-weight: 700; color: var(--t1); }
+.tl-time { font-family: var(--mono); font-size: 9.5px; color: var(--t3); flex-shrink: 0; font-weight: 600; }
+.tl-desc { font-size: 10.5px; color: var(--t2); margin-top: 2px; line-height: 1.45; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SLIDING GLASS DOCK NAVIGATION
+═══════════════════════════════════════════════════════════════ */
+.dock-container {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  height: 60px;
+  z-index: 50;
+}
+.dock {
+  width: 100%;
+  height: 100%;
+  background: var(--glass-nav);
+  backdrop-filter: blur(32px) saturate(210%);
+  -webkit-backdrop-filter: blur(32px) saturate(210%);
+  border-radius: 32px;
+  border: 1px solid var(--b1);
+  box-shadow: var(--sh-dock);
+  display: flex;
+  align-items: stretch;
+  padding: 0 5px;
+  position: relative;
+  overflow: hidden;
+}
+.dock::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent 0%, var(--b-hi) 20%, var(--b-hi) 80%, transparent 100%);
+}
+.dock-indicator {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 5px;
+  width: calc((100% - 10px) / 5);
+  background: linear-gradient(135deg, var(--brand-soft), rgba(37, 99, 235, 0.04));
+  border: 1px solid var(--brand-border);
+  border-radius: 22px;
+  box-shadow: 0 3px 14px var(--brand-soft);
+  transition: transform 0.38s var(--ease-spring);
+  pointer-events: none;
+  z-index: 1;
+}
+.dock-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--t3);
+  font-family: var(--ff);
+  font-size: 9px;
+  font-weight: 600;
+  position: relative;
+  z-index: 2;
+  transition: color 0.2s var(--ease-out);
+}
+.dock-item.active {
+  color: var(--brand);
+  font-weight: 800;
+}
+.dock-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.32s var(--ease-spring);
+}
+.dock-item.active .dock-icon {
+  transform: translateY(-2px) scale(1.1);
+  filter: drop-shadow(0 2px 6px var(--brand-glow));
+}
+.dock-item:active .dock-icon { transform: scale(0.88); }
+.dock-notif {
+  position: absolute;
+  top: 7px;
+  right: calc(50% - 13px);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--hi);
+  border: 1.5px solid var(--surface);
+  box-shadow: 0 0 6px var(--hi);
+  animation: pulse-badge 2s infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST NOTIFICATIONS
+═══════════════════════════════════════════════════════════════ */
+.toast-container {
+  position: absolute;
+  top: 62px;
+  left: 12px;
+  right: 12px;
+  z-index: 95;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  pointer-events: none;
+}
+.toast-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: var(--glass-card);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-lg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  animation: toast-enter 0.35s var(--ease-spring) forwards;
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+}
+.toast-item::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--brand);
+  animation: toast-timer 3s linear forwards;
+}
+@keyframes toast-timer { from { width: 100%; } to { width: 0%; } }
+@keyframes toast-enter {
+  from { opacity: 0; transform: translateY(-14px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toast-exit {
+  from { opacity: 1; transform: translateY(0) scale(1); max-height: 80px; }
+  to   { opacity: 0; transform: translateY(-10px) scale(0.9); max-height: 0; padding: 0; margin: 0; }
+}
+.toast-item.leaving { animation: toast-exit 0.25s var(--ease-in-out) forwards; }
+.toast-icon-box {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BOTTOM SHEETS & MODALS (AI CO-PILOT, AUDIT REPORT, EVENT DETAIL)
+═══════════════════════════════════════════════════════════════ */
+.sheet-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.7);
+  z-index: 85;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  align-items: flex-end;
+}
+.sheet-overlay.open { display: flex; animation: overlay-in 0.24s ease forwards; }
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+.sheet {
+  width: 100%;
+  max-height: 88%;
+  background: var(--surface);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  border-top: 1px solid var(--b1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: sheet-up 0.35s var(--ease-spring);
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.35);
+}
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--b1);
+  border-radius: 2px;
+  margin: 10px auto 3px;
+  flex-shrink: 0;
+}
+.sheet-header {
+  padding: 10px 18px 12px;
+  border-bottom: 1px solid var(--b1);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.sheet-header-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.sheet-id { font-family: var(--mono); font-size: 12px; font-weight: 800; color: var(--t1); }
+.sheet-clf { font-family: var(--display); font-size: 13.5px; font-weight: 800; color: var(--t1); line-height: 1.3; }
+.sheet-body { padding: 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+.sheet-body::-webkit-scrollbar { display: none; }
+.rec-block {
+  background: var(--brand-soft);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+}
+.rec-label {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  font-weight: 800;
+  color: var(--brand);
+  letter-spacing: 0.8px;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+.rec-text { font-size: 11.5px; color: var(--t1); line-height: 1.5; }
+.param-list { display: flex; flex-direction: column; }
+.param-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--b1);
+  gap: 8px;
+}
+.param-row:last-child { border-bottom: none; }
+.param-key { font-size: 11px; color: var(--t2); font-weight: 600; flex-shrink: 0; }
+.param-val { font-size: 11.5px; font-weight: 700; color: var(--t1); text-align: right; }
+.param-mono { font-family: var(--mono); font-size: 10.5px; }
+.param-masked { color: var(--hi); font-family: var(--mono); font-size: 10.5px; }
+.sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   AI NEURAL CO-PILOT MODAL & ATTACK HEATMAP WIDGETS
+═══════════════════════════════════════════════════════════════ */
+.ai-modal-header {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(37, 99, 235, 0.1));
+  border-bottom: 1px solid var(--ai-b);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ai-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2.5px 7px;
+  border-radius: 6px;
+  background: var(--ai-s);
+  border: 1px solid var(--ai-b);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  font-weight: 800;
+  color: var(--ai);
+}
+.ai-insight-box {
+  background: var(--surface-2);
+  border: 1px solid var(--b1);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mitre-tag {
+  display: inline-flex;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  border: 1px solid var(--b1);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--t1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SETTINGS ROWS & TOGGLE SWITCH (PIXEL PERFECT)
+═══════════════════════════════════════════════════════════════ */
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--b1);
+  gap: 12px;
+}
+.setting-row:last-child { border-bottom: none; }
+.setting-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.setting-label { font-size: 12.5px; font-weight: 700; color: var(--t1); }
+.setting-sub   { font-size: 10.5px; color: var(--t2); line-height: 1.35; }
+
+.toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-track {
+  position: absolute; inset: 0;
+  background: var(--b1);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.22s var(--ease-out);
+}
+.toggle input:checked + .toggle-track { background: var(--brand); }
+.toggle-track::before {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  left: 3px;
+  top: 3px;
+  background: #FFFFFF;
+  transition: transform 0.25s var(--ease-spring);
+  box-shadow: var(--sh-xs);
+}
+.toggle input:checked + .toggle-track::before { transform: translateX(16px); }
+
+/* ═══════════════════════════════════════════════════════════════
+   INFO BOX & HEALTH INDICATOR
+═══════════════════════════════════════════════════════════════ */
+.info-box {
+  background: var(--brand-soft);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+}
+.info-box-title { font-size: 12px; font-weight: 700; color: var(--t1); margin-bottom: 2px; }
+.info-box-sub   { font-size: 10.5px; color: var(--t2); line-height: 1.4; }
+
+.health-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: var(--ok-s);
+  border: 1px solid var(--ok-b);
+  border-radius: var(--r-md);
+  width: 100%;
+}
+.health-indicator.warning { background: var(--hi-s); border-color: var(--hi-b); }
+.health-indicator.critical { background: var(--cr-s); border-color: var(--cr-b); }
+.hi-pulse {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.hi-core {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 6px var(--ok);
+  z-index: 2;
+}
+.hi-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--ok);
+  opacity: 0.5;
+  animation: ring-out 2.2s ease-out infinite;
+}
+@keyframes ring-out { 0% { transform: scale(0.5); opacity: 0.8; } 100% { transform: scale(2.8); opacity: 0; } }
+.hi-text { display: flex; flex-direction: column; gap: 1px; }
+.hi-title { font-size: 12.5px; font-weight: 800; color: var(--t1); }
+.hi-sub   { font-size: 10.5px; color: var(--t2); }
+
+.bar-track {
+  height: 5px;
+  background: var(--surface-3);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--brand), var(--brand-dark));
+  transition: width 0.8s var(--ease-out);
+}
+.bar-fill.ok   { background: linear-gradient(90deg, var(--ok), #10B981); }
+.bar-fill.warn { background: linear-gradient(90deg, var(--hi), #F59E0B); }
+.bar-fill.crit { background: linear-gradient(90deg, var(--cr), #EF4444); }
+
+/* ═══════════════════════════════════════════════════════════════
+   ONBOARDING & LOGIN SCREENS
+═══════════════════════════════════════════════════════════════ */
+.ob-screen, .login-screen, .splash {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  z-index: 60;
+}
+.ob-header {
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  flex-shrink: 0;
+}
+.ob-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 16px 0;
+  min-height: 0;
+}
+.ob-card {
+  flex: 1;
+  min-height: 0;
+  background: var(--glass-card);
+  border: 1px solid var(--b1);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px 16px;
+  overflow: hidden;
+  position: relative;
+}
+.ob-stage-label {
+  display: inline-flex;
+  padding: 3px 12px;
+  border-radius: 16px;
+  background: var(--brand-soft);
+  border: 1px solid var(--brand-border);
+  color: var(--brand);
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+.ob-img-wrap {
+  flex: 1;
+  min-height: 0;
+  max-height: 200px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.ob-img {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: var(--r-md);
+  animation: ob-float 4s ease-in-out infinite alternate;
+  filter: drop-shadow(0 16px 28px rgba(37, 99, 235, 0.18));
+}
+@keyframes ob-float {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-8px); }
+}
+.ob-title {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--t1);
+  letter-spacing: -0.4px;
+  line-height: 1.25;
+  margin-bottom: 6px;
+  flex-shrink: 0;
+}
+.ob-desc {
+  font-size: 11.5px;
+  color: var(--t2);
+  line-height: 1.5;
+  max-width: 300px;
+  flex-shrink: 0;
+}
+.ob-footer {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  flex-shrink: 0;
+}
+.ob-dots { display: flex; gap: 6px; align-items: center; }
+.ob-dot {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--b1);
+  transition: all 0.3s var(--ease-spring);
+  width: 6px;
+}
+.ob-dot.on {
+  width: 22px;
+  background: var(--brand);
+  box-shadow: 0 0 8px var(--brand-glow);
+}
+.prog-btn {
+  width: 50px;
+  height: 50px;
+  position: relative;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s var(--ease-spring);
+}
+.prog-btn:active { transform: scale(0.92); }
+.prog-svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.prog-track { fill: none; stroke: var(--b1); stroke-width: 3.5; }
+.prog-fill {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-dasharray: 151.8;
+  transition: stroke-dashoffset 0.6s var(--ease-out);
+}
+.prog-core {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  z-index: 2;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  box-shadow: var(--sh-brand);
+}
+
+/* Login */
+.login-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 16px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.login-body::-webkit-scrollbar { display: none; }
+.login-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 8px 0;
+}
+.login-brand img {
+  height: 42px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 20px rgba(37, 99, 235, 0.25));
+}
+.login-card {
+  background: var(--glass-card);
+  border: 1px solid var(--b1);
+  border-radius: var(--r-xl);
+  padding: 20px 18px;
+  box-shadow: var(--sh-lg);
+  position: relative;
+  overflow: hidden;
+}
+.form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.login-divider { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+.login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: var(--b1); }
+.login-divider span { font-size: 9.5px; font-weight: 600; color: var(--t3); text-transform: uppercase; letter-spacing: 0.5px; }
+.sso-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* Splash */
+.splash {
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 90;
+}
+.splash-logo img { height: 48px; object-fit: contain; }
+.splash-spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--b1);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Ambient background */
+.ambient { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.amb-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(var(--b1) 1px, transparent 1px), linear-gradient(90deg, var(--b1) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.35;
+}
+body.dark .amb-grid { opacity: 0.12; }
+</style>
+</head>
+<body>
+
+<!-- ── DEVICE VIEW TOOLBAR ── -->
+<div class="toolbar">
+  <span class="tb-label">Viewport</span>
+  <button class="tb-btn active" id="tb-pixel" onclick="setDevice('pixel',this)">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="2" width="14" height="20" rx="3"/></svg>
+    Pixel 8
+  </button>
+  <button class="tb-btn" id="tb-iphone" onclick="setDevice('iphone',this)">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="2" width="14" height="20" rx="3"/></svg>
+    iPhone 15
+  </button>
+  <button class="tb-btn" id="tb-tablet" onclick="setDevice('tablet',this)">
+    <svg width="13" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="3"/></svg>
+    Tablet
+  </button>
+  <button class="tb-btn" id="tb-fluid" onclick="setDevice('fluid',this)">
+    <svg width="13" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="18" rx="2"/></svg>
+    Fluid SOC
+  </button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" id="tb-theme" onclick="toggleTheme()">
+    <svg id="theme-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    Light
+  </button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="toggleDemo()">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+    <span id="demo-label">Live Data</span>
+  </button>
+</div>
+
+<!-- ── PHONE FRAME BEZEL ── -->
+<div class="frame-container">
+<div class="phone-frame" id="phone-frame">
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- AMBIENT CANVAS -->
+  <div class="ambient"><div class="amb-grid"></div></div>
+
+  <!-- ══════════════ SPLASH SCREEN ══════════════ -->
+  <div class="splash" id="splash">
+    <div class="splash-logo">
+      <img src="assets/logo-full.png" alt="LeukQuant">
+    </div>
+    <span style="font-family:var(--mono);font-size:10px;font-weight:800;color:var(--t3);letter-spacing:1.5px;">ENTERPRISE CYBER DEFENSE</span>
+    <div class="splash-spinner"></div>
+  </div>
+
+  <!-- ══════════════ ONBOARDING CAROUSEL ══════════════ -->
+  <div class="ob-screen" id="ob-screen" style="display:none;">
+    <div class="ob-header">
+      <img src="assets/logo-full.png" alt="LeukQuant" style="height:24px;object-fit:contain;">
+      <button class="btn-ghost" onclick="showScreen('login-screen')" style="font-size:11.5px;color:var(--brand);font-weight:800;">SKIP</button>
+    </div>
+    <div class="ob-body">
+      <div class="ob-card">
+        <div class="ob-stage-label" id="ob-stage">OBSERVE</div>
+        <div class="ob-img-wrap">
+          <img class="ob-img" id="ob-img" src="assets/onboard_observe_3d.jpg" alt="Observe">
+        </div>
+        <h2 class="ob-title" id="ob-title">See suspicious activity early</h2>
+        <p class="ob-desc" id="ob-desc">Ghost-Net observes interactions with controlled decoy services before attackers reach real systems.</p>
+      </div>
+    </div>
+    <div class="ob-footer">
+      <button class="btn-ghost" id="ob-back" onclick="prevOb()" style="visibility:hidden;">Back</button>
+      <div class="ob-dots">
+        <div class="ob-dot on" id="od0"></div>
+        <div class="ob-dot" id="od1"></div>
+        <div class="ob-dot" id="od2"></div>
+      </div>
+      <button class="prog-btn" onclick="nextOb()" aria-label="Next step">
+        <svg class="prog-svg" viewBox="0 0 56 56">
+          <circle class="prog-track" cx="28" cy="28" r="24"/>
+          <circle class="prog-fill" id="prog-fill" cx="28" cy="28" r="24" stroke-dashoffset="152"/>
+        </svg>
+        <div class="prog-core" id="prog-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════ LOGIN SCREEN ══════════════ -->
+  <div class="login-screen" id="login-screen" style="display:none;">
+    <div style="height:46px;display:flex;align-items:center;justify-content:flex-end;padding:0 14px;flex-shrink:0;">
+      <button class="hud-btn" onclick="toggleTheme()" title="Toggle Theme">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+    <div class="login-body">
+      <div class="login-brand">
+        <img src="assets/logo-full.png" alt="LeukQuant">
+        <div>
+          <h1 style="font-family:var(--display);font-size:20px;font-weight:800;color:var(--t1);letter-spacing:-0.4px;">Security Workspace</h1>
+          <p style="font-size:11.5px;color:var(--t2);margin-top:3px;">Sign in to access real-time honeynet telemetry.</p>
+        </div>
+      </div>
+      <div class="login-card">
+        <div class="form-group">
+          <label class="input-label">Corporate Identity / Email</label>
+          <input class="input-field" type="email" value="analyst@enterprise.internal" placeholder="analyst@org.com">
+        </div>
+        <div class="form-group" style="margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+            <label class="input-label" style="margin:0;">Password Key</label>
+            <button class="btn-ghost" style="font-size:10.5px;color:var(--brand);padding:2px 4px;">Forgot key?</button>
+          </div>
+          <input class="input-field" type="password" value="Enterprise#2026" placeholder="••••••••">
+        </div>
+        <button class="btn-primary" onclick="enterApp()">
+          Sign In to Console
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <div class="login-divider" style="margin:14px 0 12px;"><span>or authenticate with</span></div>
+        <div class="sso-row">
+          <button class="btn-secondary" style="font-size:11px;gap:5px;" onclick="enterApp()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            SAML SSO
+          </button>
+          <button class="btn-secondary" style="font-size:11px;gap:5px;" onclick="enterApp()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            FIDO2 PKI
+          </button>
+        </div>
+      </div>
+      <p style="font-size:10px;color:var(--t3);text-align:center;font-family:var(--mono);">© 2026 LeukQuant Sec-OS • Enclave Protected</p>
+    </div>
+  </div>
+
+  <!-- ══════════════ MAIN APP INTERFACE ══════════════ -->
+  <div class="screen" id="app-screen" style="display:none;">
+
+    <!-- ══ ULTRA-MINIMAL, MODERN & PROFESSIONAL HEADER ══ -->
+    <header class="app-header">
+      <div class="hdr-main">
+        <div class="hdr-left">
+          <div class="hdr-logo-wrap" onclick="showToast('info','LeukQuant Sec-OS','Build 8900 • Integrity Verified')">
+            <img src="assets/logo-full.png" alt="LeukQuant" class="hdr-logo">
+          </div>
+          <div class="hdr-divider"></div>
+          <span class="hdr-page-title" id="hdr-title">Overview</span>
+        </div>
+
+        <div class="hdr-right">
+          <!-- Live Honeynet Armed Status Badge -->
+          <div class="live-pill" onclick="showToast('success','Honeynet Armed','4 active canary listeners isolating perimeter')" title="Canary Status">
+            <span class="live-pulse-dot"></span>
+            <span class="live-pill-text">ARMED</span>
+          </div>
+
+          <!-- Quick Theme Toggle -->
+          <button class="hdr-action-btn" onclick="toggleTheme()" title="Switch Light/Dark Mode" aria-label="Toggle Theme">
+            <svg id="theme-btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </button>
+
+          <!-- User Profile Avatar -->
+          <div class="hdr-avatar" onclick="goTab('settings',document.getElementById('di-settings'),4)" title="SecOps Persona">
+            <span id="avatar-initial">A</span>
+            <div class="avatar-status"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ══════════════ TAB CONTENT ══════════════ -->
+
+    <!-- ── TAB 1: OVERVIEW & POSTURE ── -->
+    <div class="scroll-area tab-pane" id="pane-overview">
+
+      <!-- Deployment Posture Banner -->
+      <div class="card card-accent-ok">
+        <div class="card-body">
+          <div class="card-head">
+            <div class="card-head-text">
+              <span class="card-title">Deployment Posture</span>
+              <span class="card-subtitle" id="dep-sub">Active honeynet cluster — EU-Central region</span>
+            </div>
+            <span class="badge badge-ok" id="dep-badge"><span class="dot"></span><span id="dep-badge-txt">HEALTHY</span></span>
+          </div>
+          <div class="health-indicator" id="health-ind">
+            <div class="hi-pulse">
+              <div class="hi-core" id="hi-core"></div>
+              <div class="hi-ring" id="hi-ring"></div>
+            </div>
+            <div class="hi-text">
+              <span class="hi-title" id="hi-title">Standby / Operational</span>
+              <span class="hi-sub" id="hi-sub">All canary listeners and tripwires confirmed active</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- High-Priority Metrics Grid -->
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="m-head-row">
+            <div class="m-icon-wrap" style="background:var(--cr-s);color:var(--cr);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <span class="badge badge-ok" style="font-size:8px;"><span class="dot"></span>CLEAN</span>
+          </div>
+          <span class="m-label">Critical Incidents</span>
+          <span class="m-value" id="m-critical">0</span>
+          <span class="m-caption" id="m-critical-sub">No active breaches</span>
+        </div>
+
+        <div class="metric-card">
+          <div class="m-head-row">
+            <div class="m-icon-wrap" style="background:var(--hi-s);color:var(--hi);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <span class="badge badge-hi" style="font-size:8px;"><span class="dot"></span>24H</span>
+          </div>
+          <span class="m-label">High-Risk Events</span>
+          <span class="m-value" id="m-high">2</span>
+          <span class="m-caption" id="m-high-sub">Past 24 hours</span>
+        </div>
+      </div>
+
+      <!-- 🌐 NEW: GLOBAL ATTACK SURFACE & VECTOR MATRIX -->
+      <div class="card card-accent-ai">
+        <div class="card-body">
+          <div class="card-head">
+            <div class="card-head-text">
+              <span class="card-title" style="display:flex;align-items:center;gap:6px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ai)" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                Global Attack Surface Vector
+              </span>
+              <span class="card-subtitle">Real-time incoming telemetry vectors by origin</span>
+            </div>
+            <button class="ai-chip" onclick="openAIModal()">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              AI TRIAGE
+            </button>
+          </div>
+
+          <!-- Interactive Vector Feed Grid -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+            <div style="background:var(--surface-2);border:1px solid var(--b1);border-radius:10px;padding:9px 11px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                <span style="font-family:var(--mono);font-size:9.5px;color:var(--brand);font-weight:800;">DE • Frankfurt</span>
+                <span class="badge badge-cr" style="font-size:7.5px;">CRITICAL</span>
+              </div>
+              <div style="font-size:11px;font-weight:700;color:var(--t1);">198.51.100.44</div>
+              <div style="font-size:9.5px;color:var(--t3);margin-top:2px;">SSH Spray (14 Probes)</div>
+            </div>
+            <div style="background:var(--surface-2);border:1px solid var(--b1);border-radius:10px;padding:9px 11px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                <span style="font-family:var(--mono);font-size:9.5px;color:var(--brand);font-weight:800;">SG • Singapore</span>
+                <span class="badge badge-hi" style="font-size:7.5px;">HIGH</span>
+              </div>
+              <div style="font-size:11px;font-weight:700;color:var(--t1);">203.0.113.89</div>
+              <div style="font-size:9.5px;color:var(--t3);margin-top:2px;">TLS Anomaly (Obsolete)</div>
+            </div>
+          </div>
+
+          <button class="btn-secondary" style="width:100%;font-size:11.5px;" onclick="showToast('info','Attack Surface Scan','Synchronizing with global BGP threat feeds and ASN reputation matrix')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Deep Scan Attack Surface
+          </button>
+        </div>
+      </div>
+
+      <!-- Security Activity Chart -->
+      <div class="card">
+        <div class="card-body">
+          <div class="card-head">
+            <div class="card-head-text">
+              <span class="card-title">Security Activity Stream</span>
+              <span class="card-subtitle">Honeynet probe frequency over 24 hours</span>
+            </div>
+            <span class="badge badge-ok"><span class="dot"></span>STREAMING</span>
+          </div>
+          <div style="height:120px;width:100%;overflow:hidden;" id="chart-area">
+            <svg viewBox="0 0 340 120" fill="none" style="width:100%;display:block;">
+              <defs>
+                <linearGradient id="chart-grad-1" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#2563EB" stop-opacity="0.25"/>
+                  <stop offset="100%" stop-color="#2563EB" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <line x1="0" y1="85" x2="340" y2="85" stroke="var(--b1)" stroke-dasharray="3 5" stroke-width="1"/>
+              <line x1="0" y1="55" x2="340" y2="55" stroke="var(--b1)" stroke-dasharray="3 5" stroke-width="1"/>
+              <line x1="0" y1="25" x2="340" y2="25" stroke="var(--b1)" stroke-dasharray="3 5" stroke-width="1"/>
+              <path d="M10 85 Q45 72 80 68 Q115 64 150 45 Q185 26 220 38 Q255 50 290 24 Q312 14 330 16 L330 105 L10 105Z" fill="url(#chart-grad-1)"/>
+              <path d="M10 85 Q45 72 80 68 Q115 64 150 45 Q185 26 220 38 Q255 50 290 24 Q312 14 330 16" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="80" cy="68" r="3.5" fill="#2563EB" stroke="#FFFFFF" stroke-width="1.8"/>
+              <circle cx="150" cy="45" r="3.5" fill="#2563EB" stroke="#FFFFFF" stroke-width="1.8"/>
+              <circle cx="220" cy="38" r="3.5" fill="#2563EB" stroke="#FFFFFF" stroke-width="1.8"/>
+              <circle cx="290" cy="24" r="3.5" fill="#2563EB" stroke="#FFFFFF" stroke-width="1.8"/>
+              <text x="10" y="114" fill="#94A3B8" font-size="8.5" font-family="JetBrains Mono" font-weight="600">00:00</text>
+              <text x="80" y="114" fill="#94A3B8" font-size="8.5" font-family="JetBrains Mono" font-weight="600">06:00</text>
+              <text x="150" y="114" fill="#94A3B8" font-size="8.5" font-family="JetBrains Mono" font-weight="600">12:00</text>
+              <text x="220" y="114" fill="#94A3B8" font-size="8.5" font-family="JetBrains Mono" font-weight="600">18:00</text>
+              <text x="290" y="114" fill="#94A3B8" font-size="8.5" font-family="JetBrains Mono" font-weight="600">24:00</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Decoy Fleet Matrix Table -->
+      <div class="card">
+        <div class="card-body" style="padding-bottom:0;">
+          <div class="card-head">
+            <div class="card-head-text">
+              <span class="card-title">Decoy Fleet Matrix</span>
+              <span class="card-subtitle">Active canary listeners & isolation telemetry</span>
+            </div>
+            <span class="badge badge-br"><span class="dot"></span>4 ONLINE</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr><th>Listener Node</th><th>Port</th><th>Protocol</th><th>Status</th><th>Latency</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="td-name td-mono">decoy-ssh-dmz-01</td>
+                  <td class="td-mono">2222</td>
+                  <td><span class="td-chip">SSH Honey</span></td>
+                  <td><span class="badge badge-ok" style="font-size:8px;"><span class="dot"></span>Active</span></td>
+                  <td class="td-mono td-dim">1.2ms</td>
+                </tr>
+                <tr>
+                  <td class="td-name td-mono">decoy-https-edge-02</td>
+                  <td class="td-mono">443</td>
+                  <td><span class="td-chip">TLS Proxy</span></td>
+                  <td><span class="badge badge-ok" style="font-size:8px;"><span class="dot"></span>Active</span></td>
+                  <td class="td-mono td-dim">0.8ms</td>
+                </tr>
+                <tr>
+                  <td class="td-name td-mono">decoy-pg-prod-01</td>
+                  <td class="td-mono">5432</td>
+                  <td><span class="td-chip">PostgreSQL</span></td>
+                  <td><span class="badge badge-ok" style="font-size:8px;"><span class="dot"></span>Honeytoken</span></td>
+                  <td class="td-mono td-dim">1.4ms</td>
+                </tr>
+                <tr>
+                  <td class="td-name td-mono">decoy-dns-can-01</td>
+                  <td class="td-mono">53</td>
+                  <td><span class="td-chip">BIND9 Tripwire</span></td>
+                  <td><span class="badge badge-ok" style="font-size:8px;"><span class="dot"></span>Active</span></td>
+                  <td class="td-mono td-dim">0.4ms</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="height:14px;"></div>
+      </div>
+
+      <!-- Recommended Containment Action -->
+      <div class="card card-accent">
+        <div class="card-body">
+          <div class="card-head">
+            <div class="card-head-text">
+              <span class="card-title">Recommended Containment Action</span>
+              <span class="card-subtitle" id="rec-title">Enforce BGP route filter on AS14618 prefix</span>
+            </div>
+            <span class="badge badge-br"><span class="dot"></span>PRIORITY</span>
+          </div>
+          <p id="rec-desc" style="font-size:11.5px;color:var(--t2);line-height:1.5;margin-bottom:12px;">Recent SSH credential spray indicates active reconnaissance from a known malicious ASN. Consider promoting the block rule to edge routers.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <button class="btn-action" onclick="showToast('success','BGP Rule Promoted','Perimeter firewall drop rule activated at edge router')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Enforce BGP Drop
+            </button>
+            <button class="btn-secondary" style="padding:9px;" onclick="showToast('info','Canary Rotated','Honeytoken credentials refreshed across cluster')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Rotate Canary
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /pane-overview -->
+
+    <!-- ── TAB 2: EVENTS & CANARY VAULT ── -->
+    <div class="scroll-area tab-pane" id="pane-events" style="display:none;">
+
+      <!-- ⚡ NEW: LIVE ATTACK SIMULATOR BAR -->
+      <div class="card card-accent-ai">
+        <div class="card-body">
+          <div class="card-head" style="margin-bottom:8px;">
+            <div class="card-head-text">
+              <span class="card-title" style="font-size:13px;display:flex;align-items:center;gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ai)" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Canary Attack Simulation Suite
+              </span>
+              <span class="card-subtitle">Inject synthetic decoy probes to validate SOC triage</span>
+            </div>
+            <span class="badge badge-ai" style="font-size:8px;">SIMULATOR</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <button class="btn-secondary" style="font-size:10.5px;padding:7px;" onclick="simulateProbe('ssh')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Simulate SSH Spray
+            </button>
+            <button class="btn-secondary" style="font-size:10.5px;padding:7px;" onclick="simulateProbe('sql')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+              Simulate DB Probe
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Honeytoken Vault -->
+      <div class="card">
+        <div class="card-body" style="padding-bottom:0;">
+          <div class="card-head">
+            <div class="card-head-text">
+              <span class="card-title">Canary Honeytoken Vault</span>
+              <span class="card-subtitle">Tripwire credentials & cryptographic audit hashes</span>
+            </div>
+            <button class="btn-secondary" style="padding:5px 10px;font-size:10.5px;" onclick="showToast('success','Audit Complete','All 3 honeytoken hashes verified — Cryptographic integrity 100%')">Audit All</button>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr><th>Token ID</th><th>Type</th><th>Mask</th><th>Hash</th><th>Audit</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="td-name td-mono">TOKEN-SSH-882</td>
+                  <td><span class="td-chip">SSH Key</span></td>
+                  <td style="color:var(--hi);font-family:var(--mono);font-size:9.5px;">admin / ********</td>
+                  <td class="td-mono td-dim">a8f9c2…</td>
+                  <td><button class="btn-secondary" style="padding:2px 7px;font-size:9.5px;" onclick="showToast('success','Token Verified','TOKEN-SSH-882 hash matching active vault')">Audit</button></td>
+                </tr>
+                <tr>
+                  <td class="td-name td-mono">TOKEN-SQL-104</td>
+                  <td><span class="td-chip">DB Conn</span></td>
+                  <td style="color:var(--hi);font-family:var(--mono);font-size:9.5px;">pg_ro / ********</td>
+                  <td class="td-mono td-dim">3d7b11…</td>
+                  <td><button class="btn-secondary" style="padding:2px 7px;font-size:9.5px;" onclick="showToast('success','Token Verified','TOKEN-SQL-104 hash matching active vault')">Audit</button></td>
+                </tr>
+                <tr>
+                  <td class="td-name td-mono">TOKEN-AWS-592</td>
+                  <td><span class="td-chip">IAM Key</span></td>
+                  <td style="color:var(--hi);font-family:var(--mono);font-size:9.5px;">AKIA********</td>
+                  <td class="td-mono td-dim">7c2e04…</td>
+                  <td><button class="btn-secondary" style="padding:2px 7px;font-size:9.5px;" onclick="showToast('success','Token Verified','TOKEN-AWS-592 hash matching active vault')">Audit</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="height:14px;"></div>
+      </div>
+
+      <!-- Severity Filter Pills -->
+      <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;">
+        <div class="pill on" onclick="setEvFilter(null,this)">All Events</div>
+        <div class="pill" onclick="setEvFilter('critical',this)">Critical</div>
+        <div class="pill" onclick="setEvFilter('high',this)">High</div>
+        <div class="pill" onclick="setEvFilter('warning',this)">Warning</div>
+        <div class="pill" onclick="setEvFilter('info',this)">Info</div>
+      </div>
+
+      <!-- Search Input -->
+      <div style="position:relative;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2.2" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="input-field" id="ev-search" placeholder="Search events, IPs, protocols, tokens…" oninput="renderEvents()" style="padding-left:36px;">
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <span id="ev-count" style="font-family:var(--mono);font-size:10.5px;color:var(--t3);font-weight:600;">4 events • last 24h</span>
+        <div class="radar-beacon" style="padding:2px 6px;">
+          <div class="radar-ping"><div class="radar-dot"></div></div>
+          <span class="radar-txt">STREAM ACTIVE</span>
+        </div>
+      </div>
+
+      <div id="ev-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div><!-- /pane-events -->
+
+    <!-- ── TAB 3: INCIDENTS & AI TRIAGE ── -->
+    <div class="scroll-area tab-pane" id="pane-incidents" style="display:none;">
+      <div class="info-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2.2" style="flex-shrink:0;margin-top:1px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <div>
+          <div class="info-box-title" id="inc-count">2 active incidents under containment</div>
+          <div class="info-box-sub">Correlated from real-time honeynet telemetry and canary signals.</div>
+        </div>
+      </div>
+      <div id="inc-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+    </div><!-- /pane-incidents -->
+
+    <!-- ── TAB 4: COMPLIANCE & CRYPTOGRAPHIC REPORTS ── -->
+    <div class="scroll-area tab-pane" id="pane-reports" style="display:none;">
+      <div class="info-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2.2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div>
+          <div class="info-box-title">Cryptographic Audit & Compliance Reports</div>
+          <div class="info-box-sub">Export verified incident logs and telemetry for SOC2 / ISO 27001 audit compliance.</div>
+        </div>
+      </div>
+
+      <!-- Report Card 1 -->
+      <div class="card">
+        <div class="card-body">
+          <div class="card-head">
+            <div class="card-head-text">
+              <span class="card-title">7-Day Executive Threat Brief</span>
+              <span class="card-subtitle">Probe distributions, canary trips, firewall drops & IP origins</span>
+            </div>
+            <span class="pill">Weekly</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <span class="badge badge-br"><span class="dot"></span>PDF • SOC2 READY</span>
+            <span class="badge badge-ok"><span class="dot"></span>VERIFIED</span>
+          </div>
+          <button class="btn-primary" onclick="openReportModal('exec')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Generate Signed PDF Audit Report
+          </button>
+        </div>
+      </div>
+
+      <!-- Report Card 2 -->
+      <div class="card">
+        <div class="card-body">
+          <div class="card-head">
+            <div class="card-head-text">
+              <span class="card-title">Forensic Incident & Triage Log</span>
+              <span class="card-subtitle">Containment timestamps, analyst notes & packet captures</span>
+            </div>
+            <span class="pill">On-Demand</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <span class="badge badge-neu">JSON / CSV</span>
+            <span class="badge badge-ok"><span class="dot"></span>READY</span>
+          </div>
+          <button class="btn-secondary" style="width:100%;" onclick="openReportModal('forensic')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Inspect Forensic Telemetry Stream
+          </button>
+        </div>
+      </div>
+    </div><!-- /pane-reports -->
+
+    <!-- ── TAB 5: SETTINGS, RBAC & ENTERPRISE SECURITY CONTROLS ── -->
+    <div class="scroll-area tab-pane" id="pane-settings" style="display:none;">
+
+      <!-- Profile & Multi-Tier RBAC Persona Switcher -->
+      <div class="card">
+        <div class="card-body">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <div style="width:48px;height:48px;border-radius:14px;background:var(--brand-soft);border:1px solid var(--brand-border);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div style="min-width:0;flex:1;">
+              <div style="font-family:var(--display);font-size:14.5px;font-weight:800;color:var(--t1);" id="profile-role-title">Lead SecOps Analyst</div>
+              <div style="font-size:11px;color:var(--t2);margin-top:2px;">analyst@enterprise.internal</div>
+              <div style="display:flex;align-items:center;gap:5px;margin-top:5px;">
+                <span class="badge badge-ok" style="font-size:8px;"><span class="dot"></span>ACTIVE SSO</span>
+                <span class="badge badge-br" style="font-size:8px;" id="profile-role-badge">TIER-3 SEC</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size:10px;font-family:var(--mono);font-weight:800;color:var(--t3);letter-spacing:0.6px;margin-bottom:6px;text-transform:uppercase;">SWITCH RBAC PERSONA</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+            <button class="btn-secondary" id="rb-analyst" style="font-size:10px;padding:6px 4px;font-weight:800;border-color:var(--brand);color:var(--brand);background:var(--brand-soft);" onclick="setPersona('analyst')">Analyst</button>
+            <button class="btn-secondary" id="rb-responder" style="font-size:10px;padding:6px 4px;" onclick="setPersona('responder')">Responder</button>
+            <button class="btn-secondary" id="rb-ciso" style="font-size:10px;padding:6px 4px;" onclick="setPersona('ciso')">CISO</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appearance -->
+      <div class="card">
+        <div class="card-body">
+          <div style="font-family:var(--display);font-size:13px;font-weight:800;color:var(--t1);margin-bottom:10px;">Visual Theme</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+            <button class="btn-secondary" id="t-sys" onclick="setThemeMode('system')">System</button>
+            <button class="btn-secondary" id="t-light" onclick="setThemeMode('light')">Light</button>
+            <button class="btn-secondary" id="t-dark" onclick="setThemeMode('dark')">Dark</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notification Settings -->
+      <div class="card">
+        <div class="card-body">
+          <div style="font-family:var(--display);font-size:13px;font-weight:800;color:var(--t1);margin-bottom:10px;">Alerts & Signal Stream</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">In-App Threat Notifications</span>
+              <span class="setting-sub">Show instant alerts on high & critical signals</span>
+            </div>
+            <label class="toggle"><input type="checkbox" checked onchange="playCyberSound('click')"><div class="toggle-track"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Synthesized Cyber Audio FX</span>
+              <span class="setting-sub">Futuristic telemetry chimes on breach events</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="audio-toggle" checked onchange="toggleAudio(this)"><div class="toggle-track"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Mobile Push Notifications</span>
+              <span class="setting-sub">Device registered for critical escalation</span>
+            </div>
+            <span class="badge badge-ok"><span class="dot"></span>ENABLED</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Policies & Hardware PKI -->
+      <div class="card">
+        <div class="card-body">
+          <div style="font-family:var(--display);font-size:13px;font-weight:800;color:var(--t1);margin-bottom:10px;">Device Security & Access</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Biometric Verification</span>
+              <span class="setting-sub">FaceID / TouchID required on resume</span>
+            </div>
+            <label class="toggle"><input type="checkbox" checked onchange="showToast('info','Biometrics','Hardware biometric authentication policy updated')"><div class="toggle-track"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">YubiKey FIDO2 Enclave</span>
+              <span class="setting-sub">Hardware token paired: YUBI-SEC-994</span>
+            </div>
+            <span class="badge badge-ok"><span class="dot"></span>PAIRED</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Honeynet Safety Killswitch -->
+      <div class="card" style="border-color:var(--cr-b);background:var(--cr-s);">
+        <div class="card-body">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="font-family:var(--display);font-size:13px;font-weight:800;color:var(--cr);">Emergency Cluster Isolation</div>
+            <span class="badge badge-cr"><span class="dot"></span>KILLSWITCH</span>
+          </div>
+          <p style="font-size:11px;color:var(--t2);line-height:1.45;margin-bottom:10px;">Instantly sever all decoy honeytoken endpoints and drop all incoming perimeter connections.</p>
+          <button class="btn-danger" onclick="triggerKillswitch()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+            Trigger Emergency Honeynet Killswitch
+          </button>
+        </div>
+      </div>
+
+      <button class="btn-secondary" style="width:100%;color:var(--cr);border-color:var(--cr-b);" onclick="signOut()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Sign Out of Security Workspace
+      </button>
+    </div><!-- /pane-settings -->
+
+    <!-- ══ SLIDING GLASS DOCK NAVBAR ══ -->
+    <div class="dock-container">
+      <nav class="dock" id="dock-nav">
+        <div class="dock-indicator" id="dock-ind"></div>
+        <button class="dock-item active" onclick="goTab('overview',this,0)" id="di-overview">
+          <div class="dock-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></svg>
+          </div>
+          <span>Overview</span>
+        </button>
+        <button class="dock-item" onclick="goTab('events',this,1)" id="di-events">
+          <div class="dock-notif"></div>
+          <div class="dock-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+          </div>
+          <span>Events</span>
+        </button>
+        <button class="dock-item" onclick="goTab('incidents',this,2)" id="di-incidents">
+          <div class="dock-notif"></div>
+          <div class="dock-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <span>Incidents</span>
+        </button>
+        <button class="dock-item" onclick="goTab('reports',this,3)" id="di-reports">
+          <div class="dock-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <span>Reports</span>
+        </button>
+        <button class="dock-item" onclick="goTab('settings',this,4)" id="di-settings">
+          <div class="dock-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </div>
+          <span>Settings</span>
+        </button>
+      </nav>
+    </div>
+
+  </div><!-- /app-screen -->
+
+  <!-- ══════════════ EVENT DETAIL BOTTOM SHEET ══════════════ -->
+  <div class="sheet-overlay" id="ev-sheet" onclick="closeSheet(event)">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div class="sheet-header-info">
+          <div id="sh-badge"></div>
+          <div id="sh-id" class="sheet-id" style="margin-top:4px;"></div>
+          <div id="sh-clf" class="sheet-clf"></div>
+        </div>
+        <button class="hud-btn" onclick="document.getElementById('ev-sheet').classList.remove('open')" style="font-size:18px;color:var(--t2);">&times;</button>
+      </div>
+      <div class="sheet-body">
+        <div class="rec-block">
+          <div class="rec-label">RECOMMENDED CONTAINMENT ACTION</div>
+          <div id="sh-rec" class="rec-text"></div>
+        </div>
+        <div>
+          <div style="font-family:var(--display);font-size:12px;font-weight:800;color:var(--t1);margin-bottom:6px;">Classification Heuristics</div>
+          <div id="sh-reasons" style="display:flex;flex-direction:column;gap:5px;"></div>
+        </div>
+        <div>
+          <div style="font-family:var(--display);font-size:12px;font-weight:800;color:var(--t1);margin-bottom:5px;">Telemetry Parameters</div>
+          <div class="param-list">
+            <div class="param-row"><span class="param-key">Protocol</span><span id="sh-proto" class="param-val"></span></div>
+            <div class="param-row"><span class="param-key">Source IP</span><span id="sh-ip" class="param-val param-mono"></span></div>
+            <div class="param-row"><span class="param-key">Target Port</span><span id="sh-port" class="param-val param-mono"></span></div>
+            <div class="param-row"><span class="param-key">Geo Origin</span><span id="sh-country" class="param-val"></span></div>
+            <div class="param-row"><span class="param-key">Canary Node</span><span id="sh-canary" class="param-val param-mono"></span></div>
+            <div class="param-row"><span class="param-key">Injected Credentials</span><span id="sh-creds" class="param-val param-masked"></span></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:var(--display);font-size:12px;font-weight:800;color:var(--t1);margin-bottom:8px;">Forensic Containment</div>
+          <div class="sheet-actions">
+            <button class="btn-action" onclick="showToast('success','BGP Rule Promoted','Perimeter firewall drop rule activated');document.getElementById('ev-sheet').classList.remove('open')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Promote BGP Block
+            </button>
+            <button class="btn-secondary" onclick="showToast('info','Canary Rotated','Honeytoken credentials refreshed');document.getElementById('ev-sheet').classList.remove('open')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Rotate Secret
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ 🧠 AI NEURAL CO-PILOT MODAL ══════════════ -->
+  <div class="sheet-overlay" id="ai-modal" onclick="closeAIModal(event)">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <div class="sheet-handle"></div>
+      <div class="ai-modal-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:32px;height:32px;border-radius:10px;background:var(--ai);display:flex;align-items:center;justify-content:center;color:#FFFFFF;box-shadow:0 0 14px var(--ai-glow);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12A10 10 0 0 1 12 2z"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+          </div>
+          <div>
+            <div style="font-family:var(--display);font-size:14px;font-weight:800;color:var(--t1);">Neuro-Sentinel AI Co-Pilot</div>
+            <div style="font-size:10px;color:var(--t2);">Autonomous Honeytoken Threat Correlation Engine</div>
+          </div>
+        </div>
+        <button class="hud-btn" onclick="document.getElementById('ai-modal').classList.remove('open')">&times;</button>
+      </div>
+      <div class="sheet-body">
+        <div class="ai-insight-box" style="border-color:var(--ai-b);background:var(--ai-s);">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span class="ai-chip">MITRE ATT&CK MATRIX</span>
+            <span style="font-family:var(--mono);font-size:9.5px;font-weight:700;color:var(--ai);">CONFIDENCE 98.4%</span>
+          </div>
+          <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap;">
+            <span class="mitre-tag">T1110.001 (Password Spraying)</span>
+            <span class="mitre-tag">T1078 (Valid Accounts)</span>
+            <span class="mitre-tag">T1595 (Active Scanning)</span>
+          </div>
+          <p style="font-size:11.5px;color:var(--t1);line-height:1.45;margin-top:6px;">Autonomous correlation indicates the SSH and TLS probes originate from a coordinated botnet infrastructure attempting reconnaissance prior to lateral movement.</p>
+        </div>
+
+        <div>
+          <div style="font-family:var(--display);font-size:12.5px;font-weight:800;color:var(--t1);margin-bottom:8px;">Autonomous Containment Playbooks</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <button class="btn-primary" style="background:linear-gradient(135deg,var(--ai),#6D28D9);font-size:11.5px;padding:10px;" onclick="showToast('success','Playbook Executed','Auto-isolated AS14618 subnet and rotated DMZ canary tokens');document.getElementById('ai-modal').classList.remove('open')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Execute Playbook #SEC-890: Autonomous BGP Sinkhole
+            </button>
+            <button class="btn-secondary" style="font-size:11.5px;padding:9px;" onclick="showToast('info','Prompt Sent','Generating forensic packet trace analysis');document.getElementById('ai-modal').classList.remove('open')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Explain Blast Radius & Forensics
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ 📜 CRYPTOGRAPHIC REPORT MODAL ══════════════ -->
+  <div class="sheet-overlay" id="report-modal" onclick="closeReportModal(event)">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div class="sheet-header-info">
+          <span class="badge badge-ok"><span class="dot"></span>CRYPTOGRAPHICALLY SIGNED</span>
+          <div class="sheet-clf" style="margin-top:4px;" id="rep-modal-title">SOC2 Audit Telemetry Certificate</div>
+        </div>
+        <button class="hud-btn" onclick="document.getElementById('report-modal').classList.remove('open')">&times;</button>
+      </div>
+      <div class="sheet-body">
+        <div style="background:var(--surface-2);border:1px solid var(--b1);border-radius:12px;padding:12px 14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-family:var(--mono);font-size:9.5px;color:var(--t3);font-weight:700;">SHA-256 INTEGRITY SEAL</span>
+            <span style="font-family:var(--mono);font-size:9.5px;color:var(--ok);font-weight:800;">VERIFIED</span>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--brand);word-break:break-all;background:var(--surface-3);padding:6px 8px;border-radius:6px;">
+            e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+          </div>
+        </div>
+
+        <div class="param-list">
+          <div class="param-row"><span class="param-key">Issuing Authority</span><span class="param-val">LeukQuant Sec-OS PKI</span></div>
+          <div class="param-row"><span class="param-key">Compliance Standard</span><span class="param-val">SOC2 Type II / ISO 27001</span></div>
+          <div class="param-row"><span class="param-key">Audit Period</span><span class="param-val">Last 7 Days (Verified)</span></div>
+          <div class="param-row"><span class="param-key">Total Telemetry Records</span><span class="param-val">42 Verified Incidents</span></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button class="btn-primary" onclick="showToast('success','Export Complete','Signed PDF exported with cryptographic certificate');document.getElementById('report-modal').classList.remove('open')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download PDF
+          </button>
+          <button class="btn-secondary" onclick="showToast('info','JSON Exported','42 telemetry signals copied to clipboard in standard STIX/TAXII format');document.getElementById('report-modal').classList.remove('open')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Export JSON
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /phone-frame -->
+</div><!-- /frame-container -->
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   MOCK DATA & TELEMETRY
+═══════════════════════════════════════════════════════════════ */
+const EVENTS = [
+  { id:'EVT-2026-8941', clf:'Automated SSH Credential Spray', sev:'critical',
+    proto:'SSH', ip:'198.51.100.44', port:'2222', country:'Germany (DE)', canary:'canary-ssh-edge-02',
+    creds:'admin / **********', time:'14 min ago',
+    rec:'Maintain perimeter drop rule. Check canary decoy host log integrity.',
+    reasons:['14 consecutive auth failures in 30 seconds','Pattern matches known brute-force signature list','Source IP flagged in threat reputation baseline'] },
+  { id:'EVT-2026-8938', clf:'Suspicious TLS Handshake Anomaly', sev:'high',
+    proto:'HTTPS', ip:'203.0.113.89', port:'443', country:'Singapore (SG)', canary:'canary-web-dmz-01',
+    creds:'api_user / **********', time:'42 min ago',
+    rec:'Ensure modern TLS cipher policy is enforced on reverse proxy edge nodes.',
+    reasons:['Obsolete cipher suite negotiation attempted','SNI header absent from Client Hello'] },
+  { id:'EVT-2026-8920', clf:'Decoy Database Query Probe', sev:'warning',
+    proto:'PostgreSQL', ip:'192.0.2.112', port:'5432', country:'United States (US)', canary:'canary-db-prod-01',
+    creds:'pg_readonly / **********', time:'2 hrs ago',
+    rec:'Audit internal segment routing. Confirm canary database isolation is intact.',
+    reasons:['Connection to unadvertised port 5432','Triggered canary honeytoken table query','Source subnet unexpected for DB tier'] },
+  { id:'EVT-2026-8905', clf:'DNS Canary Zone Resolution', sev:'info',
+    proto:'DNS', ip:'192.0.2.204', port:'53', country:'Internal (LAN)', canary:'canary-dns-resolver-01',
+    creds:'N/A (query token masked)', time:'5 hrs ago',
+    rec:'Verify guest subnet DHCP pool and DNS forwarding rules.',
+    reasons:['Lookup for canary hostname alert-token.internal.net','Source IP from guest VLAN subnet'] },
+];
+
+const INCIDENTS = [
+  { id:'INC-2026-041', title:'Decoy SSH Reconnaissance Cluster', sev:'critical', status:'Under Triage',
+    desc:'Correlated brute-force attempts from multiple ASN origins targeting perimeter canary port 2222.',
+    scope:'Perimeter Honeynet DMZ', assignee:'Security Operations',
+    rec:'Block upstream ASN subnet at BGP router and rotate all canary SSH credentials.',
+    tl:[ {s:'Detection', d:'Canary SSH decoy triggered threshold anomaly.', t:'03:15 UTC', done:true},
+         {s:'Correlation', d:'4 concurrent source IPs linked to common signature.', t:'03:22 UTC', done:true},
+         {s:'Triage & Containment', d:'Rate limiting applied. Analyst verifying honeytoken.', t:'03:45 UTC', done:true},
+         {s:'Resolution & Audit', d:'Pending final firewall rule promotion to perimeter.', t:'In Progress', done:false} ] },
+  { id:'INC-2026-039', title:'Internal Canary DNS Lookup Anomaly', sev:'high', status:'Contained',
+    desc:'Canary database hostname resolved from an unexpected guest workstation subnet.',
+    scope:'VLAN 40 (Guest Network)', assignee:'Network Security Team',
+    rec:'Isolate switch port 18 on Building B switch and inspect DHCP lease tables.',
+    tl:[ {s:'Detection', d:'DNS resolver flagged canary honey-record query.', t:'Yesterday 14:00', done:true},
+         {s:'Triage & Containment', d:'VLAN isolation policy activated for suspected MAC address.', t:'Yesterday 14:30', done:true},
+         {s:'Resolution & Audit', d:'Machine sanitized and reassigned. Incident formally closed.', t:'Yesterday 17:10', done:true} ] },
+];
+
+const SEV_MAP = { critical:'badge-cr', high:'badge-hi', warning:'badge-hi', info:'badge-br' };
+
+/* ═══════════════════════════════════════════════════════════════
+   AUDIO ENGINE (WEB AUDIO API CYBER CHIMES)
+═══════════════════════════════════════════════════════════════ */
+let audioCtx = null, audioEnabled = true;
+function initAudio() {
+  if(!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){}
+  }
+}
+function playCyberSound(type) {
+  if(!audioEnabled) return;
+  initAudio();
+  if(!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  if(type === 'click') {
+    osc.frequency.setValueAtTime(800, now);
+    osc.frequency.exponentialRampToValueAtTime(1400, now + 0.04);
+    gain.gain.setValueAtTime(0.06, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+    osc.start(now); osc.stop(now + 0.04);
+  } else if(type === 'alert') {
+    osc.frequency.setValueAtTime(520, now);
+    osc.frequency.setValueAtTime(780, now + 0.08);
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+    osc.start(now); osc.stop(now + 0.22);
+  } else if(type === 'success') {
+    osc.frequency.setValueAtTime(440, now);
+    osc.frequency.setValueAtTime(880, now + 0.07);
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+    osc.start(now); osc.stop(now + 0.18);
+  }
+}
+function toggleAudio(el) {
+  audioEnabled = el.checked;
+  showToast(audioEnabled?'success':'info', 'Audio Telemetry', audioEnabled?'Synthesized cyber chimes enabled':'Audio muted');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   APP STATE & CONTROLLERS
+═══════════════════════════════════════════════════════════════ */
+let obIdx = 0, evFilter = null, demoMode = true, themeMode = 'light', currentPersona = 'analyst';
+const $ = id => document.getElementById(id);
+
+/* ─── TOAST SYSTEM ─── */
+function showToast(type, title, sub) {
+  const c = $('toast-container');
+  if(!c) return;
+  playCyberSound(type === 'error' || type === 'warn' ? 'alert' : 'click');
+  const t = document.createElement('div');
+  t.className = 'toast-item';
+  const colors = { success:'var(--ok)', info:'var(--brand)', warn:'var(--hi)', error:'var(--cr)' };
+  const bgs = { success:'var(--ok-s)', info:'var(--brand-soft)', warn:'var(--hi-s)', error:'var(--cr-s)' };
+  const icons = {
+    success: '<polyline points="20 6 9 17 4 12"/>',
+    info:    '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+    warn:    '<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+    error:   '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+  };
+  t.innerHTML = `
+    <div class="toast-icon-box" style="background:${bgs[type]||bgs.info};color:${colors[type]||colors.info};">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">${icons[type]||icons.info}</svg>
+    </div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-family:var(--display);font-size:12px;font-weight:800;color:var(--t1);">${title}</div>
+      ${sub ? `<div style="font-size:10.5px;color:var(--t2);margin-top:1px;line-height:1.35;">${sub}</div>` : ''}
+    </div>`;
+  c.appendChild(t);
+  setTimeout(() => { t.classList.add('leaving'); setTimeout(() => t.remove(), 260); }, 3000);
+}
+
+/* ─── DEVICE EMULATOR ─── */
+function setDevice(type, btn) {
+  playCyberSound('click');
+  document.querySelectorAll('.tb-btn').forEach(b => {
+    if(['tb-pixel','tb-iphone','tb-tablet','tb-fluid'].includes(b.id)) b.classList.remove('active');
+  });
+  btn.classList.add('active');
+  const f = $('phone-frame');
+  f.className = 'phone-frame' + (type==='tablet'?' tablet':type==='iphone'?' iphone':type==='fluid'?' fluid':'');
+}
+
+/* ─── THEME CONTROLLER ─── */
+function toggleTheme() {
+  playCyberSound('click');
+  setThemeMode(document.body.classList.contains('dark') ? 'light' : 'dark');
+}
+function setThemeMode(m) {
+  themeMode = m;
+  const isDark = m === 'dark' || (m === 'system' && window.matchMedia('(prefers-color-scheme:dark)').matches);
+  document.body.classList.toggle('dark', isDark);
+  const tb = $('tb-theme');
+  if (tb) {
+    tb.innerHTML = isDark
+      ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Dark`
+      : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> Light`;
+  }
+  highlightThemeBtn();
+}
+function highlightThemeBtn() {
+  ['t-sys','t-light','t-dark'].forEach(id => {
+    const b = $(id);
+    if(b) { b.style.borderColor=''; b.style.color=''; b.style.fontWeight=''; b.style.background=''; }
+  });
+  const active = themeMode==='system'?'t-sys':themeMode==='light'?'t-light':'t-dark';
+  const b = $(active);
+  if(b){
+    b.style.borderColor='var(--brand)';
+    b.style.color='var(--brand)';
+    b.style.fontWeight='800';
+    b.style.background='var(--brand-soft)';
+  }
+}
+
+/* ─── RBAC PERSONA SWITCHER ─── */
+function setPersona(role) {
+  playCyberSound('click');
+  currentPersona = role;
+  ['rb-analyst','rb-responder','rb-ciso'].forEach(id => {
+    const b = $(id);
+    if(b) { b.style.borderColor=''; b.style.color=''; b.style.fontWeight=''; b.style.background=''; }
+  });
+  const active = $('rb-' + role);
+  if(active) {
+    active.style.borderColor = 'var(--brand)';
+    active.style.color = 'var(--brand)';
+    active.style.fontWeight = '800';
+    active.style.background = 'var(--brand-soft)';
+  }
+  const titles = { analyst: 'Lead SecOps Analyst', responder: 'SOC Tier-3 Incident Responder', ciso: 'Chief Information Security Officer (CISO)' };
+  const badges = { analyst: 'TIER-3 SEC', responder: 'INCIDENT COMMAND', ciso: 'EXECUTIVE CLEARANCE' };
+  const initials = { analyst: 'A', responder: 'R', ciso: 'C' };
+  $('profile-role-title').textContent = titles[role];
+  $('profile-role-badge').textContent = badges[role];
+  $('avatar-initial').textContent = initials[role];
+  showToast('info', 'RBAC Persona Switched', `SecOps View: ${titles[role]}`);
+}
+
+/* ─── DEMO MODE TOGGLE ─── */
+function toggleDemo() {
+  playCyberSound('click');
+  demoMode = !demoMode;
+  $('demo-label').textContent = demoMode ? 'Live Data' : 'Offline';
+  renderAll();
+  showToast(demoMode?'success':'info', demoMode?'Live Telemetry Online':'Offline Mode', demoMode?'Connected to honeynet pipeline':'Simulation paused');
+}
+
+/* ─── SCREEN MANAGEMENT ─── */
+function showScreen(id) {
+  const ids = ['splash','ob-screen','login-screen','app-screen'];
+  ids.forEach(s => {
+    const el = $(s);
+    if(el){ el.style.display = 'none'; el.classList.remove('active'); }
+  });
+  const el = $(id);
+  if(el){ el.style.display = 'flex'; requestAnimationFrame(()=>el.classList.add('active')); }
+}
+
+/* ─── ONBOARDING FLOW ─── */
+const OB_PAGES = [
+  { stage:'OBSERVE',   title:'See suspicious activity early',    desc:'Ghost-Net observes interactions with controlled decoy services before attackers reach real systems.', img:'assets/onboard_observe_3d.jpg' },
+  { stage:'UNDERSTAND',title:'Understand every security event',  desc:'Turn complex security signals into clear timelines, severity levels, and recommended actions.', img:'assets/onboard_understand_3d.jpg' },
+  { stage:'ACT',       title:'Act with confidence',              desc:'Receive verified incident updates and keep your organisation informed at every stage of response.', img:'assets/onboard_act_3d.jpg' },
+];
+function renderOb() {
+  const p = OB_PAGES[obIdx];
+  $('ob-stage').textContent = p.stage;
+  $('ob-title').textContent = p.title;
+  $('ob-desc').textContent  = p.desc;
+  $('ob-img').src = p.img;
+  [0,1,2].forEach(i => { $('od'+i).className = 'ob-dot'+(i===obIdx?' on':''); });
+  $('ob-back').style.visibility = obIdx > 0 ? 'visible' : 'hidden';
+  const offsets = [152, 76, 0];
+  $('prog-fill').style.strokeDashoffset = offsets[obIdx];
+  $('prog-icon').innerHTML = obIdx === 2
+    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'
+    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+}
+function nextOb() { playCyberSound('click'); obIdx < 2 ? (obIdx++, renderOb()) : showScreen('login-screen'); }
+function prevOb() { playCyberSound('click'); obIdx > 0 && (obIdx--, renderOb()); }
+renderOb();
+
+/* ─── ENTER APP ─── */
+function enterApp() {
+  playCyberSound('success');
+  showScreen('app-screen');
+  renderAll();
+  highlightThemeBtn();
+  setTimeout(() => showToast('success','Workspace Connected','LeukQuant SEC-OS telemetry stream operational'), 400);
+}
+function signOut() { playCyberSound('click'); showScreen('login-screen'); }
+
+/* ─── TAB NAVIGATION ─── */
+const TAB_TITLES = { overview:'Overview', events:'Events', incidents:'Incidents', reports:'Reports', settings:'Settings' };
+const TAB_TAGS   = { overview:'SEC-OS', events:'LIVE', incidents:'TRIAGE', reports:'AUDIT', settings:'SECOPS' };
+
+function goTab(key, btn, idx) {
+  playCyberSound('click');
+  document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.dock-item').forEach(b => b.classList.remove('active'));
+  const pane = $('pane-'+key);
+  if(pane){ pane.style.display = 'flex'; pane.scrollTop = 0; }
+  btn.classList.add('active');
+  $('dock-ind').style.transform = `translateX(${idx * 100}%)`;
+
+  const tag = $('hdr-tag');
+  const ht = $('hdr-title');
+  if(tag) tag.textContent = TAB_TAGS[key] || 'LEUKQUANT';
+  if(ht){
+    ht.textContent = TAB_TITLES[key] || 'Overview';
+  }
+  if(key==='settings') highlightThemeBtn();
+  updateHeaderAnalytics(key);
+}
+
+/* ─── RENDERERS ─── */
+function renderAll() { renderOverview(); renderEvents(); renderIncidents(); }
+
+function renderOverview() {
+  if(demoMode) {
+    $('dep-badge-txt').textContent = 'HEALTHY';
+    $('dep-badge').className = 'badge badge-ok';
+    $('dep-sub').textContent = 'Active honeynet cluster — EU-Central region';
+    $('health-ind').className = 'health-indicator';
+    $('hi-core').style.background = 'var(--ok)';
+    $('hi-ring').style.background = 'var(--ok)';
+    $('hi-title').textContent = 'Standby / Operational';
+    $('hi-sub').textContent = 'All canary listeners and tripwires confirmed active';
+    $('m-critical').textContent = '0'; $('m-critical').className = 'm-value'; $('m-critical-sub').textContent = 'No active breaches';
+    $('m-high').textContent = '2'; $('m-high').className = 'm-value'; $('m-high-sub').textContent = 'Past 24 hours';
+    $('rec-title').textContent = 'Enforce BGP route filter on AS14618 prefix';
+    $('rec-desc').textContent = 'Recent SSH credential spray indicates active reconnaissance from a known malicious ASN. Consider promoting the block rule to edge routers.';
+  } else {
+    $('dep-badge-txt').textContent = 'STANDBY';
+    $('dep-badge').className = 'badge badge-neu';
+    $('dep-sub').textContent = 'Sensor telemetry stream pending connection';
+    $('health-ind').className = 'health-indicator warning';
+    $('hi-title').textContent = 'Awaiting backend data';
+    $('hi-sub').textContent = 'Sensor stream pending connection';
+    $('m-critical').textContent = '—'; $('m-critical').className = 'm-value pending'; $('m-critical-sub').textContent = 'Pending backend sync';
+    $('m-high').textContent = '—'; $('m-high').className = 'm-value pending'; $('m-high-sub').textContent = 'Awaiting stream';
+    $('rec-title').textContent = 'Awaiting backend security policies';
+    $('rec-desc').textContent = 'Security posture recommendations will appear once connected to the central analytics service.';
+  }
+}
+
+function renderEvents() {
+  if(!demoMode){
+    $('ev-list').innerHTML = `<div class="card"><div class="card-body" style="text-align:center;padding:20px;"><p style="font-family:var(--display);font-size:13px;font-weight:700;color:var(--t1);">No Events Available</p><p style="font-size:11px;color:var(--t2);margin-top:3px;">Awaiting backend event stream connection.</p></div></div>`;
+    $('ev-count').textContent = 'Awaiting backend stream';
+    return;
+  }
+  const q = ($('ev-search')?.value || '').toLowerCase();
+  const f = EVENTS.filter(e => {
+    if(evFilter && e.sev !== evFilter) return false;
+    return !q || (e.id+e.clf+e.proto+e.ip).toLowerCase().includes(q);
+  });
+  $('ev-count').textContent = `${f.length} of ${EVENTS.length} events • last 24h`;
+  $('ev-list').innerHTML = f.length ? f.map(e => `
+    <div class="card" onclick='openSheet(${JSON.stringify(e).replace(/'/g,"&#39;")})' style="cursor:pointer;">
+      <div class="card-body" style="padding:13px 14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="badge ${SEV_MAP[e.sev]||'badge-br'}"><span class="dot"></span>${e.sev}</span>
+            <span style="font-family:var(--mono);font-size:10.5px;font-weight:800;color:var(--t1);">${e.id}</span>
+          </div>
+          <span style="font-family:var(--mono);font-size:9.5px;color:var(--t3);flex-shrink:0;">${e.time}</span>
+        </div>
+        <div style="font-family:var(--display);font-size:13px;font-weight:800;color:var(--t1);margin-bottom:6px;line-height:1.25;">${e.clf}</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;">
+          <span class="pill" style="padding:2.5px 8px;font-size:9.5px;color:var(--brand);font-weight:800;">${e.proto}</span>
+          <span class="pill" style="padding:2.5px 8px;font-size:9.5px;font-family:var(--mono);">${e.ip}:${e.port}</span>
+          <span class="pill" style="padding:2.5px 8px;font-size:9.5px;">${e.country}</span>
+        </div>
+      </div>
+    </div>
+  `).join('') : `<div class="card"><div class="card-body" style="text-align:center;padding:20px;"><p style="font-family:var(--display);font-size:13px;font-weight:700;">No matching telemetry signals</p></div></div>`;
+}
+
+function setEvFilter(sev, el) {
+  playCyberSound('click');
+  evFilter = sev;
+  document.querySelectorAll('#pane-events .pill').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+  renderEvents();
+}
+
+function renderIncidents() {
+  if(!demoMode){
+    $('inc-count').textContent = 'Awaiting backend incident analysis';
+    $('inc-list').innerHTML = `<div class="card"><div class="card-body" style="text-align:center;padding:20px;"><p style="font-family:var(--display);font-size:13px;font-weight:700;color:var(--t1);">No Active Incidents</p><p style="font-size:11px;color:var(--t2);margin-top:3px;">Awaiting backend analysis pipeline.</p></div></div>`;
+    return;
+  }
+  $('inc-count').textContent = `${INCIDENTS.length} active incidents under containment`;
+  $('inc-list').innerHTML = INCIDENTS.map((inc) => `
+    <div class="card">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="badge ${SEV_MAP[inc.sev]||'badge-br'}"><span class="dot"></span>${inc.sev}</span>
+            <span style="font-family:var(--mono);font-size:10.5px;font-weight:800;">${inc.id}</span>
+          </div>
+          <span class="pill" style="font-size:9.5px;color:var(--brand);font-weight:800;padding:2px 8px;">${inc.status}</span>
+        </div>
+        <div style="font-family:var(--display);font-size:14px;font-weight:800;color:var(--t1);margin-bottom:4px;letter-spacing:-0.2px;">${inc.title}</div>
+        <div style="font-size:11px;color:var(--t2);line-height:1.45;margin-bottom:10px;">${inc.desc}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;font-size:10.5px;">
+          <div style="background:var(--surface-2);border:1px solid var(--b1);border-radius:8px;padding:8px 10px;">
+            <div style="color:var(--t3);margin-bottom:1px;font-size:8.5px;font-weight:700;letter-spacing:0.5px;font-family:var(--mono);">SCOPE</div>
+            <div style="font-weight:800;color:var(--t1);">${inc.scope}</div>
+          </div>
+          <div style="background:var(--surface-2);border:1px solid var(--b1);border-radius:8px;padding:8px 10px;">
+            <div style="color:var(--t3);margin-bottom:1px;font-size:8.5px;font-weight:700;letter-spacing:0.5px;font-family:var(--mono);">ASSIGNEE</div>
+            <div style="font-weight:800;color:var(--t1);">${inc.assignee}</div>
+          </div>
+        </div>
+        <div class="rec-block" style="margin-bottom:12px;">
+          <div class="rec-label">RECOMMENDED CONTAINMENT</div>
+          <div class="rec-text">${inc.rec}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="font-family:var(--mono);font-size:9px;font-weight:800;color:var(--t3);letter-spacing:0.8px;text-transform:uppercase;">FORENSIC AUDIT TRAIL</div>
+          <button class="ai-chip" style="cursor:pointer;" onclick="openAIModal()">AI AUTO-TRIAGE</button>
+        </div>
+        <div class="timeline">
+          ${inc.tl.map(s=>`
+          <div class="tl-step${s.done?' done':''}">
+            <div class="tl-node">
+              ${s.done?`<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`:''}
+            </div>
+            <div class="tl-body">
+              <div class="tl-title-row">
+                <span class="tl-step-name">${s.s}</span>
+                <span class="tl-time">${s.t}</span>
+              </div>
+              <div class="tl-desc">${s.d}</div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ─── MODALS & SHEETS ─── */
+function openSheet(ev) {
+  playCyberSound('click');
+  const e = typeof ev === 'string' ? JSON.parse(ev) : ev;
+  $('sh-badge').innerHTML = `<span class="badge ${SEV_MAP[e.sev]||'badge-br'}"><span class="dot"></span>${e.sev}</span>`;
+  $('sh-id').textContent  = e.id;
+  $('sh-clf').textContent = e.clf;
+  $('sh-rec').textContent = e.rec;
+  $('sh-reasons').innerHTML = e.reasons.map(r=>`
+    <div style="display:flex;gap:6px;font-size:11px;color:var(--t2);line-height:1.4;">
+      <span style="color:var(--brand);font-weight:800;">•</span><span>${r}</span>
+    </div>`).join('');
+  $('sh-proto').textContent   = e.proto;
+  $('sh-ip').textContent      = e.ip;
+  $('sh-port').textContent    = e.port;
+  $('sh-country').textContent = e.country;
+  $('sh-canary').textContent  = e.canary;
+  $('sh-creds').textContent   = e.creds;
+  $('ev-sheet').classList.add('open');
+}
+function closeSheet(ev) { if(ev.target.id==='ev-sheet') $('ev-sheet').classList.remove('open'); }
+
+function openAIModal() { playCyberSound('click'); $('ai-modal').classList.add('open'); }
+function closeAIModal(ev) { if(ev.target.id==='ai-modal') $('ai-modal').classList.remove('open'); }
+
+function openReportModal(type) {
+  playCyberSound('click');
+  $('rep-modal-title').textContent = type==='exec' ? '7-Day Executive Threat Audit Certificate' : 'Cryptographic Forensic Telemetry Log';
+  $('report-modal').classList.add('open');
+}
+function closeReportModal(ev) { if(ev.target.id==='report-modal') $('report-modal').classList.remove('open'); }
+
+/* ─── LIVE ATTACK PROBE SIMULATOR ─── */
+function simulateProbe(type) {
+  playCyberSound('alert');
+  if(type === 'ssh') {
+    const newEv = {
+      id: 'EVT-2026-' + (8942 + Math.floor(Math.random()*50)),
+      clf: 'Synthetic SSH Spray Injected',
+      sev: 'critical',
+      proto: 'SSH',
+      ip: '185.220.101.' + Math.floor(Math.random()*250),
+      port: '2222',
+      country: 'Netherlands (NL)',
+      canary: 'canary-ssh-edge-02',
+      creds: 'root / toor#2026',
+      time: 'Just now',
+      rec: 'Perimeter honeypot trapped unauthorized authentication attempt.',
+      reasons: ['Synthetic attack probe simulation triggered from console', 'Decoy authentication tripwire tripped']
+    };
+    EVENTS.unshift(newEv);
+    renderEvents();
+    showToast('warn', 'Simulated Probe Triggered', 'SSH honeytoken tripwire tripped on port 2222');
+  } else if(type === 'sql') {
+    const newEv = {
+      id: 'EVT-2026-' + (8942 + Math.floor(Math.random()*50)),
+      clf: 'Synthetic DB Honeytoken Query',
+      sev: 'high',
+      proto: 'PostgreSQL',
+      ip: '192.0.2.140',
+      port: '5432',
+      country: 'Internal Enclave',
+      canary: 'canary-db-prod-01',
+      creds: 'pg_readonly / **********',
+      time: 'Just now',
+      rec: 'Decoy table schema access trapped by honeynet auditor.',
+      reasons: ['Decoy database canary tripwire query executed', 'Source flagged for lateral traversal triage']
+    };
+    EVENTS.unshift(newEv);
+    renderEvents();
+    showToast('warn', 'Simulated DB Query', 'PostgreSQL canary table queried by simulated actor');
+  }
+}
+
+/* ─── KILLSWITCH CONTROLLER ─── */
+function triggerKillswitch() {
+  playCyberSound('alert');
+  if(confirm("EMERGENCY KILLSWITCH: Confirm isolating all honeynet nodes and dropping perimeter traffic?")) {
+    showToast('error', 'Cluster Severed', 'Emergency Honeynet Killswitch active — All canary listeners dropped');
+  }
+}
+
+/* ─── LIVE DIGITAL CLOCK ─── */
+function updateClock() {
+  const el = $('hud-clock');
+  if(!el) return;
+  const now = new Date();
+  el.textContent = now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+/* ─── DYNAMIC HEADER ANALYTICS CONTROLLER ─── */
+function updateHeaderAnalytics(activeTab) {
+  const tb = $('threat-bar'), tv = $('threat-val');
+  const hev = $('hud-events'), hfl = $('hud-fleet'), hup = $('hud-uptime');
+  if(!demoMode) {
+    if(tb) tb.style.width='0%';
+    if(tv){ tv.textContent='—'; tv.style.color='var(--t3)'; }
+    if(hev) hev.textContent='—';
+    if(hfl) hfl.textContent='—';
+    if(hup) hup.textContent='—';
+    return;
+  }
+  const stats = {
+    overview:  { threat:22, pct:'LOW', color:'var(--ok)', events:'4', fleet:'4/4', uptime:'99.9%' },
+    events:    { threat:34, pct:'LOW', color:'var(--ok)', events:EVENTS.length.toString(), fleet:'4/4', uptime:'99.9%' },
+    incidents: { threat:65, pct:'MED', color:'var(--hi)', events:EVENTS.length.toString(), fleet:'4/4', uptime:'99.9%' },
+    reports:   { threat:22, pct:'LOW', color:'var(--ok)', events:EVENTS.length.toString(), fleet:'4/4', uptime:'99.9%' },
+    settings:  { threat:22, pct:'LOW', color:'var(--ok)', events:EVENTS.length.toString(), fleet:'4/4', uptime:'99.9%' },
+  };
+  const s = stats[activeTab] || stats.overview;
+  if(tb) tb.style.width  = s.threat + '%';
+  if(tv){ tv.textContent = s.pct; tv.style.color = s.color; }
+  if(hev) hev.textContent = s.events;
+  if(hfl) hfl.textContent = s.fleet;
+  if(hup) hup.textContent = s.uptime;
+}
+
+/* ─── BOOT ─── */
+setTimeout(() => { showScreen('ob-screen'); }, 1200);
+</script>
+</body>
+</html>

@@ -1,9 +1,10 @@
 // lib/core/widgets/protocol_icon.dart
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
 
-/// Clean branded protocol badge with vector icon and label.
+/// Clean bare protocol indicator with vector icon and label.
 class ProtocolBadge extends StatelessWidget {
   final String protocol;
   final bool isCompact;
@@ -20,6 +21,7 @@ class ProtocolBadge extends StatelessWidget {
         return Icons.terminal_rounded;
       case 'HTTPS':
       case 'TLS':
+        return Icons.lock_outline_rounded;
       case 'HTTP':
         return Icons.language_rounded;
       case 'POSTGRESQL':
@@ -27,7 +29,13 @@ class ProtocolBadge extends StatelessWidget {
       case 'MYSQL':
         return Icons.storage_rounded;
       case 'DNS':
-        return Icons.dns_rounded;
+        return Icons.alt_route_rounded;
+      case 'RDP':
+      case 'VNC':
+        return Icons.desktop_windows_rounded;
+      case 'FTP':
+      case 'SFTP':
+        return Icons.folder_shared_rounded;
       default:
         return Icons.shield_outlined;
     }
@@ -38,35 +46,26 @@ class ProtocolBadge extends StatelessWidget {
     final colors = AppColors.of(context);
     final icon = _getIcon(protocol);
 
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: isCompact ? 6 : 8,
-        vertical: isCompact ? 2 : 4,
-      ),
-      decoration: BoxDecoration(
-        color: colors.brandPrimary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: colors.brandPrimary.withValues(alpha: 0.2),
-          width: 1,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(
+          icon,
+          size: isCompact ? 12 : 14,
+          color: colors.brandPrimary.withValues(alpha: 0.85),
         ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: isCompact ? 12 : 14, color: colors.brandPrimary),
-          const SizedBox(width: 4),
-          Text(
-            protocol.toUpperCase(),
-            style: TextStyle(
-              fontSize: isCompact ? 10.5 : 11.5,
-              fontWeight: FontWeight.w700,
-              color: colors.brandPrimary,
-              letterSpacing: 0.3,
-            ),
+        const SizedBox(width: 4.5),
+        Text(
+          protocol.toUpperCase(),
+          style: GoogleFonts.jetBrainsMono(
+            fontSize: isCompact ? 10.5 : 11.5,
+            fontWeight: FontWeight.w700,
+            color: colors.brandPrimary,
+            letterSpacing: 0.2,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

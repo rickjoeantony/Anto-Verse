@@ -98,7 +98,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                     Text(
                       'Initializing workspace...',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: colors.textSecondary.withOpacity(0.8),
+                        color: colors.textSecondary.withValues(alpha: 0.8),
                       ),
                     ),
                     const SizedBox(height: 28),

@@ -3,10 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/glass/liquid_glass_card.dart';
 import '../../../../shared/models/port_attack_summary.dart';
 import '../../../../core/widgets/chart_empty_state.dart';
 
-/// Bar chart visualizing targeted decoy ports.
+/// Bar chart visualizing targeted decoy ports in Liquid Glass.
 /// Shows the count of attacks per target port as provided by the backend.
 class TargetedPortsChart extends StatelessWidget {
   final List<PortAttackSummary> data;
@@ -17,34 +18,32 @@ class TargetedPortsChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Targeted Decoy Ports',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: colors.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
+    return LiquidGlassCard(
+      cornerRadius: 24.0,
+      padding: const EdgeInsets.all(18),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Targeted Decoy Ports',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: colors.textPrimary,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.2,
             ),
-            const SizedBox(height: 12),
-            if (data.isEmpty)
-              const ChartEmptyState(
-                title: 'No Targeted Port Data',
-                description: 'Targeted port analytics awaiting telemetry data.',
-                icon: Icons.bar_chart_rounded,
-                height: 160,
-              )
-            else
-              _buildChart(context, colors),
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          if (data.isEmpty)
+            const ChartEmptyState(
+              title: 'No Targeted Port Data',
+              description: 'Targeted port analytics awaiting telemetry data.',
+              icon: Icons.bar_chart_rounded,
+              height: 160,
+            )
+          else
+            _buildChart(context, colors),
+        ],
       ),
     );
   }
@@ -91,7 +90,7 @@ class TargetedPortsChart extends StatelessWidget {
                 BarChartRodData(
                   toY: data[i].count.toDouble(),
                   width: 16,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(5),
                   color: colors.brandPrimary,
                 ),
               ],

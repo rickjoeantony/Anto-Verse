@@ -1,10 +1,13 @@
+// lib/features/events/presentation/widgets/event_filter_bar.dart
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/severity_level.dart';
 import '../../providers/events_provider.dart';
 
-/// Clean enterprise filter bar for search, severity, and protocol filtering.
+/// Clean, luxury iOS filter bar with unified single-row filter stream and disciplined palette.
 class EventFilterBar extends ConsumerStatefulWidget {
   const EventFilterBar({super.key});
 
@@ -32,117 +35,147 @@ class _EventFilterBarState extends ConsumerState<EventFilterBar> {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final selectedSeverity = ref.watch(eventSeverityFilterProvider);
     final selectedProtocol = ref.watch(eventProtocolFilterProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Search Input
-        TextField(
-          controller: _searchController,
-          onChanged: (value) => ref.read(eventSearchQueryProvider.notifier).state = value,
-          decoration: InputDecoration(
-            hintText: 'Search events by ID, IP, protocol...',
-            prefixIcon: Icon(Icons.search_rounded, size: 20, color: colors.textSecondary),
-            suffixIcon: _searchController.text.isNotEmpty
-                ? IconButton(
-                    icon: Icon(Icons.clear_rounded, size: 18, color: colors.textSecondary),
-                    onPressed: () {
-                      _searchController.clear();
-                      ref.read(eventSearchQueryProvider.notifier).state = '';
-                      setState(() {});
-                    },
-                  )
-                : null,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        // ── Search Input (Sleek Apple Inset) ────────────────────────
+        Container(
+          height: 44,
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.black.withValues(alpha: 0.04),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.06),
+              width: 1,
+            ),
+          ),
+          child: TextField(
+            controller: _searchController,
+            onChanged: (value) =>
+                ref.read(eventSearchQueryProvider.notifier).state = value,
+            style: TextStyle(
+              fontSize: 13.5,
+              color: colors.textPrimary,
+              fontWeight: FontWeight.w500,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Search events by ID, IP, protocol...',
+              hintStyle: TextStyle(
+                fontSize: 13,
+                color: colors.textSecondary.withValues(alpha: 0.60),
+                fontWeight: FontWeight.w400,
+              ),
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                size: 18,
+                color: colors.textSecondary.withValues(alpha: 0.65),
+              ),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        _searchController.clear();
+                        ref.read(eventSearchQueryProvider.notifier).state = '';
+                        setState(() {});
+                      },
+                      child: Icon(
+                        Icons.cancel_rounded,
+                        size: 16,
+                        color: colors.textSecondary.withValues(alpha: 0.6),
+                      ),
+                    )
+                  : null,
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+            ),
           ),
         ),
+
         const SizedBox(height: 10),
 
-        // Severity Filters
+        // ── Unified Minimalist Filter Chips Track ────────────────────
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
           child: Row(
             children: [
-              Text(
-                'Severity: ',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colors.textSecondary,
-                ),
+              // All Filter
+              _FilterChip(
+                label: 'All Signals',
+                isSelected: selectedSeverity == null && selectedProtocol == null,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  ref.read(eventSeverityFilterProvider.notifier).state = null;
+                  ref.read(eventProtocolFilterProvider.notifier).state = null;
+                },
               ),
-              const SizedBox(width: 4),
-              _buildSeverityChip(
-                label: 'All',
-                isSelected: selectedSeverity == null,
-                onSelected: () =>
-                    ref.read(eventSeverityFilterProvider.notifier).state = null,
-              ),
-              _buildSeverityChip(
-                label: 'Critical',
-                isSelected: selectedSeverity == SeverityLevel.critical,
-                color: colors.critical,
-                onSelected: () => ref
-                    .read(eventSeverityFilterProvider.notifier)
-                    .state = SeverityLevel.critical,
-              ),
-              _buildSeverityChip(
-                label: 'High',
-                isSelected: selectedSeverity == SeverityLevel.high,
-                color: colors.high,
-                onSelected: () => ref
-                    .read(eventSeverityFilterProvider.notifier)
-                    .state = SeverityLevel.high,
-              ),
-              _buildSeverityChip(
-                label: 'Warning',
-                isSelected: selectedSeverity == SeverityLevel.warning,
-                color: colors.warning,
-                onSelected: () => ref
-                    .read(eventSeverityFilterProvider.notifier)
-                    .state = SeverityLevel.warning,
-              ),
-              _buildSeverityChip(
-                label: 'Info',
-                isSelected: selectedSeverity == SeverityLevel.info,
-                color: colors.brandPrimary,
-                onSelected: () => ref
-                    .read(eventSeverityFilterProvider.notifier)
-                    .state = SeverityLevel.info,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
 
-        // Protocol Filters
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              Text(
-                'Protocol: ',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colors.textSecondary,
-                ),
+              // Severity Category Divider
+              _FilterDivider(isDark: isDark),
+
+              // Critical
+              _FilterChip(
+                label: 'Critical',
+                dotColor: colors.critical,
+                isSelected: selectedSeverity == SeverityLevel.critical,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  ref.read(eventSeverityFilterProvider.notifier).state =
+                      selectedSeverity == SeverityLevel.critical
+                          ? null
+                          : SeverityLevel.critical;
+                },
               ),
-              const SizedBox(width: 4),
-              _buildProtocolChip(
-                label: 'All',
-                isSelected: selectedProtocol == null,
-                onSelected: () =>
-                    ref.read(eventProtocolFilterProvider.notifier).state = null,
+
+              // High
+              _FilterChip(
+                label: 'High',
+                dotColor: colors.high,
+                isSelected: selectedSeverity == SeverityLevel.high,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  ref.read(eventSeverityFilterProvider.notifier).state =
+                      selectedSeverity == SeverityLevel.high
+                          ? null
+                          : SeverityLevel.high;
+                },
               ),
+
+              // Warning
+              _FilterChip(
+                label: 'Warning',
+                dotColor: colors.warning,
+                isSelected: selectedSeverity == SeverityLevel.warning,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  ref.read(eventSeverityFilterProvider.notifier).state =
+                      selectedSeverity == SeverityLevel.warning
+                          ? null
+                          : SeverityLevel.warning;
+                },
+              ),
+
+              // Protocol Category Divider
+              _FilterDivider(isDark: isDark),
+
+              // Protocols
               ...['SSH', 'HTTPS', 'PostgreSQL', 'DNS'].map(
-                (proto) => _buildProtocolChip(
+                (proto) => _FilterChip(
                   label: proto,
                   isSelected: selectedProtocol == proto,
-                  onSelected: () => ref
-                      .read(eventProtocolFilterProvider.notifier)
-                      .state = selectedProtocol == proto ? null : proto,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    ref.read(eventProtocolFilterProvider.notifier).state =
+                        selectedProtocol == proto ? null : proto;
+                  },
                 ),
               ),
             ],
@@ -151,68 +184,102 @@ class _EventFilterBarState extends ConsumerState<EventFilterBar> {
       ],
     );
   }
+}
 
-  Widget _buildSeverityChip({
-    required String label,
-    required bool isSelected,
-    Color? color,
-    required VoidCallback onSelected,
-  }) {
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final Color? dotColor;
+  final VoidCallback onTap;
+
+  const _FilterChip({
+    required this.label,
+    required this.isSelected,
+    this.dotColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final activeColor = color ?? colors.brandPrimary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.only(right: 6),
-      child: FilterChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (_) => onSelected(),
-        selectedColor: activeColor.withOpacity(0.18),
-        checkmarkColor: activeColor,
-        labelStyle: TextStyle(
-          fontSize: 12,
-          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-          color: isSelected ? activeColor : colors.textSecondary,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6.5),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? (isDark ? Colors.white.withValues(alpha: 0.16) : Colors.black.withValues(alpha: 0.09))
+                : (isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.03)),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected
+                  ? (isDark ? Colors.white.withValues(alpha: 0.35) : Colors.black.withValues(alpha: 0.20))
+                  : (isDark ? Colors.white.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.05)),
+              width: 1.0,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (dotColor != null) ...[
+                Container(
+                  width: 5.5,
+                  height: 5.5,
+                  decoration: BoxDecoration(
+                    color: dotColor,
+                    shape: BoxShape.circle,
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: dotColor!.withValues(alpha: 0.7),
+                              blurRadius: 5,
+                            ),
+                          ]
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: 5),
+              ],
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected
+                      ? colors.textPrimary
+                      : colors.textSecondary.withValues(alpha: 0.75),
+                  letterSpacing: 0.1,
+                ),
+              ),
+            ],
+          ),
         ),
-        side: BorderSide(
-          color: isSelected ? activeColor : colors.border,
-          width: 1,
-        ),
-        backgroundColor: colors.surfaceMuted,
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
     );
   }
+}
 
-  Widget _buildProtocolChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onSelected,
-  }) {
-    final colors = AppColors.of(context);
+class _FilterDivider extends StatelessWidget {
+  final bool isDark;
 
-    return Padding(
-      padding: const EdgeInsets.only(right: 6),
-      child: FilterChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (_) => onSelected(),
-        selectedColor: colors.brandSecondary.withOpacity(0.18),
-        checkmarkColor: colors.brandSecondary,
-        labelStyle: TextStyle(
-          fontSize: 12,
-          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-          color: isSelected ? colors.brandSecondary : colors.textSecondary,
-        ),
-        side: BorderSide(
-          color: isSelected ? colors.brandSecondary : colors.border,
-          width: 1,
-        ),
-        backgroundColor: colors.surfaceMuted,
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
+  const _FilterDivider({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 16,
+      margin: const EdgeInsets.symmetric(horizontal: 6),
+      color: isDark
+          ? Colors.white.withValues(alpha: 0.10)
+          : Colors.black.withValues(alpha: 0.08),
     );
   }
 }

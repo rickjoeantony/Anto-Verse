@@ -5,15 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/custom_app_bar.dart';
+import '../../../core/widgets/glass/glass_card.dart';
 import '../../auth/providers/auth_state_provider.dart';
 import '../../settings/presentation/widgets/notifications_settings_tile.dart';
 import '../../settings/presentation/widgets/profile_card.dart';
 import '../../settings/presentation/widgets/theme_selector_tile.dart';
 import '../../settings/providers/settings_provider.dart';
 
-/// Consolidated More screen providing access to Reports, Deployments,
-/// Notifications, Appearance, Support, and Sign Out.
+/// Consolidated More screen with iOS Settings-style grouped glass lists.
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
 
@@ -24,7 +23,7 @@ class MoreScreen extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: colors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text('Sign Out'),
         content: const Text('Are you sure you want to sign out of your security workspace?'),
         actions: [
@@ -36,6 +35,7 @@ class MoreScreen extends ConsumerWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: colors.critical,
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             ),
             onPressed: () async {
               Navigator.of(dialogContext).pop();
@@ -59,134 +59,165 @@ class MoreScreen extends ConsumerWidget {
     final profile = ref.watch(userProfileProvider);
 
     return Scaffold(
-      backgroundColor: colors.background,
-      appBar: const LeukQuantAppBar(
-        title: 'More',
-        subtitle: 'Workspace, Reports & Settings',
-      ),
+      backgroundColor: Colors.transparent,
       body: SafeArea(
+        bottom: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 130),
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 130),
+          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
           children: [
+            // iOS Large Title
+            Text(
+              'Settings & More',
+              style: theme.textTheme.displayLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                fontSize: 32,
+                color: colors.textPrimary,
+                letterSpacing: -0.8,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Workspace preferences and security profile',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colors.textSecondary,
+                fontSize: 14,
+                letterSpacing: -0.2,
+              ),
+            ),
+            const SizedBox(height: 20),
+
             // User Profile Card
             ProfileCard(profile: profile),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
-            // Management & Features Group
-            Container(
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isDark ? colors.border.withValues(alpha: 0.85) : colors.border,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: isDark ? Colors.black.withValues(alpha: 0.35) : const Color(0x0C2563EB),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
+            // GROUP 1: Security Workspace
+            _buildSectionHeader('SECURITY WORKSPACE', colors),
+            const SizedBox(height: 8),
+            GlassCard(
+              borderRadius: 24.0,
+              padding: EdgeInsets.zero,
               child: Column(
                 children: [
-                  _buildNavTile(
+                  _buildSettingsRow(
                     context,
                     icon: Icons.description_outlined,
-                    title: 'Reports & Audit Briefs',
-                    subtitle: 'Executive summaries and compliance exports',
+                    iconColor: colors.brandPrimary,
+                    title: 'Reports & Briefs',
+                    subtitle: 'Compliance exports and SOC 2 telemetry',
                     onTap: () => context.push('/more/reports'),
                     colors: colors,
                   ),
                   Divider(
                     height: 1,
-                    color: isDark ? colors.border.withValues(alpha: 0.6) : colors.border,
+                    color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06),
                   ),
-                  _buildNavTile(
+                  _buildSettingsRow(
                     context,
                     icon: Icons.cloud_done_outlined,
+                    iconColor: colors.brandSecondary,
                     title: 'Protected Deployments',
-                    subtitle: 'Sensor health and coverage status',
+                    subtitle: 'Active decoy sensor nodes and regions',
                     onTap: () => context.push('/more/deployments'),
+                    colors: colors,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06),
+                  ),
+                  _buildSettingsRow(
+                    context,
+                    icon: Icons.speed_rounded,
+                    iconColor: colors.success,
+                    title: 'Connection Diagnostics',
+                    subtitle: 'Target health, latency & telemetry stream status',
+                    onTap: () => context.push('/more/diagnostics'),
                     colors: colors,
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
-            // Appearance & Themes Group
+            // GROUP 2: Preferences
+            _buildSectionHeader('PREFERENCES', colors),
+            const SizedBox(height: 8),
             const ThemeSelectorTile(),
-            const SizedBox(height: 16),
-
-            // Notifications, Push Alert Tone & Live Tester
+            const SizedBox(height: 12),
             const NotificationsSettingsTile(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
-            // Help & Information
-            Container(
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isDark ? colors.border.withValues(alpha: 0.85) : colors.border,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: isDark ? Colors.black.withValues(alpha: 0.35) : const Color(0x0C2563EB),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(18),
+            // GROUP 3: Support & About
+            _buildSectionHeader('SUPPORT & ABOUT', colors),
+            const SizedBox(height: 8),
+            GlassCard(
+              borderRadius: 24.0,
+              padding: const EdgeInsets.all(18.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Application Info',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: colors.textPrimary,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: colors.brandPrimary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.info_outline_rounded, size: 18, color: colors.brandPrimary),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'About LeukQuant',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: colors.textPrimary,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   _buildInfoRow('Version', AppConstants.appVersion, colors),
-                  _buildInfoRow('Environment', 'Staging Client (middle-man-3)', colors),
-                  _buildInfoRow('Platform', 'Android Security Mobile Client', colors),
+                  _buildInfoRow('Engine', 'LeukQuant Autonomous Defense v2026', colors),
+                  _buildInfoRow('Platform', 'iOS-Native Glass Architecture', colors),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
-            // Sign Out Action
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: OutlinedButton.icon(
-                onPressed: () => _showSignOutDialog(context, ref),
-                icon: Icon(Icons.logout_rounded, size: 18, color: colors.critical),
-                label: Text(
-                  'Sign Out',
-                  style: TextStyle(
-                    color: colors.critical,
-                    fontWeight: FontWeight.w700,
+            // Sign Out Button
+            GestureDetector(
+              onTap: () => _showSignOutDialog(context, ref),
+              child: GlassCard(
+                borderRadius: 18.0,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.logout_rounded, size: 18, color: colors.critical),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Sign Out of Workspace',
+                        style: TextStyle(
+                          color: colors.critical,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14.5,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: colors.critical.withValues(alpha: 0.4)),
-                  backgroundColor: colors.critical.withValues(alpha: 0.04),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 18),
 
             Center(
               child: Text(
                 AppConstants.copyright,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: colors.textSecondary.withValues(alpha: 0.7),
+                  color: colors.textSecondary.withValues(alpha: 0.6),
                   fontSize: 11,
                 ),
               ),
@@ -198,34 +229,65 @@ class MoreScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildNavTile(
+  Widget _buildSectionHeader(String title, AppColorScheme colors) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
+          color: colors.textSecondary,
+          letterSpacing: 0.8,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsRow(
     BuildContext context, {
     required IconData icon,
+    required Color iconColor,
     required String title,
     required String subtitle,
     required VoidCallback onTap,
     required AppColorScheme colors,
   }) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: colors.brandPrimary.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: colors.brandPrimary.withValues(alpha: 0.2)),
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: iconColor.withValues(alpha: 0.25)),
+          ),
+          child: Icon(icon, size: 18, color: iconColor),
         ),
-        child: Icon(icon, size: 20, color: colors.brandPrimary),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: colors.textPrimary,
+            fontSize: 14.5,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(
+            fontSize: 12,
+            color: colors.textSecondary,
+          ),
+        ),
+        trailing: Icon(
+          Icons.chevron_right_rounded,
+          size: 18,
+          color: colors.textSecondary.withValues(alpha: 0.7),
+        ),
+        onTap: onTap,
       ),
-      title: Text(
-        title,
-        style: TextStyle(fontWeight: FontWeight.w700, color: colors.textPrimary, fontSize: 14.5),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(fontSize: 12, color: colors.textSecondary),
-      ),
-      trailing: Icon(Icons.chevron_right_rounded, size: 20, color: colors.textSecondary),
-      onTap: onTap,
     );
   }
 
@@ -235,8 +297,15 @@ class MoreScreen extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontSize: 12, color: colors.textSecondary)),
-          Text(value, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: colors.textPrimary)),
+          Text(label, style: TextStyle(fontSize: 12.5, color: colors.textSecondary)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              color: colors.textPrimary,
+            ),
+          ),
         ],
       ),
     );

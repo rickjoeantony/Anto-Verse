@@ -4,31 +4,27 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 typedef TokenProvider = String? Function();
-typedef SessionExpiredCallback = void Function();
 
 /// Security-conscious Dio interceptor:
-/// 1. Attaches in-memory Bearer token
-/// 2. Sanitizes headers & bodies to prevent credential logging
-/// 3. Intercepts 401 responses to trigger graceful re-login
+/// 1. Attaches in-memory Bearer token to every request
+/// 2. Never logs token, Authorization header, passwords, or sensitive response bodies
+/// 3. Safe endpoint method/path logging only in debug mode
 class ApiInterceptor extends Interceptor {
   final TokenProvider _tokenProvider;
-  final SessionExpiredCallback? _onSessionExpired;
 
   ApiInterceptor({
     required TokenProvider tokenProvider,
-    SessionExpiredCallback? onSessionExpired,
-  })  : _tokenProvider = tokenProvider,
-        _onSessionExpired = onSessionExpired;
+  }) : _tokenProvider = tokenProvider;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    // 1. Attach in-memory JWT if available
+    // Attach in-memory JWT if available — never persisted to disk
     final token = _tokenProvider();
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
     }
 
-    // 2. Safe request logging in debug mode (NO credentials, NO JWT logging)
+    // Safe request logging: method + path only. NO token, NO Authorization header, NO body.
     if (kDebugMode) {
       debugPrint('[API] -> ${options.method} ${options.path}');
     }
@@ -38,6 +34,7 @@ class ApiInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
+    // Safe response logging: status code + path only. NO response body.
     if (kDebugMode) {
       debugPrint('[API] <- ${response.statusCode} ${response.requestOptions.path}');
     }
@@ -46,15 +43,10 @@ class ApiInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
+    // Safe error logging: status code + path only. NO request/response bodies.
     if (kDebugMode) {
       debugPrint('[API] !! Error ${err.response?.statusCode} ${err.requestOptions.path}');
     }
-
-    // Trigger session expired callback on 401 (excluding the login endpoint itself)
-    if (err.response?.statusCode == 401 && !err.requestOptions.path.contains('/api/auth/login')) {
-      _onSessionExpired?.call();
-    }
-
     handler.next(err);
   }
 }

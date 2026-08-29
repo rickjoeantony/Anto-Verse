@@ -7,7 +7,7 @@ import '../../../core/websocket/websocket_service.dart';
 import '../domain/security_event.dart';
 import '../domain/severity_level.dart';
 
-/// State notifier managing paginated and live security events.
+/// State notifier managing paginated and live security events from GET /api/dashboard/events?limit=50.
 class EventsNotifier extends StateNotifier<AsyncValue<List<SecurityEvent>>> {
   final ApiClient _apiClient;
   final Ref _ref;
@@ -27,17 +27,14 @@ class EventsNotifier extends StateNotifier<AsyncValue<List<SecurityEvent>>> {
     });
   }
 
-  /// Initial load or pull-to-refresh
+  /// Initial load: GET /api/dashboard/events?limit=50
   Future<void> fetchInitialEvents() async {
     state = const AsyncValue.loading();
     _currentPage = 1;
     _hasMore = true;
 
     try {
-      final response = await _apiClient.get<dynamic>(
-        '/api/dashboard/events',
-        queryParameters: {'page': 1, 'limit': 25},
-      );
+      final response = await _apiClient.getDashboardEvents(limit: 50, page: 1);
 
       final List<SecurityEvent> events = [];
       final data = response.data;
@@ -62,7 +59,7 @@ class EventsNotifier extends StateNotifier<AsyncValue<List<SecurityEvent>>> {
     }
   }
 
-  /// Load next page when user scrolls near the end of the list
+  /// Load next page when scrolling near end
   Future<void> fetchNextPage() async {
     if (!_hasMore || _isLoadingMore || state.isLoading) return;
 
@@ -70,10 +67,7 @@ class EventsNotifier extends StateNotifier<AsyncValue<List<SecurityEvent>>> {
     final nextPage = _currentPage + 1;
 
     try {
-      final response = await _apiClient.get<dynamic>(
-        '/api/dashboard/events',
-        queryParameters: {'page': nextPage, 'limit': 25},
-      );
+      final response = await _apiClient.getDashboardEvents(limit: 50, page: nextPage);
 
       final List<SecurityEvent> newEvents = [];
       final data = response.data;
@@ -100,9 +94,23 @@ class EventsNotifier extends StateNotifier<AsyncValue<List<SecurityEvent>>> {
         state = AsyncValue.data([...currentList, ...newEvents]);
       }
     } catch (_) {
-      // Retain existing list on page fetch failure
+      // Keep existing list on page fetch failure
     } finally {
       _isLoadingMore = false;
+    }
+  }
+
+  /// Mark event reviewed via PATCH /api/events/:id
+  Future<bool> markReviewed(String eventId, bool reviewed) async {
+    try {
+      await _apiClient.patchEvent(eventId, {'reviewed': reviewed});
+      final currentList = state.valueOrNull ?? [];
+      state = AsyncValue.data(
+        currentList.map((e) => e.id == eventId ? e.copyWith(reviewed: reviewed) : e).toList(),
+      );
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 
@@ -159,10 +167,10 @@ final filteredEventsProvider = Provider<AsyncValue<List<SecurityEvent>>>((ref) {
         final matchesId = event.id.toLowerCase().contains(query);
         final matchesClassification = event.classification.toLowerCase().contains(query);
         final matchesIp = event.sourceIp.toLowerCase().contains(query);
-        final matchesCanary = event.canaryReference.toLowerCase().contains(query);
+        final matchesHoneypot = event.honeypot.toLowerCase().contains(query);
         final matchesProtocol = event.protocol.toLowerCase().contains(query);
 
-        return matchesId || matchesClassification || matchesIp || matchesCanary || matchesProtocol;
+        return matchesId || matchesClassification || matchesIp || matchesHoneypot || matchesProtocol;
       }
 
       return true;
