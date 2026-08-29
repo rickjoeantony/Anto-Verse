@@ -155,6 +155,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 builder: (context, state) => const MoreScreen(),
                 routes: [
                   GoRoute(
+                    path: 'reports',
+                    builder: (context, state) => const ReportsScreen(),
+                  ),
+                  GoRoute(
                     path: 'deployments',
                     builder: (context, state) => const DeploymentsScreen(),
                   ),
