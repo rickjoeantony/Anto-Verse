@@ -1,4 +1,4 @@
-// lib/core/widgets/states/form_validation_state_view.dart
+﻿// lib/core/widgets/states/form_validation_state_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -444,7 +444,7 @@ class _FormValidationStateViewState extends State<FormValidationStateView> {
               title: const Text('Active Baiting & Live Telemetry', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
               subtitle: const Text('Broadcast decoys to local ARP & routing tables.', style: TextStyle(fontSize: 11)),
               value: _enableActiveBaiting,
-              activeThumbColor: colors.brandPrimary,
+              activeColor: colors.brandPrimary,
               onChanged: (val) => setState(() => _enableActiveBaiting = val),
             ),
             SwitchListTile(
@@ -452,7 +452,7 @@ class _FormValidationStateViewState extends State<FormValidationStateView> {
               title: const Text('Auto-Rotate Canary Credentials', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
               subtitle: const Text('Regenerate token signatures every 24 hours.', style: TextStyle(fontSize: 11)),
               value: _autoRotatePayload,
-              activeThumbColor: colors.brandPrimary,
+              activeColor: colors.brandPrimary,
               onChanged: (val) => setState(() => _autoRotatePayload = val),
             ),
             const SizedBox(height: 20),

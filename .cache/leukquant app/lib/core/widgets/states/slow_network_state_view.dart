@@ -1,4 +1,4 @@
-// lib/core/widgets/states/slow_network_state_view.dart
+﻿// lib/core/widgets/states/slow_network_state_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -167,7 +167,7 @@ class _SlowNetworkStateViewState extends State<SlowNetworkStateView> {
                 ),
                 Switch(
                   value: _lowBandwidthMode,
-                  activeThumbColor: colors.brandPrimary,
+                  activeColor: colors.brandPrimary,
                   onChanged: (val) {
                     setState(() => _lowBandwidthMode = val);
                     widget.onToggleLowBandwidth?.call(val);
