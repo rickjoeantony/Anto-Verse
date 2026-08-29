@@ -1,4 +1,4 @@
-// lib/core/network/api_client.dart
+﻿// lib/core/network/api_client.dart
 
 import 'dart:async';
 import 'dart:convert';
@@ -56,6 +56,7 @@ class ApiClient {
   final void Function(bool isReachable)? onReachabilityChanged;
 
   Completer<String?>? _refreshCompleter;
+  String? _inMemoryRefreshToken;
 
   ApiClient({
     required String baseUrl,
@@ -130,9 +131,26 @@ class ApiClient {
     _refreshCompleter = Completer<String?>();
 
     try {
+      final currentToken = _tokenProvider();
+      final bodyData = <String, dynamic>{};
+      if (_inMemoryRefreshToken != null && _inMemoryRefreshToken!.isNotEmpty) {
+        bodyData['refreshToken'] = _inMemoryRefreshToken;
+        bodyData['refresh_token'] = _inMemoryRefreshToken;
+      }
+      if (currentToken != null && currentToken.isNotEmpty) {
+        bodyData['token'] = currentToken;
+      }
+
       final response = await _dio.post(
         '/api/auth/refresh',
-        options: Options(headers: {'Accept': 'application/json'}),
+        data: bodyData.isNotEmpty ? bodyData : null,
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            if (currentToken != null && currentToken.isNotEmpty)
+              'Authorization': 'Bearer $currentToken',
+          },
+        ),
       );
 
       final data = response.data;

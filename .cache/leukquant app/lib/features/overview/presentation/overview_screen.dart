@@ -20,6 +20,9 @@ import '../../../core/widgets/responsive_layout.dart';
 import '../../../core/widgets/security_posture_hero.dart';
 import '../../../core/widgets/shimmer_skeleton.dart';
 import '../../auth/providers/auth_state_provider.dart';
+import '../../events/domain/security_event.dart';
+import '../../events/domain/severity_level.dart';
+import '../../events/presentation/widgets/full_screen_critical_alert_dialog.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../domain/overview_summary.dart';
 import '../providers/overview_provider.dart';
@@ -243,28 +246,29 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                                     onPressed: () async {
                                       HapticFeedback.heavyImpact();
                                       await NotificationService.instance.sendTestNotification();
+
+                                      final testEvent = SecurityEvent(
+                                        id: 'crit-${DateTime.now().millisecondsSinceEpoch}',
+                                        timestamp: DateTime.now(),
+                                        sourceIp: '185.220.101.5',
+                                        country: 'United States',
+                                        countryCode: 'US',
+                                        honeypot: 'SSH Decoy',
+                                        protocol: 'SSH',
+                                        destinationPort: '2222',
+                                        threatLevel: 5,
+                                        abuseScore: 98.5,
+                                        reviewed: false,
+                                        credentials: const [],
+                                        type: 'CRITICAL SSH BRUTE FORCE INGRESS',
+                                        payload: 'ssh root@sensor -p 2222 [48 Dictionary attempts/sec]',
+                                        canaryReference: '',
+                                        recommendedAction: 'Isolate source IP and blacklist across routing tables.',
+                                        classificationReasons: const ['Rapid successive auth failure', 'Root user targeting'],
+                                      );
+
                                       if (context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            behavior: SnackBarBehavior.floating,
-                                            margin: const EdgeInsets.all(16),
-                                            backgroundColor: const Color(0xFF1E293B),
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                            content: Row(
-                                              children: const [
-                                                Icon(Icons.notifications_active_rounded, color: Color(0xFF30D158), size: 20),
-                                                SizedBox(width: 10),
-                                                Expanded(
-                                                  child: Text(
-                                                    'Security notification sent with sound & vibration!',
-                                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            duration: const Duration(seconds: 3),
-                                          ),
-                                        );
+                                        FullScreenCriticalAlertDialog.show(context, testEvent);
                                       }
                                     },
                                   ),

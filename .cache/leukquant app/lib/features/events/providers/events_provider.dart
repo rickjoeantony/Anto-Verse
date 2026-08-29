@@ -4,7 +4,9 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/services/notification_service.dart';
+import '../../../core/router/app_router.dart';
 import '../../../core/websocket/websocket_service.dart';
+import '../presentation/widgets/full_screen_critical_alert_dialog.dart';
 import '../domain/security_event.dart';
 import '../domain/severity_level.dart';
 
@@ -160,7 +162,23 @@ class EventsNotifier extends StateNotifier<AsyncValue<List<SecurityEvent>>> {
     final currentList = state.valueOrNull ?? [];
     if (!currentList.any((e) => e.id == liveEvent.id)) {
       state = AsyncValue.data([liveEvent, ...currentList]);
+      
+      // 1. Hardware audio & system notification
       NotificationService.instance.showAttackNotification(liveEvent);
+
+      // 2. Full-Screen Tactical Alert Modal for Critical Attacks (Threat Level 4-5 / Critical Severity / Abuse > 75)
+      final isCritical = liveEvent.severity == SeverityLevel.critical ||
+          liveEvent.threatLevel >= 4 ||
+          liveEvent.abuseScore >= 75 ||
+          liveEvent.type.toLowerCase().contains('brute') ||
+          liveEvent.type.toLowerCase().contains('injection');
+
+      if (isCritical) {
+        final context = rootNavigatorKey.currentContext;
+        if (context != null && context.mounted) {
+          FullScreenCriticalAlertDialog.show(context, liveEvent);
+        }
+      }
     }
   }
 

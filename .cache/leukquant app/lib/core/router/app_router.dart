@@ -1,4 +1,4 @@
-// lib/core/router/app_router.dart
+﻿// lib/core/router/app_router.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +17,7 @@ import '../../features/shell/presentation/main_shell_screen.dart';
 import '../../features/states/presentation/state_pages.dart';
 import '../../features/states/presentation/state_views_showcase_screen.dart';
 
-final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'homeNav');
 final _eventsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'eventsNav');
 final _incidentsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'incidentsNav');
@@ -27,7 +27,7 @@ final _moreNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'moreNav');
 /// Provider for app-wide GoRouter instance with 5-tab customer navigation (Home, Events, Incidents, Reports, More).
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    navigatorKey: _rootNavigatorKey,
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/splash',
     routes: [
       // 1. Splash Screen
