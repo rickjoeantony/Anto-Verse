@@ -1,4 +1,5 @@
-﻿// lib/features/overview/presentation/overview_screen.dart
+﻿import '../../../core/services/notification_service.dart';
+// lib/features/overview/presentation/overview_screen.dart
 
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -239,9 +240,32 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                                       color: colors.textPrimary,
                                       size: 20,
                                     ),
-                                    onPressed: () {
-                                      HapticFeedback.selectionClick();
-                                      context.go('/incidents');
+                                    onPressed: () async {
+                                      HapticFeedback.heavyImpact();
+                                      await NotificationService.instance.sendTestNotification();
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            behavior: SnackBarBehavior.floating,
+                                            margin: const EdgeInsets.all(16),
+                                            backgroundColor: const Color(0xFF1E293B),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                            content: Row(
+                                              children: const [
+                                                Icon(Icons.notifications_active_rounded, color: Color(0xFF30D158), size: 20),
+                                                SizedBox(width: 10),
+                                                Expanded(
+                                                  child: Text(
+                                                    'Security notification sent with sound & vibration!',
+                                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            duration: const Duration(seconds: 3),
+                                          ),
+                                        );
+                                      }
                                     },
                                   ),
                                   Positioned(

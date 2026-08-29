@@ -1,3 +1,4 @@
+﻿import '../../../../core/services/notification_service.dart';
 // lib/features/settings/presentation/widgets/notifications_settings_tile.dart
 
 import 'dart:async';
@@ -42,8 +43,9 @@ class NotificationsSettingsTile extends ConsumerWidget {
     final colors = AppColors.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Trigger audible tone and vibration
+    // Trigger audible tone, vibration, and Android system notification
     unawaited(_playAlertSound(tone));
+    unawaited(NotificationService.instance.sendTestNotification());
 
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
