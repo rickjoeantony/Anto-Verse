@@ -44,6 +44,35 @@ String _formatEventType(String raw) {
   }
 }
 
+String _canonicalPortKey(String raw) {
+  final lower = raw.toLowerCase().trim();
+  if (lower.contains('ssh') || lower.contains('brute_force') || lower == '22') {
+    return 'SSH';
+  }
+  if (lower.contains('http') || lower.contains('credential') || lower.contains('stuffing') || lower == '80') {
+    return 'HTTP';
+  }
+  if (lower.contains('ddos') || lower.contains('udp') || lower.contains('flood')) {
+    return 'DDoS';
+  }
+  if (lower.contains('injection') || lower.contains('sql') || lower == '3306' || lower == '5432') {
+    return 'SQLi';
+  }
+  if (lower.contains('xss') || lower.contains('https') || lower == '443') {
+    return 'XSS';
+  }
+  if (lower.contains('rdp') || lower == '3389') {
+    return 'RDP';
+  }
+  if (lower.contains('ftp') || lower == '21') {
+    return 'FTP';
+  }
+  if (lower.contains('dns') || lower == '53') {
+    return 'DNS';
+  }
+  return raw.toUpperCase();
+}
+
 /// Provider for overview metrics and health summary connected to GET /api/dashboard/stats
 /// and dynamically enriched with real live events from GET /api/dashboard/events.
 final overviewSummaryProvider =
@@ -56,8 +85,28 @@ final overviewSummaryProvider =
     if (response.data != null) {
       var summary = OverviewSummary.fromJson(response.data!);
 
-      // Enrich with live events from eventsNotifierProvider
-      final liveEvents = eventsAsync.valueOrNull ?? [];
+      // Resolve live events: either from notifier or directly from apiClient
+      List<SecurityEvent> liveEvents = eventsAsync.valueOrNull ?? [];
+      if (liveEvents.isEmpty) {
+        try {
+          final eventsResponse = await apiClient.getDashboardEvents(limit: 50, page: 1);
+          final data = eventsResponse.data;
+          if (data is List) {
+            liveEvents = data
+                .whereType<Map<String, dynamic>>()
+                .map((json) => SecurityEvent.fromJson(json))
+                .toList();
+          } else if (data is Map<String, dynamic> && data['events'] is List) {
+            liveEvents = (data['events'] as List)
+                .whereType<Map<String, dynamic>>()
+                .map((json) => SecurityEvent.fromJson(json))
+                .toList();
+          }
+        } catch (_) {
+          // Fallback gracefully
+        }
+      }
+
       if (liveEvents.isNotEmpty) {
         // 1. Recent Activities List
         final recentActivities = liveEvents.take(5).map((e) {
@@ -80,7 +129,7 @@ final overviewSummaryProvider =
                  e.timestamp.day == now.day;
         }).length;
 
-        // 3. 24h Activity Trend Curve (6 slots: 0h, 4h, 8h, 12h, 16h, 20h, 24h)
+        // 3. 24h Activity Trend Curve (6 points)
         List<double> activityTrend = summary.activityTrendData ?? [];
         if (activityTrend.isEmpty || activityTrend.every((v) => v == 0)) {
           final buckets = List<double>.filled(6, 0.0);
@@ -94,7 +143,6 @@ final overviewSummaryProvider =
           if (buckets.any((b) => b > 0)) {
             activityTrend = buckets;
           } else {
-            // Default active dynamic curve representing real telemetry volume
             activityTrend = [
               1.0,
               0.0,
@@ -106,15 +154,31 @@ final overviewSummaryProvider =
           }
         }
 
-        // 4. Update Protocol / Vector Activity with all live logged events
-        final updatedProtocols = Map<String, double>.from(summary.protocolActivity ?? {});
-        final updatedThreats = Map<String, double>.from(summary.threatDistribution ?? {});
+        // 4. Update Protocol / Vector Activity with CANONICAL keys (NO DUPLICATES)
+        final updatedProtocols = <String, double>{};
+        if (summary.protocolActivity != null) {
+          for (final entry in summary.protocolActivity!.entries) {
+            final key = _canonicalPortKey(entry.key);
+            updatedProtocols[key] = (updatedProtocols[key] ?? 0.0) + entry.value;
+          }
+        }
 
         for (final ev in liveEvents) {
-          final protoKey = ev.type.isNotEmpty ? ev.type : ev.protocol;
-          updatedProtocols[protoKey] = (updatedProtocols[protoKey] ?? 0.0) + 1.0;
+          final rawKey = ev.type.isNotEmpty ? ev.type : ev.protocol;
+          final key = _canonicalPortKey(rawKey);
+          // If the protocol was not already in stats, count it from liveEvents
+          if (!updatedProtocols.containsKey(key)) {
+            updatedProtocols[key] = (updatedProtocols[key] ?? 0.0) + 1.0;
+          }
+        }
+
+        // 5. Threat Distribution update
+        final updatedThreats = Map<String, double>.from(summary.threatDistribution ?? {});
+        for (final ev in liveEvents) {
           final lvlKey = ev.threatLevel.toString();
-          updatedThreats[lvlKey] = (updatedThreats[lvlKey] ?? 0.0) + 1.0;
+          if (!updatedThreats.containsKey(lvlKey)) {
+            updatedThreats[lvlKey] = (updatedThreats[lvlKey] ?? 0.0) + 1.0;
+          }
         }
 
         final maxTotal = (summary.totalAttacksCount ?? 0) > liveEvents.length

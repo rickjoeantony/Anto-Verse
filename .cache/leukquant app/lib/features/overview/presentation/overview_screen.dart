@@ -30,6 +30,42 @@ import 'widgets/recent_activity_list.dart';
 import 'widgets/recommended_action_card.dart';
 
 /// Clean Warm Minimalist Security Overview Screen for LeukQuant.
+String _formatRelativeTime(DateTime dt) {
+  final now = DateTime.now();
+  final diff = now.difference(dt);
+  if (diff.inSeconds < 60) return 'Just now';
+  if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+  if (diff.inHours < 24) return '${diff.inHours}h ago';
+  return '${diff.inDays}d ago';
+}
+
+String _formatEventType(String raw) {
+  final lower = raw.toLowerCase().trim();
+  switch (lower) {
+    case 'ddos':
+      return 'DDoS Attack';
+    case 'credential_stuffing':
+      return 'Credential Stuffing';
+    case 'brute_force':
+      return 'Brute Force SSH';
+    case 'injection':
+    case 'sqli':
+      return 'SQL Injection';
+    case 'xss':
+      return 'XSS Attack';
+    case 'ssh':
+      return 'SSH Access';
+    case 'rdp':
+      return 'RDP Brute Force';
+    case 'ftp':
+      return 'FTP Probe';
+    case 'dns':
+      return 'DNS Query';
+    default:
+      return raw.split('_').map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : '').join(' ');
+  }
+}
+
 class OverviewScreen extends ConsumerStatefulWidget {
   const OverviewScreen({super.key});
 
@@ -462,7 +498,23 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
             const SizedBox(height: 14),
 
             RecentActivityList(
-              activities: summary.recentActivities,
+              activities: () {
+                final live = ref.watch(eventsNotifierProvider).valueOrNull ?? [];
+                if (live.isNotEmpty) {
+                  return live.take(5).map((e) {
+                    final timeStr = _formatRelativeTime(e.timestamp);
+                    return OverviewActivityItem(
+                      id: e.id,
+                      title: _formatEventType(e.type.isNotEmpty ? e.type : e.classification),
+                      protocol: e.protocol,
+                      timestamp: timeStr,
+                      severity: e.severity,
+                      description: '${e.sourceIp} â€¢ ${e.country}',
+                    );
+                  }).toList();
+                }
+                return summary.recentActivities;
+              }(),
               isBackendConnected: true,
             ).animate(target: isReducedMotion ? 0 : 1).fadeIn(duration: 400.ms, delay: 290.ms).slideY(begin: 0.05, end: 0, duration: 400.ms),
           ],
