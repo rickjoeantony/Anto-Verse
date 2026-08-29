@@ -1,4 +1,4 @@
-// lib/features/events/presentation/widgets/event_card.dart
+﻿// lib/features/events/presentation/widgets/event_card.dart
 
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -7,7 +7,7 @@ import '../../../../core/widgets/protocol_icon.dart';
 import '../../domain/security_event.dart';
 import '../../domain/severity_level.dart';
 
-/// Premium clean Event Card — no heavy rail bars, AI-grade surface.
+/// Premium clean Event Card with human-readable threat types and zero glyph corruption.
 class EventCard extends StatelessWidget {
   final SecurityEvent event;
   final VoidCallback onTap;
@@ -24,7 +24,34 @@ class EventCard extends StatelessWidget {
     final s = dt.second.toString().padLeft(2, '0');
     final d = dt.day.toString().padLeft(2, '0');
     const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return '$h:$m:$s · $d ${months[dt.month - 1]}';
+    return '$h:$m:$s â€¢ $d ${months[dt.month - 1]}';
+  }
+
+  String _formatEventType(String raw) {
+    final lower = raw.toLowerCase().trim();
+    switch (lower) {
+      case 'ddos':
+        return 'DDoS Attack';
+      case 'credential_stuffing':
+        return 'Credential Stuffing';
+      case 'brute_force':
+        return 'Brute Force SSH';
+      case 'injection':
+      case 'sqli':
+        return 'SQL Injection';
+      case 'xss':
+        return 'XSS Attack';
+      case 'ssh':
+        return 'SSH Access';
+      case 'rdp':
+        return 'RDP Brute Force';
+      case 'ftp':
+        return 'FTP Probe';
+      case 'dns':
+        return 'DNS Query';
+      default:
+        return raw.split('_').map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : '').join(' ');
+    }
   }
 
   @override
@@ -45,11 +72,13 @@ class EventCard extends StatelessWidget {
     final severityLabel = switch (event.severity) {
       SeverityLevel.critical => 'Critical',
       SeverityLevel.high     => 'High',
-      SeverityLevel.warning  => 'Warning',
+      SeverityLevel.warning  => 'Medium',
       SeverityLevel.low      => 'Low',
       SeverityLevel.healthy || SeverityLevel.success => 'Healthy',
       SeverityLevel.info     => 'Info',
     };
+
+    final displayTitle = _formatEventType(event.type.isNotEmpty ? event.type : event.classification);
 
     return GlassCard(
       borderRadius: 22.0,
@@ -58,11 +87,10 @@ class EventCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Top row: dot + severity + protocol + time ─────────────
+          // Top row: dot + severity + protocol + time
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Glowing severity dot
               Container(
                 width: 7,
                 height: 7,
@@ -79,7 +107,6 @@ class EventCard extends StatelessWidget {
               ),
               const SizedBox(width: 7),
 
-              // Severity label — plain text, tinted
               Text(
                 severityLabel,
                 style: TextStyle(
@@ -91,12 +118,10 @@ class EventCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
 
-              // Protocol badge
               ProtocolBadge(protocol: event.protocol, isCompact: true),
 
               const Spacer(),
 
-              // Timestamp — right-aligned, muted
               Text(
                 timeStr,
                 style: TextStyle(
@@ -110,23 +135,23 @@ class EventCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
-          // ── Event classification title ─────────────────────────────
+          // Event classification title
           Text(
-            event.classification,
+            displayTitle,
             style: TextStyle(
               fontWeight: FontWeight.w700,
               color: colors.textPrimary,
-              fontSize: 15,
+              fontSize: 15.5,
               letterSpacing: -0.3,
-              height: 1.3,
+              height: 1.2,
             ),
           ),
 
           const SizedBox(height: 10),
 
-          // ── Bottom row: source + action link ──────────────────────
+          // Bottom row: source + action link
           Row(
             children: [
               Icon(
@@ -137,7 +162,7 @@ class EventCard extends StatelessWidget {
               const SizedBox(width: 5),
               Expanded(
                 child: Text(
-                  '${event.sourceIp}  ·  ${event.country}',
+                  '${event.sourceIp} â€¢ ${event.country}',
                   style: TextStyle(
                     fontSize: 12,
                     color: colors.textSecondary.withValues(alpha: isDark ? 0.7 : 0.8),

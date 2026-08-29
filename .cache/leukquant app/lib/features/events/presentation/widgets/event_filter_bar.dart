@@ -1,4 +1,4 @@
-// lib/features/events/presentation/widgets/event_filter_bar.dart
+﻿// lib/features/events/presentation/widgets/event_filter_bar.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,7 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../domain/severity_level.dart';
 import '../../providers/events_provider.dart';
 
-/// Clean, luxury iOS filter bar with unified single-row filter stream and disciplined palette.
+/// Ultra-clean, unified search & filter bar for security events.
 class EventFilterBar extends ConsumerStatefulWidget {
   const EventFilterBar({super.key});
 
@@ -21,9 +21,8 @@ class _EventFilterBarState extends ConsumerState<EventFilterBar> {
   @override
   void initState() {
     super.initState();
-    _searchController = TextEditingController(
-      text: ref.read(eventSearchQueryProvider),
-    );
+    _searchController =
+        TextEditingController(text: ref.read(eventSearchQueryProvider));
   }
 
   @override
@@ -42,13 +41,14 @@ class _EventFilterBarState extends ConsumerState<EventFilterBar> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Search Input (Sleek Apple Inset) ────────────────────────
+        // 1. Search Bar
         Container(
           height: 44,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
             color: isDark
                 ? Colors.white.withValues(alpha: 0.05)
-                : Colors.black.withValues(alpha: 0.04),
+                : Colors.black.withValues(alpha: 0.03),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: isDark
@@ -67,7 +67,7 @@ class _EventFilterBarState extends ConsumerState<EventFilterBar> {
               fontWeight: FontWeight.w500,
             ),
             decoration: InputDecoration(
-              hintText: 'Search events by ID, IP, protocol...',
+              hintText: 'Search by IP, protocol, threat type...',
               hintStyle: TextStyle(
                 fontSize: 13,
                 color: colors.textSecondary.withValues(alpha: 0.60),
@@ -101,7 +101,7 @@ class _EventFilterBarState extends ConsumerState<EventFilterBar> {
 
         const SizedBox(height: 10),
 
-        // ── Unified Minimalist Filter Chips Track ────────────────────
+        // 2. Horizontal Filter Chips Track
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
@@ -118,10 +118,9 @@ class _EventFilterBarState extends ConsumerState<EventFilterBar> {
                 },
               ),
 
-              // Severity Category Divider
               _FilterDivider(isDark: isDark),
 
-              // Critical
+              // Severity Filters
               _FilterChip(
                 label: 'Critical',
                 dotColor: colors.critical,
@@ -135,7 +134,6 @@ class _EventFilterBarState extends ConsumerState<EventFilterBar> {
                 },
               ),
 
-              // High
               _FilterChip(
                 label: 'High',
                 dotColor: colors.high,
@@ -149,9 +147,8 @@ class _EventFilterBarState extends ConsumerState<EventFilterBar> {
                 },
               ),
 
-              // Warning
               _FilterChip(
-                label: 'Warning',
+                label: 'Medium',
                 dotColor: colors.warning,
                 isSelected: selectedSeverity == SeverityLevel.warning,
                 onTap: () {
@@ -163,11 +160,23 @@ class _EventFilterBarState extends ConsumerState<EventFilterBar> {
                 },
               ),
 
-              // Protocol Category Divider
+              _FilterChip(
+                label: 'Low',
+                dotColor: colors.brandPrimary,
+                isSelected: selectedSeverity == SeverityLevel.low,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  ref.read(eventSeverityFilterProvider.notifier).state =
+                      selectedSeverity == SeverityLevel.low
+                          ? null
+                          : SeverityLevel.low;
+                },
+              ),
+
               _FilterDivider(isDark: isDark),
 
-              // Protocols
-              ...['SSH', 'HTTPS', 'PostgreSQL', 'DNS'].map(
+              // Attack Vector / Protocol Filters
+              ...['SSH', 'HTTP', 'DDoS', 'SQLi', 'DNS'].map(
                 (proto) => _FilterChip(
                   label: proto,
                   isSelected: selectedProtocol == proto,

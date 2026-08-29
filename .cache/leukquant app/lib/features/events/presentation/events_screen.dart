@@ -1,4 +1,4 @@
-// lib/features/events/presentation/events_screen.dart
+﻿// lib/features/events/presentation/events_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -12,7 +12,7 @@ import '../providers/events_provider.dart';
 import 'widgets/event_card.dart';
 import 'widgets/event_details_sheet.dart';
 import 'widgets/event_filter_bar.dart';
-import 'widgets/honeytoken_vault_card.dart';
+// import 'widgets/honeytoken_vault_card.dart';
 
 /// Events screen with iOS-inspired glass styling, search, filter chips, and interactive sheet.
 class EventsScreen extends ConsumerWidget {
@@ -76,34 +76,7 @@ class EventsScreen extends ConsumerWidget {
                 ),
               ),
 
-              // Honeytoken Vault Overview Card
-              const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 14),
-                  child: HoneytokenVaultCard(
-                    tokens: [
-                      HoneytokenData(
-                        id: 'TOKEN-SSH-882',
-                        type: 'SSH Keypair',
-                        credential: 'admin / **********',
-                        auditHash: 'a8f9c2...4e1',
-                      ),
-                      HoneytokenData(
-                        id: 'TOKEN-SQL-104',
-                        type: 'DB Connection',
-                        credential: 'pg_readonly / **********',
-                        auditHash: '3d7b11...9a2',
-                      ),
-                      HoneytokenData(
-                        id: 'TOKEN-AWS-592',
-                        type: 'IAM API Key',
-                        credential: 'AKIA**********',
-                        auditHash: '7c2e04...f83',
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+
 
               // Status Bar
               SliverToBoxAdapter(
@@ -144,7 +117,7 @@ class EventsScreen extends ConsumerWidget {
               ...asyncEvents.when(
                 loading: () => [
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 130),
+                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 170),
                     sliver: SliverList(
                       delegate: SliverChildListDelegate(const [
                         ShimmerSkeleton(height: 100, borderRadius: 24),
@@ -199,7 +172,7 @@ class EventsScreen extends ConsumerWidget {
 
                   return [
                     SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 130),
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 170),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {

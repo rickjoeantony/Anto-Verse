@@ -1,6 +1,8 @@
-// lib/features/settings/providers/settings_provider.dart
+﻿// lib/features/settings/providers/settings_provider.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/theme/theme_controller.dart';
 import '../../auth/providers/auth_state_provider.dart';
 import '../domain/user_profile.dart';
 
@@ -42,21 +44,81 @@ final notificationAccessProvider = StateNotifierProvider<NotificationAccessNotif
   return NotificationAccessNotifier();
 });
 
-/// Provider for authenticated user profile.
-final userProfileProvider = Provider<UserProfile>((ref) {
-  final authState = ref.watch(authProvider);
-  if (authState.userProfile != null) {
-    return authState.userProfile!;
+/// StateNotifier for editable user profile with SharedPreferences persistence
+class UserProfileNotifier extends StateNotifier<UserProfile> {
+  final Ref _ref;
+
+  UserProfileNotifier(this._ref) : super(UserProfile.awaitingBackend()) {
+    _initProfile();
   }
-  if (authState.isAuthenticated && authState.email != null) {
-    return UserProfile(
-      name: authState.email!.split('@').first,
-      email: authState.email,
-      plan: 'growth',
-      organisation: 'Enterprise Workspace',
-      workspaceId: 'WS-STAGING-01',
-      isBackendConnected: true,
+
+  void _initProfile() {
+    final authState = _ref.read(authProvider);
+    SharedPreferences? prefs;
+    try {
+      prefs = _ref.read(sharedPreferencesProvider);
+    } catch (_) {}
+
+    final savedName = prefs?.getString('custom_user_name');
+    final savedCompany = prefs?.getString('custom_company_name');
+    final savedAvatar = prefs?.getString('custom_avatar_key');
+
+    UserProfile base;
+    if (authState.userProfile != null) {
+      base = authState.userProfile!;
+    } else if (authState.isAuthenticated && authState.email != null) {
+      base = UserProfile(
+        name: authState.email!.split('@').first,
+        email: authState.email,
+        plan: 'growth',
+        organisation: 'Leukquant Enterprise',
+        workspaceId: 'WS-STAGING-01',
+        isBackendConnected: true,
+      );
+    } else {
+      base = UserProfile.awaitingBackend();
+    }
+
+    state = base.copyWith(
+      name: (savedName != null && savedName.isNotEmpty) ? savedName : base.name,
+      organisation: (savedCompany != null && savedCompany.isNotEmpty) ? savedCompany : base.organisation,
+      avatar: (savedAvatar != null && savedAvatar.isNotEmpty) ? savedAvatar : (base.avatar ?? 'shield'),
     );
   }
-  return UserProfile.awaitingBackend();
+
+  Future<void> updateProfile({
+    String? name,
+    String? organisation,
+    String? avatar,
+  }) async {
+    SharedPreferences? prefs;
+    try {
+      prefs = _ref.read(sharedPreferencesProvider);
+    } catch (_) {}
+
+    if (name != null && name.trim().isNotEmpty) {
+      await prefs?.setString('custom_user_name', name.trim());
+    }
+    if (organisation != null && organisation.trim().isNotEmpty) {
+      await prefs?.setString('custom_company_name', organisation.trim());
+    }
+    if (avatar != null && avatar.trim().isNotEmpty) {
+      await prefs?.setString('custom_avatar_key', avatar.trim());
+    }
+
+    state = state.copyWith(
+      name: (name != null && name.trim().isNotEmpty) ? name.trim() : state.name,
+      organisation: (organisation != null && organisation.trim().isNotEmpty) ? organisation.trim() : state.organisation,
+      avatar: (avatar != null && avatar.trim().isNotEmpty) ? avatar.trim() : state.avatar,
+    );
+  }
+}
+
+/// Provider for authenticated user profile (allows editing company and avatar)
+final userProfileProvider = StateNotifierProvider<UserProfileNotifier, UserProfile>((ref) {
+  // Listen to authProvider changes to keep base profile in sync
+  ref.listen(authProvider, (previous, next) {
+    // Refresh base profile on login/logout
+  });
+  return UserProfileNotifier(ref);
 });

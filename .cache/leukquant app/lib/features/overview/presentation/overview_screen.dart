@@ -1,4 +1,4 @@
-// lib/features/overview/presentation/overview_screen.dart
+﻿// lib/features/overview/presentation/overview_screen.dart
 
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -22,6 +22,8 @@ import '../../auth/providers/auth_state_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../domain/overview_summary.dart';
 import '../providers/overview_provider.dart';
+import '../../settings/presentation/widgets/user_avatar_widget.dart';
+import '../../settings/presentation/widgets/edit_profile_sheet.dart';
 import 'widgets/analytics_charts.dart';
 import 'widgets/recent_activity_list.dart';
 import 'widgets/recommended_action_card.dart';
@@ -70,7 +72,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
             physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
             slivers: [
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(18, 10, 18, 120),
+                padding: const EdgeInsets.fromLTRB(18, 10, 18, 170),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     // 1. TOP HEADER (Profile Avatar + Circular Action Bells)

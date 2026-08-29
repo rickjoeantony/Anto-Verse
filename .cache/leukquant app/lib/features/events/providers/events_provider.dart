@@ -1,4 +1,4 @@
-// lib/features/events/providers/events_provider.dart
+﻿// lib/features/events/providers/events_provider.dart
 
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -142,7 +142,7 @@ final eventSearchQueryProvider = StateProvider<String>((ref) => '');
 /// Severity filter provider
 final eventSeverityFilterProvider = StateProvider<SeverityLevel?>((ref) => null);
 
-/// Protocol filter provider
+/// Protocol / Vector filter provider (e.g. 'SSH', 'HTTP', 'DDoS', 'SQLi', 'DNS')
 final eventProtocolFilterProvider = StateProvider<String?>((ref) => null);
 
 /// Filtered events provider
@@ -154,23 +154,52 @@ final filteredEventsProvider = Provider<AsyncValue<List<SecurityEvent>>>((ref) {
 
   return asyncEvents.whenData((events) {
     return events.where((event) {
+      // 1. Severity filter
       if (severityFilter != null && event.severity != severityFilter) {
         return false;
       }
 
-      if (protocolFilter != null &&
-          event.protocol.toLowerCase() != protocolFilter.toLowerCase()) {
-        return false;
+      // 2. Protocol / Vector / Service filter
+      if (protocolFilter != null) {
+        final pf = protocolFilter.toLowerCase();
+        final rawType = event.type.toLowerCase();
+        final rawProto = event.protocol.toLowerCase();
+        final rawClass = event.classification.toLowerCase();
+        final rawHoneypot = event.honeypot.toLowerCase();
+        final rawPort = event.destinationPort.toLowerCase();
+
+        bool matches = false;
+        if (pf == 'ssh') {
+          matches = rawType.contains('ssh') || rawType.contains('brute_force') || rawProto.contains('ssh') || rawPort == '22' || rawHoneypot.contains('ssh');
+        } else if (pf == 'http' || pf == 'https' || pf == 'web') {
+          matches = rawType.contains('http') || rawType.contains('credential') || rawType.contains('stuffing') || rawType.contains('xss') || rawPort == '80' || rawPort == '443' || rawProto.contains('http');
+        } else if (pf == 'ddos') {
+          matches = rawType.contains('ddos') || rawType.contains('udp') || rawProto.contains('udp');
+        } else if (pf == 'sqli' || pf == 'sql') {
+          matches = rawType.contains('injection') || rawType.contains('sql') || rawPort == '3306' || rawPort == '5432';
+        } else if (pf == 'dns') {
+          matches = rawType.contains('dns') || rawProto.contains('dns') || rawPort == '53';
+        } else {
+          matches = rawType.contains(pf) || rawProto.contains(pf) || rawClass.contains(pf) || rawHoneypot.contains(pf);
+        }
+
+        if (!matches) {
+          return false;
+        }
       }
 
+      // 3. Text Search Query
       if (query.isNotEmpty) {
         final matchesId = event.id.toLowerCase().contains(query);
+        final matchesType = event.type.toLowerCase().contains(query);
         final matchesClassification = event.classification.toLowerCase().contains(query);
         final matchesIp = event.sourceIp.toLowerCase().contains(query);
+        final matchesCountry = event.country.toLowerCase().contains(query);
         final matchesHoneypot = event.honeypot.toLowerCase().contains(query);
         final matchesProtocol = event.protocol.toLowerCase().contains(query);
+        final matchesPort = event.destinationPort.toLowerCase().contains(query);
 
-        return matchesId || matchesClassification || matchesIp || matchesHoneypot || matchesProtocol;
+        return matchesId || matchesType || matchesClassification || matchesIp || matchesCountry || matchesHoneypot || matchesProtocol || matchesPort;
       }
 
       return true;

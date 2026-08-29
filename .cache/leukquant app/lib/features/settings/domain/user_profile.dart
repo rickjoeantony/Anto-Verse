@@ -1,9 +1,6 @@
-// lib/features/settings/domain/user_profile.dart
+﻿// lib/features/settings/domain/user_profile.dart
 
-/// Clean domain model representing authenticated user profile from GET /api/user/profile.
-///
-/// NOTE: The backend 'role' field represents the customer subscription PLAN
-/// (e.g. starter / growth / enterprise / admin). It must be labeled "Plan" in the UI.
+/// Clean domain model representing authenticated user profile.
 class UserProfile {
   final String id;
   final String name;
@@ -44,15 +41,37 @@ class UserProfile {
     }
   }
 
+  UserProfile copyWith({
+    String? id,
+    String? name,
+    String? email,
+    String? avatar,
+    String? plan,
+    String? organisation,
+    String? workspaceId,
+    bool? isBackendConnected,
+  }) {
+    return UserProfile(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      avatar: avatar ?? this.avatar,
+      plan: plan ?? this.plan,
+      organisation: organisation ?? this.organisation,
+      workspaceId: workspaceId ?? this.workspaceId,
+      isBackendConnected: isBackendConnected ?? this.isBackendConnected,
+    );
+  }
+
   /// Default state when backend connection is pending
   factory UserProfile.awaitingBackend() {
     return const UserProfile(
       id: '',
       name: 'Security User',
       email: null,
-      avatar: null,
-      plan: 'starter',
-      organisation: null,
+      avatar: 'shield',
+      plan: 'growth',
+      organisation: 'Leukquant Enterprise',
       workspaceId: null,
       isBackendConnected: false,
     );
@@ -70,16 +89,15 @@ class UserProfile {
         .toString();
 
     final email = (json['email'] ?? fallbackEmail)?.toString();
-    final avatar = json['avatar']?.toString() ?? json['avatar_url']?.toString();
+    final avatar = json['avatar']?.toString() ?? json['avatar_url']?.toString() ?? 'shield';
 
-    // Map role/plan: starter / growth / enterprise / admin
     final rawPlan = (json['plan'] ?? json['role'] ?? json['tier'] ?? 'growth').toString().toLowerCase();
 
     final organisation = (json['organisation'] ??
             json['organization'] ??
             json['company'] ??
             json['tenant_name'] ??
-            'Enterprise Workspace')
+            'Leukquant Enterprise')
         .toString();
 
     final workspaceId = (json['workspace_id'] ?? json['tenant_id'] ?? 'WS-STAGING-01').toString();
