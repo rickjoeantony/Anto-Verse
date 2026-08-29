@@ -162,10 +162,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     path: 'deployments',
                     builder: (context, state) => const DeploymentsScreen(),
                   ),
-                  GoRoute(
-                    path: 'diagnostics',
-                    builder: (context, state) => const DiagnosticsScreen(),
-                  ),
+
                 ],
               ),
             ],

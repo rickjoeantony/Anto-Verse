@@ -121,19 +121,7 @@ class MoreScreen extends ConsumerWidget {
                     onTap: () => context.push('/more/deployments'),
                     colors: colors,
                   ),
-                  Divider(
-                    height: 1,
-                    color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06),
-                  ),
-                  _buildSettingsRow(
-                    context,
-                    icon: Icons.speed_rounded,
-                    iconColor: colors.success,
-                    title: 'Connection Diagnostics',
-                    subtitle: 'Target health, latency & telemetry stream status',
-                    onTap: () => context.push('/more/diagnostics'),
-                    colors: colors,
-                  ),
+
                 ],
               ),
             ),
