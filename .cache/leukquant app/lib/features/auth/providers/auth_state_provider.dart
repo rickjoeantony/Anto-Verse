@@ -177,8 +177,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       // Extract or fetch UserProfile
       UserProfile? profile;
-      if (data['user'] is Map) {
-        profile = UserProfile.fromJson(Map<String, dynamic>.from(data['user'] as Map), fallbackEmail: cleanEmail);
+      final userMap = data['user'] is Map
+          ? (data['user'] as Map)
+          : (data['data'] is Map && (data['data'] as Map)['user'] is Map
+              ? ((data['data'] as Map)['user'] as Map)
+              : null);
+
+      if (userMap != null) {
+        profile = UserProfile.fromJson(Map<String, dynamic>.from(userMap), fallbackEmail: cleanEmail);
       } else if (data['id'] != null || data['email'] != null) {
         profile = UserProfile.fromJson(data, fallbackEmail: cleanEmail);
       }

@@ -19,10 +19,9 @@ final inMemoryTokenProvider = StateProvider<String?>((ref) => null);
 
 /// Central Riverpod provider for ApiClient.
 final apiClientProvider = Provider<ApiClient>((ref) {
-  final token = ref.watch(inMemoryTokenProvider);
   return ApiClient(
     baseUrl: AppConfig.apiBaseUrl,
-    tokenProvider: () => token,
+    tokenProvider: () => ref.read(inMemoryTokenProvider),
     onTokenRefreshed: (newToken) {
       ref.read(inMemoryTokenProvider.notifier).state = newToken;
     },
