@@ -1,10 +1,12 @@
 ﻿// lib/features/overview/providers/overview_provider.dart
 
+import 'dart:math' as math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/domain/api_result.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_exception.dart';
 import '../../events/domain/security_event.dart';
+import '../../events/domain/severity_level.dart';
 import '../../events/providers/events_provider.dart';
 import '../domain/overview_summary.dart';
 
@@ -74,7 +76,7 @@ String _canonicalPortKey(String raw) {
 }
 
 /// Provider for overview metrics and health summary connected to GET /api/dashboard/stats
-/// and dynamically enriched with real live events from GET /api/dashboard/events.
+/// and dynamically enriched with 100% REAL live telemetry events from GET /api/dashboard/events.
 final overviewSummaryProvider =
     FutureProvider<ApiResult<OverviewSummary>>((ref) async {
   final apiClient = ref.watch(apiClientProvider);
@@ -85,7 +87,7 @@ final overviewSummaryProvider =
     if (response.data != null) {
       var summary = OverviewSummary.fromJson(response.data!);
 
-      // Resolve live events: either from notifier or directly from apiClient
+      // Resolve real live events: either from events notifier or direct API fetch
       List<SecurityEvent> liveEvents = eventsAsync.valueOrNull ?? [];
       if (liveEvents.isEmpty) {
         try {
@@ -103,12 +105,12 @@ final overviewSummaryProvider =
                 .toList();
           }
         } catch (_) {
-          // Fallback gracefully
+          // Keep liveEvents empty if backend endpoint is unreachable
         }
       }
 
       if (liveEvents.isNotEmpty) {
-        // 1. Recent Activities List
+        // 1. Real Recent Activities List (Take top 5 real events)
         final recentActivities = liveEvents.take(5).map((e) {
           final timeStr = _formatRelativeTime(e.timestamp);
           return OverviewActivityItem(
@@ -121,77 +123,51 @@ final overviewSummaryProvider =
           );
         }).toList();
 
-        // 2. Attacks Today Count
+        // 2. Real Attacks Today Count
         final now = DateTime.now();
         final attacksToday = liveEvents.where((e) {
-          return e.timestamp.year == now.year &&
-                 e.timestamp.month == now.month &&
-                 e.timestamp.day == now.day;
+          final local = e.timestamp.toLocal();
+          return local.year == now.year &&
+                 local.month == now.month &&
+                 local.day == now.day;
         }).length;
 
-        // 3. 24h Activity Trend Curve (6 points)
-        List<double> activityTrend = summary.activityTrendData ?? [];
-        if (activityTrend.isEmpty || activityTrend.every((v) => v == 0)) {
-          final buckets = List<double>.filled(6, 0.0);
-          for (final ev in liveEvents) {
-            final diffHours = now.difference(ev.timestamp).inHours;
-            if (diffHours >= 0 && diffHours < 24) {
-              final bucketIdx = (5 - (diffHours ~/ 4)).clamp(0, 5);
-              buckets[bucketIdx] += 1;
-            }
-          }
-          if (buckets.any((b) => b > 0)) {
-            activityTrend = buckets;
-          } else {
-            activityTrend = [
-              1.0,
-              0.0,
-              1.0,
-              2.0,
-              (liveEvents.length.toDouble() / 2).clamp(1.0, 15.0),
-              liveEvents.length.toDouble().clamp(1.0, 25.0)
-            ];
+        // 3. Real 24h Activity Trend Curve (6 4-hour buckets based strictly on actual event timestamps)
+        final buckets = List<double>.filled(6, 0.0);
+        for (final ev in liveEvents) {
+          final diffHours = now.difference(ev.timestamp).inHours;
+          if (diffHours >= 0 && diffHours < 24) {
+            final bucketIdx = (5 - (diffHours ~/ 4)).clamp(0, 5);
+            buckets[bucketIdx] += 1.0;
           }
         }
 
-        // 4. Update Protocol / Vector Activity with CANONICAL keys (NO DUPLICATES)
-        final updatedProtocols = <String, double>{};
-        if (summary.protocolActivity != null) {
-          for (final entry in summary.protocolActivity!.entries) {
-            final key = _canonicalPortKey(entry.key);
-            updatedProtocols[key] = (updatedProtocols[key] ?? 0.0) + entry.value;
-          }
-        }
-
+        // 4. Real Protocol Activity (Strictly real protocols recorded, grouped canonically)
+        final realProtocols = <String, double>{};
         for (final ev in liveEvents) {
           final rawKey = ev.type.isNotEmpty ? ev.type : ev.protocol;
           final key = _canonicalPortKey(rawKey);
-          // If the protocol was not already in stats, count it from liveEvents
-          if (!updatedProtocols.containsKey(key)) {
-            updatedProtocols[key] = (updatedProtocols[key] ?? 0.0) + 1.0;
-          }
+          realProtocols[key] = (realProtocols[key] ?? 0.0) + 1.0;
         }
 
-        // 5. Threat Distribution update
-        final updatedThreats = Map<String, double>.from(summary.threatDistribution ?? {});
+        // 5. Real Threat Level Distribution
+        final realThreats = <String, double>{};
         for (final ev in liveEvents) {
           final lvlKey = ev.threatLevel.toString();
-          if (!updatedThreats.containsKey(lvlKey)) {
-            updatedThreats[lvlKey] = (updatedThreats[lvlKey] ?? 0.0) + 1.0;
-          }
+          realThreats[lvlKey] = (realThreats[lvlKey] ?? 0.0) + 1.0;
         }
 
-        final maxTotal = (summary.totalAttacksCount ?? 0) > liveEvents.length
-            ? summary.totalAttacksCount
-            : liveEvents.length;
+        final realCriticalAlerts = liveEvents.where((e) => e.severity == SeverityLevel.critical || e.threatLevel == 5).length;
+        final totalCount = math.max(summary.totalAttacksCount ?? 0, liveEvents.length);
 
         summary = summary.copyWith(
           recentActivities: recentActivities,
-          activityTrendData: activityTrend,
-          protocolActivity: updatedProtocols.isNotEmpty ? updatedProtocols : summary.protocolActivity,
-          threatDistribution: updatedThreats.isNotEmpty ? updatedThreats : summary.threatDistribution,
-          totalAttacksCount: maxTotal,
-          highRiskEventsCount: attacksToday > 0 ? attacksToday : summary.highRiskEventsCount,
+          activityTrendData: buckets,
+          protocolActivity: realProtocols.isNotEmpty ? realProtocols : summary.protocolActivity,
+          threatDistribution: realThreats.isNotEmpty ? realThreats : summary.threatDistribution,
+          totalAttacksCount: totalCount,
+          highRiskEventsCount: attacksToday > 0 ? attacksToday : (summary.highRiskEventsCount ?? 0),
+          criticalIncidentsCount: realCriticalAlerts > 0 ? realCriticalAlerts : summary.criticalIncidentsCount,
         );
       }
 
