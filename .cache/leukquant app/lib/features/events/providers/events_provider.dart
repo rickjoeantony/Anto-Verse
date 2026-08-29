@@ -1,18 +1,19 @@
-﻿import '../../../core/services/notification_service.dart';
-// lib/features/events/providers/events_provider.dart
+﻿// lib/features/events/providers/events_provider.dart
 
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/websocket/websocket_service.dart';
 import '../domain/security_event.dart';
 import '../domain/severity_level.dart';
 
-/// State notifier managing paginated and live security events from GET /api/dashboard/events?limit=50.
+/// State notifier managing paginated and live security events from GET /api/dashboard/events.
 class EventsNotifier extends StateNotifier<AsyncValue<List<SecurityEvent>>> {
   final ApiClient _apiClient;
   final Ref _ref;
   StreamSubscription<SecurityEvent>? _wsSubscription;
+  Timer? _pollingTimer;
 
   int _currentPage = 1;
   bool _hasMore = true;
@@ -21,10 +22,49 @@ class EventsNotifier extends StateNotifier<AsyncValue<List<SecurityEvent>>> {
   EventsNotifier(this._apiClient, this._ref) : super(const AsyncValue.loading()) {
     fetchInitialEvents();
 
-    // Listen to live WebSocket events and prepend deduplicated events
+    // 1. Establish live WebSocket telemetry stream
     final wsNotifier = _ref.read(webSocketProvider.notifier);
+    wsNotifier.connect();
+
     _wsSubscription = wsNotifier.eventStream.listen((event) {
       prependLiveEvent(event);
+    });
+
+    // 2. Continuous real-time polling sync (every 6 seconds) for immediate alert dispatch
+    _startPeriodicPolling();
+  }
+
+  void _startPeriodicPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 6), (_) async {
+      try {
+        final response = await _apiClient.getDashboardEvents(limit: 10, page: 1);
+        final data = response.data;
+        final List<SecurityEvent> latest = [];
+
+        if (data is List) {
+          for (final item in data) {
+            if (item is Map<String, dynamic>) {
+              latest.add(SecurityEvent.fromJson(item));
+            }
+          }
+        } else if (data is Map<String, dynamic> && data['events'] is List) {
+          for (final item in data['events'] as List) {
+            if (item is Map<String, dynamic>) {
+              latest.add(SecurityEvent.fromJson(item));
+            }
+          }
+        }
+
+        final currentList = state.valueOrNull ?? [];
+        for (final ev in latest.reversed) {
+          if (!currentList.any((e) => e.id == ev.id)) {
+            prependLiveEvent(ev);
+          }
+        }
+      } catch (_) {
+        // Continue polling
+      }
     });
   }
 
@@ -115,18 +155,18 @@ class EventsNotifier extends StateNotifier<AsyncValue<List<SecurityEvent>>> {
     }
   }
 
-  /// Prepend live event from WebSocket and notify user on mobile
+  /// Prepend live event from WebSocket / polling and trigger real-time mobile notification
   void prependLiveEvent(SecurityEvent liveEvent) {
     final currentList = state.valueOrNull ?? [];
     if (!currentList.any((e) => e.id == liveEvent.id)) {
       state = AsyncValue.data([liveEvent, ...currentList]);
-      // Trigger instant mobile push/local notification for live attack
       NotificationService.instance.showAttackNotification(liveEvent);
     }
   }
 
   @override
   void dispose() {
+    _pollingTimer?.cancel();
     _wsSubscription?.cancel();
     super.dispose();
   }
@@ -139,70 +179,43 @@ final eventsNotifierProvider =
   return EventsNotifier(apiClient, ref);
 });
 
-/// Search query provider
-final eventSearchQueryProvider = StateProvider<String>((ref) => '');
-
-/// Severity filter provider
+/// Filter state providers
 final eventSeverityFilterProvider = StateProvider<SeverityLevel?>((ref) => null);
-
-/// Protocol / Vector filter provider (e.g. 'SSH', 'HTTP', 'DDoS', 'SQLi', 'DNS')
 final eventProtocolFilterProvider = StateProvider<String?>((ref) => null);
+final eventSearchQueryProvider = StateProvider<String>((ref) => '');
 
 /// Filtered events provider
 final filteredEventsProvider = Provider<AsyncValue<List<SecurityEvent>>>((ref) {
-  final asyncEvents = ref.watch(eventsNotifierProvider);
-  final query = ref.watch(eventSearchQueryProvider).trim().toLowerCase();
+  final eventsAsync = ref.watch(eventsNotifierProvider);
   final severityFilter = ref.watch(eventSeverityFilterProvider);
   final protocolFilter = ref.watch(eventProtocolFilterProvider);
+  final searchQuery = ref.watch(eventSearchQueryProvider).toLowerCase().trim();
 
-  return asyncEvents.whenData((events) {
+  return eventsAsync.whenData((events) {
     return events.where((event) {
-      // 1. Severity filter
+      // Severity Filter
       if (severityFilter != null && event.severity != severityFilter) {
         return false;
       }
 
-      // 2. Protocol / Vector / Service filter
-      if (protocolFilter != null) {
-        final pf = protocolFilter.toLowerCase();
-        final rawType = event.type.toLowerCase();
-        final rawProto = event.protocol.toLowerCase();
-        final rawClass = event.classification.toLowerCase();
-        final rawHoneypot = event.honeypot.toLowerCase();
-        final rawPort = event.destinationPort.toLowerCase();
-
-        bool matches = false;
-        if (pf == 'ssh') {
-          matches = rawType.contains('ssh') || rawType.contains('brute_force') || rawProto.contains('ssh') || rawPort == '22' || rawHoneypot.contains('ssh');
-        } else if (pf == 'http' || pf == 'https' || pf == 'web') {
-          matches = rawType.contains('http') || rawType.contains('credential') || rawType.contains('stuffing') || rawType.contains('xss') || rawPort == '80' || rawPort == '443' || rawProto.contains('http');
-        } else if (pf == 'ddos') {
-          matches = rawType.contains('ddos') || rawType.contains('udp') || rawProto.contains('udp');
-        } else if (pf == 'sqli' || pf == 'sql') {
-          matches = rawType.contains('injection') || rawType.contains('sql') || rawPort == '3306' || rawPort == '5432';
-        } else if (pf == 'dns') {
-          matches = rawType.contains('dns') || rawProto.contains('dns') || rawPort == '53';
-        } else {
-          matches = rawType.contains(pf) || rawProto.contains(pf) || rawClass.contains(pf) || rawHoneypot.contains(pf);
-        }
-
-        if (!matches) {
-          return false;
-        }
+      // Protocol Filter
+      if (protocolFilter != null &&
+          event.protocol.toLowerCase() != protocolFilter.toLowerCase() &&
+          event.destinationPort != protocolFilter) {
+        return false;
       }
 
-      // 3. Text Search Query
-      if (query.isNotEmpty) {
-        final matchesId = event.id.toLowerCase().contains(query);
-        final matchesType = event.type.toLowerCase().contains(query);
-        final matchesClassification = event.classification.toLowerCase().contains(query);
-        final matchesIp = event.sourceIp.toLowerCase().contains(query);
-        final matchesCountry = event.country.toLowerCase().contains(query);
-        final matchesHoneypot = event.honeypot.toLowerCase().contains(query);
-        final matchesProtocol = event.protocol.toLowerCase().contains(query);
-        final matchesPort = event.destinationPort.toLowerCase().contains(query);
+      // Search Query Filter
+      if (searchQuery.isNotEmpty) {
+        final matchesIp = event.sourceIp.toLowerCase().contains(searchQuery);
+        final matchesCountry = event.country.toLowerCase().contains(searchQuery);
+        final matchesType = event.type.toLowerCase().contains(searchQuery);
+        final matchesPayload = event.payload.toLowerCase().contains(searchQuery);
+        final matchesUser = event.credentials.any((c) => c.username.toLowerCase().contains(searchQuery));
 
-        return matchesId || matchesType || matchesClassification || matchesIp || matchesCountry || matchesHoneypot || matchesProtocol || matchesPort;
+        if (!matchesIp && !matchesCountry && !matchesType && !matchesPayload && !matchesUser) {
+          return false;
+        }
       }
 
       return true;

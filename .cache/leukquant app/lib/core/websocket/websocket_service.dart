@@ -1,4 +1,4 @@
-// lib/core/websocket/websocket_service.dart
+﻿// lib/core/websocket/websocket_service.dart
 
 import 'dart:async';
 import 'dart:convert';
@@ -23,19 +23,11 @@ enum WsConnectionState {
   /// Lost connection; auto-reconnecting with backoff
   reconnecting,
 
-  /// Token expired and refresh failed — user session expired
+  /// Token expired and refresh failed
   sessionExpired,
 }
 
 /// WebSocket state notifier managing middle-man-3 real-time telemetry stream.
-///
-/// SECURITY & PRIVACY CONTRACT:
-/// - Connects to WS_BASE_URL + /api/ws?token=<jwt> using in-memory 15-min JWT.
-/// - NEVER logs the full WebSocket URL or token parameter anywhere.
-/// - Automatically dedupes events by ID.
-/// - On 401/expiry: calls POST /api/auth/refresh to rotate JWT, then reconnects.
-/// - If refresh fails, disconnects and transitions to sessionExpired state.
-/// - URL with token is NEVER written to SharedPreferences or disk.
 class WebSocketNotifier extends StateNotifier<WsConnectionState> {
   final Ref _ref;
   WebSocketChannel? _channel;
@@ -60,13 +52,11 @@ class WebSocketNotifier extends StateNotifier<WsConnectionState> {
       return;
     }
 
-    if (!AppConfig.isConfigured || AppConfig.wsBaseUrl.isEmpty) {
-      state = WsConnectionState.disconnected;
-      return;
-    }
+    final rawBase = AppConfig.wsBaseUrl.isNotEmpty
+        ? AppConfig.wsBaseUrl
+        : (AppConfig.apiBaseUrl.replaceFirst(RegExp(r'^http'), 'ws'));
 
-    final token = _ref.read(inMemoryTokenProvider);
-    if (token == null || token.isEmpty) {
+    if (rawBase.trim().isEmpty) {
       state = WsConnectionState.disconnected;
       return;
     }
@@ -80,12 +70,15 @@ class WebSocketNotifier extends StateNotifier<WsConnectionState> {
         : WsConnectionState.connecting;
 
     try {
-      // Build WebSocket URL with query parameter token
-      final wsUri = Uri.parse('${AppConfig.wsBaseUrl}/api/ws?token=$token');
+      final cleanBase = rawBase.endsWith('/') ? rawBase.substring(0, rawBase.length - 1) : rawBase;
+      final path = (cleanBase.endsWith('/api/ws') || cleanBase.endsWith('/ws')) ? '' : '/api/ws';
+      final token = _ref.read(inMemoryTokenProvider);
+      final query = (token != null && token.isNotEmpty) ? '?token=$token' : '';
 
-      // CRITICAL SECURITY RULE: NEVER log the full URL or token
+      final wsUri = Uri.parse('$cleanBase$path$query');
+
       if (kDebugMode) {
-        debugPrint('[WebSocket] -> Connecting to ${AppConfig.wsBaseUrl}/api/ws?token=[REDACTED]');
+        debugPrint('[WebSocket] -> Connecting to $cleanBase$path?token=[REDACTED]');
       }
 
       _channel = WebSocketChannel.connect(wsUri);
@@ -119,7 +112,6 @@ class WebSocketNotifier extends StateNotifier<WsConnectionState> {
 
         final event = SecurityEvent.fromJson(eventData);
 
-        // Deduplicate: ring-buffer of last 200 event IDs
         if (!_recentEventIds.contains(event.id)) {
           _recentEventIds.add(event.id);
           if (_recentEventIds.length > 200) {
@@ -137,15 +129,12 @@ class WebSocketNotifier extends StateNotifier<WsConnectionState> {
     state = WsConnectionState.disconnected;
     _cleanSubscription();
 
-    // Check if disconnection was due to token expiry/auth error
     final isAuthError = error != null && error.toString().contains('401');
 
     if (isAuthError) {
-      // Attempt token refresh
       final apiClient = _ref.read(apiClientProvider);
       final newJwt = await apiClient.refreshJwt();
       if (newJwt != null && !_isDisposed) {
-        // Reconnect with new token
         unawaited(connect());
         return;
       } else {
@@ -158,16 +147,12 @@ class WebSocketNotifier extends StateNotifier<WsConnectionState> {
   }
 
   void _scheduleReconnect() {
-    if (_isDisposed || !AppConfig.isConfigured) return;
+    if (_isDisposed) return;
     if (state == WsConnectionState.sessionExpired) return;
-
-    final token = _ref.read(inMemoryTokenProvider);
-    if (token == null) return;
 
     _reconnectTimer?.cancel();
     _reconnectAttempts++;
 
-    // Exponential backoff: 2s, 4s, 8s, 16s up to 30s max
     final delaySeconds = (_reconnectAttempts * 2).clamp(2, 30);
     _reconnectTimer = Timer(Duration(seconds: delaySeconds), () {
       if (!_isDisposed) connect();
@@ -181,7 +166,7 @@ class WebSocketNotifier extends StateNotifier<WsConnectionState> {
     _channel = null;
   }
 
-  /// Disconnect explicitly (e.g. on user logout).
+  /// Disconnect explicitly
   void disconnect() {
     _reconnectTimer?.cancel();
     _reconnectAttempts = 0;
