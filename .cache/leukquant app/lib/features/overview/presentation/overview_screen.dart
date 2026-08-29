@@ -22,6 +22,7 @@ import '../../auth/providers/auth_state_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../domain/overview_summary.dart';
 import '../providers/overview_provider.dart';
+import '../../events/providers/events_provider.dart';
 import '../../settings/presentation/widgets/user_avatar_widget.dart';
 import '../../settings/presentation/widgets/edit_profile_sheet.dart';
 import 'widgets/analytics_charts.dart';
@@ -67,6 +68,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
         child: RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(overviewSummaryProvider);
+            await ref.read(eventsNotifierProvider.notifier).fetchInitialEvents();
           },
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),

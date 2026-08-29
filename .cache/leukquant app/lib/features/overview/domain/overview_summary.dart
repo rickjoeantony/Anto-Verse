@@ -1,4 +1,4 @@
-// lib/features/overview/domain/overview_summary.dart
+﻿// lib/features/overview/domain/overview_summary.dart
 
 import '../../events/domain/severity_level.dart';
 import 'dashboard_stats.dart';
@@ -46,6 +46,50 @@ class OverviewSummary {
     this.stats,
     this.isBackendConnected = false,
   });
+
+  OverviewSummary copyWith({
+    String? deploymentHealthStatus,
+    SeverityLevel? deploymentHealthSeverity,
+    String? deploymentRegion,
+    int? criticalIncidentsCount,
+    int? highRiskEventsCount,
+    int? activeDeploymentsCount,
+    int? totalAttacksCount,
+    int? activeThreatsCount,
+    int? blockedIPsCount,
+    String? lastEventTimestamp,
+    String? recommendedActionTitle,
+    String? recommendedActionDescription,
+    String? organisationName,
+    List<double>? activityTrendData,
+    Map<String, double>? threatDistribution,
+    Map<String, double>? protocolActivity,
+    List<OverviewActivityItem>? recentActivities,
+    DashboardStats? stats,
+    bool? isBackendConnected,
+  }) {
+    return OverviewSummary(
+      deploymentHealthStatus: deploymentHealthStatus ?? this.deploymentHealthStatus,
+      deploymentHealthSeverity: deploymentHealthSeverity ?? this.deploymentHealthSeverity,
+      deploymentRegion: deploymentRegion ?? this.deploymentRegion,
+      criticalIncidentsCount: criticalIncidentsCount ?? this.criticalIncidentsCount,
+      highRiskEventsCount: highRiskEventsCount ?? this.highRiskEventsCount,
+      activeDeploymentsCount: activeDeploymentsCount ?? this.activeDeploymentsCount,
+      totalAttacksCount: totalAttacksCount ?? this.totalAttacksCount,
+      activeThreatsCount: activeThreatsCount ?? this.activeThreatsCount,
+      blockedIPsCount: blockedIPsCount ?? this.blockedIPsCount,
+      lastEventTimestamp: lastEventTimestamp ?? this.lastEventTimestamp,
+      recommendedActionTitle: recommendedActionTitle ?? this.recommendedActionTitle,
+      recommendedActionDescription: recommendedActionDescription ?? this.recommendedActionDescription,
+      organisationName: organisationName ?? this.organisationName,
+      activityTrendData: activityTrendData ?? this.activityTrendData,
+      threatDistribution: threatDistribution ?? this.threatDistribution,
+      protocolActivity: protocolActivity ?? this.protocolActivity,
+      recentActivities: recentActivities ?? this.recentActivities,
+      stats: stats ?? this.stats,
+      isBackendConnected: isBackendConnected ?? this.isBackendConnected,
+    );
+  }
 
   /// Default state when backend connection is pending
   factory OverviewSummary.awaitingBackend() {
