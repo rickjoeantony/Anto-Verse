@@ -82,87 +82,39 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Circular Profile Avatar with Glowing Liquid Ring
+                        // Circular Profile Cyber Avatar with Live Pulse Ring
                         GestureDetector(
                           onTap: () {
                             HapticFeedback.selectionClick();
-                            context.go('/more');
+                            EditProfileSheet.show(context, profile);
                           },
                           child: Stack(
                             clipBehavior: Clip.none,
                             alignment: Alignment.center,
                             children: [
-                              Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: LinearGradient(
-                                    colors: isDark
-                                        ? [
-                                            colors.brandPrimary.withValues(alpha: 0.6),
-                                            Colors.white.withValues(alpha: 0.2),
-                                          ]
-                                        : [
-                                            Colors.white,
-                                            colors.brandPrimary.withValues(alpha: 0.4),
-                                          ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: colors.brandPrimary.withValues(alpha: isDark ? 0.35 : 0.15),
-                                      blurRadius: 14,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                padding: const EdgeInsets.all(2.5),
-                                child: ClipOval(
-                                  clipBehavior: Clip.antiAlias,
-                                  child: SizedBox(
-                                    width: 45,
-                                    height: 45,
-                                    child: Image.network(
-                                      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
-                                      fit: BoxFit.cover,
-                                      cacheWidth: 160,
-                                      cacheHeight: 160,
-                                      errorBuilder: (_, __, ___) => Container(
-                                        color: colors.brandPrimary.withValues(alpha: 0.2),
-                                        child: Center(
-                                          child: Text(
-                                            userName.substring(0, math.min(userName.length, 2)).toUpperCase(),
-                                            style: TextStyle(
-                                              color: colors.brandPrimary,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                              UserAvatarWidget(
+                                avatarKey: profile.avatar,
+                                name: userName,
+                                size: 48,
+                                showGlow: true,
                               ),
                               // Online glowing beacon
                               Positioned(
-                                bottom: 1,
-                                right: 1,
+                                bottom: -1,
+                                right: -1,
                                 child: Container(
-                                  width: 13,
-                                  height: 13,
+                                  width: 14,
+                                  height: 14,
                                   decoration: BoxDecoration(
-                                    color: colors.success,
+                                    color: const Color(0xFF30D158),
                                     shape: BoxShape.circle,
                                     border: Border.all(
                                       color: isDark ? const Color(0xFF0B1020) : Colors.white,
-                                      width: 2.2,
+                                      width: 2.5,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: colors.success.withValues(alpha: 0.85),
+                                        color: const Color(0xFF30D158).withValues(alpha: 0.6),
                                         blurRadius: 6,
                                       ),
                                     ],
@@ -173,18 +125,17 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                           ),
                         ),
 
-                        // Floating Circular Action Buttons
+                        // Action Buttons: Theme Toggle + Notifications Bell
                         Row(
                           children: [
-                            // Theme Toggle Button
+                            // Tactile Theme Mode Toggle Glass Pill
                             Container(
-                              width: 44,
-                              height: 44,
+                              height: 42,
                               decoration: BoxDecoration(
-                                color: colors.glassCard,
-                                shape: BoxShape.circle,
+                                color: colors.surfaceMuted,
+                                borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: colors.glassBorder,
+                                  color: colors.border,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
@@ -194,31 +145,44 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                                   ),
                                 ],
                               ),
-                              child: IconButton(
-                                padding: EdgeInsets.zero,
-                                tooltip: 'Toggle Theme',
-                                icon: Icon(
-                                  isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                                  color: isDark ? const Color(0xFFFBBF24) : colors.brandPrimary,
-                                  size: 19,
-                                ),
-                                onPressed: () {
-                                  HapticFeedback.lightImpact();
-                                  ref.read(themeModeProvider.notifier).toggleTheme();
-                                },
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                    tooltip: 'Switch Theme',
+                                    icon: AnimatedSwitcher(
+                                      duration: const Duration(milliseconds: 300),
+                                      transitionBuilder: (child, anim) => RotationTransition(
+                                        turns: anim,
+                                        child: FadeTransition(opacity: anim, child: child),
+                                      ),
+                                      child: Icon(
+                                        isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                                        key: ValueKey(isDark),
+                                        color: isDark ? const Color(0xFFFFD60A) : colors.brandPrimary,
+                                        size: 19,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      HapticFeedback.selectionClick();
+                                      ref.read(themeModeProvider.notifier).toggleTheme();
+                                    },
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 10),
 
-                            // Floating Circular Notification Bell Button
+                            // Incidents Alert Bell with Live Glowing Dot
                             Container(
-                              width: 44,
-                              height: 44,
+                              height: 42,
+                              width: 42,
                               decoration: BoxDecoration(
-                                color: colors.glassCard,
-                                shape: BoxShape.circle,
+                                color: colors.surfaceMuted,
+                                borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: colors.glassBorder,
+                                  color: colors.border,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
