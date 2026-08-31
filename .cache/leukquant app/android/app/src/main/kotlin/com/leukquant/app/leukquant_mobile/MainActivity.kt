@@ -34,6 +34,7 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         unlockAndTurnScreenOn()
+        TelemetryBackgroundService.start(this)
     }
 
     private fun unlockAndTurnScreenOn() {
