@@ -1,7 +1,8 @@
-﻿// lib/features/settings/providers/settings_provider.dart
+// lib/features/settings/providers/settings_provider.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/network/api_client.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../../auth/providers/auth_state_provider.dart';
 import '../domain/user_profile.dart';
@@ -111,6 +112,18 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
       organisation: (organisation != null && organisation.trim().isNotEmpty) ? organisation.trim() : state.organisation,
       avatar: (avatar != null && avatar.trim().isNotEmpty) ? avatar.trim() : state.avatar,
     );
+
+    // Synchronize directly with backend database via PATCH /api/user/profile
+    try {
+      final apiClient = _ref.read(apiClientProvider);
+      await apiClient.updateUserProfile({
+        if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
+        if (organisation != null && organisation.trim().isNotEmpty) 'organization': organisation.trim(),
+        if (avatar != null && avatar.trim().isNotEmpty) 'avatar': avatar.trim(),
+      });
+    } catch (_) {
+      // Local fallback active if offline
+    }
   }
 }
 

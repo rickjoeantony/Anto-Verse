@@ -2,9 +2,9 @@
 class AppConstants {
   AppConstants._();
 
-  static const String appName = 'LeukQuant Mobile';
+  static const String appName = 'LeukQuant Alpha';
   static const String appSubtitle = 'Security Monitoring';
-  static const String appVersion = 'v1.0.0 (Build 101)';
+  static const String appVersion = 'LeukQuant Alpha v1.0.0-alpha (Build 101)';
   static const String copyright = '© 2026 LeukQuant Security. All rights reserved.';
 
   // Storage keys

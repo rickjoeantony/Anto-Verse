@@ -40,7 +40,8 @@ class AuthState {
     this.rateLimitCooldownSeconds = 0,
   });
 
-  bool get isRateLimited => rateLimitCooldownSeconds > 0 || errorType == AuthErrorType.rateLimited;
+  bool get isRateLimited => errorType == AuthErrorType.rateLimited || rateLimitCooldownSeconds > 0;
+  bool get hasError => errorMessage != null && errorMessage!.isNotEmpty;
 
   AuthState copyWith({
     bool? isAuthenticated,
@@ -66,6 +67,7 @@ class AuthState {
   }
 }
 
+/// Controller managing login, logout, 401 refresh, and in-memory JWT tokens.
 class AuthNotifier extends StateNotifier<AuthState> {
   final ApiClient _apiClient;
   final Ref _ref;
@@ -73,43 +75,70 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   AuthNotifier(this._apiClient, this._ref) : super(const AuthState());
 
-  /// Authenticate with middle-man-3: POST /api/auth/login.
-  ///
-  /// Contract: Returns { "success": true, "data": { "jwt": "<token>", "user": {...} }, "error": null }
-  /// Sets httpOnly refresh cookie in in-memory CookieJar.
-  ///
-  /// Flow:
-  /// 1. Parse JSON response: check json["success"] == true, extract json["data"]["jwt"] and json["data"]["user"].
-  /// 2. Store JWT in memory only (never SharedPreferences or disk).
-  /// 3. Request GET /api/user/profile with Bearer JWT:
-  ///    - if profile succeeds -> set isAuthenticated = true
-  ///    - if profile 401 -> clear JWT and show session error
-  /// 4. On login error:
-  ///    - success false or 401 -> invalid credentials
-  ///    - 429 -> rate limited
-  ///    - timeout / connectionError -> backend unavailable
-  Future<bool> signIn(String email, String password) async {
-    if (state.rateLimitCooldownSeconds > 0) {
-      return false;
-    }
+  /// Try restoring active session on app launch via persisted refresh token/cookie.
+  Future<bool> tryRestoreSession() async {
+    try {
+      final hasData = await _apiClient.restorePersistedCookies();
+      if (!hasData) return false;
 
+      state = state.copyWith(isAuthenticating: true);
+      final newJwt = await _apiClient.refreshJwt();
+      if (newJwt != null && newJwt.isNotEmpty) {
+        _ref.read(inMemoryTokenProvider.notifier).state = newJwt;
+
+        // Fetch User Profile
+        UserProfile? profile;
+        try {
+          final profileRes = await _apiClient.getUserProfile();
+          if (profileRes.data != null) {
+            final resData = profileRes.data!;
+            final profileData = (resData['data'] is Map)
+                ? Map<String, dynamic>.from(resData['data'] as Map)
+                : resData;
+            profile = UserProfile.fromJson(profileData);
+          }
+        } catch (_) {
+          profile = const UserProfile(
+            name: 'Security Analyst',
+            plan: 'growth',
+            isBackendConnected: true,
+          );
+        }
+
+        state = state.copyWith(
+          isAuthenticated: true,
+          isAuthenticating: false,
+          userProfile: profile,
+          errorMessage: null,
+          clearErrorType: true,
+        );
+
+        // Auto-connect live WebSocket stream for realtime attack notifications
+        unawaited(_ref.read(webSocketProvider.notifier).connect());
+        return true;
+      }
+    } catch (_) {}
+    state = state.copyWith(isAuthenticating: false);
+    return false;
+  }
+
+  /// Authenticate against POST /api/auth/login
+  Future<bool> signIn(String email, String password) async {
     final cleanEmail = email.trim();
     final cleanPassword = password.trim();
 
-    if (cleanEmail.isEmpty || !cleanEmail.contains('@')) {
+    if (cleanEmail.isEmpty || cleanPassword.isEmpty) {
       state = state.copyWith(
-        isAuthenticating: false,
-        errorMessage: 'Please enter a valid organisation email address.',
-        clearErrorType: true,
+        errorMessage: 'Email and password are required.',
+        errorType: AuthErrorType.invalidCredentials,
       );
       return false;
     }
 
-    if (cleanPassword.isEmpty || cleanPassword.length < 6) {
+    if (state.isRateLimited) {
       state = state.copyWith(
-        isAuthenticating: false,
-        errorMessage: 'Password must be at least 6 characters.',
-        clearErrorType: true,
+        errorMessage: 'Too many attempts. Please wait ${state.rateLimitCooldownSeconds}s.',
+        errorType: AuthErrorType.rateLimited,
       );
       return false;
     }
@@ -117,31 +146,40 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(
       isAuthenticating: true,
       errorMessage: null,
-      isSessionExpired: false,
       clearErrorType: true,
     );
 
     try {
       final response = await _apiClient.login(cleanEmail, cleanPassword);
-      final rawData = response.data;
 
-      Map<String, dynamic> jsonMap = {};
-      if (rawData is Map<String, dynamic>) {
-        jsonMap = rawData;
-      } else if (rawData is Map) {
-        jsonMap = Map<String, dynamic>.from(rawData);
-      } else if (rawData is String && rawData.isNotEmpty) {
-        try {
-          final decoded = jsonDecode(rawData);
-          if (decoded is Map<String, dynamic>) {
-            jsonMap = decoded;
-          } else if (decoded is Map) {
-            jsonMap = Map<String, dynamic>.from(decoded);
-          }
-        } catch (_) {}
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        state = state.copyWith(
+          isAuthenticated: false,
+          isAuthenticating: false,
+          errorMessage: 'Invalid email or password.',
+          errorType: AuthErrorType.invalidCredentials,
+        );
+        return false;
       }
 
-      // Check success envelope
+      final data = response.data;
+      Map<String, dynamic> jsonMap;
+
+      if (data is Map<String, dynamic>) {
+        jsonMap = data;
+      } else if (data is Map) {
+        jsonMap = Map<String, dynamic>.from(data);
+      } else if (data is String && data.isNotEmpty) {
+        try {
+          final decoded = jsonDecode(data);
+          jsonMap = decoded is Map ? Map<String, dynamic>.from(decoded) : {};
+        } catch (_) {
+          jsonMap = {};
+        }
+      } else {
+        jsonMap = {};
+      }
+
       if (jsonMap.containsKey('success') && jsonMap['success'] == false) {
         final errorMsg = jsonMap['error']?.toString();
         state = state.copyWith(
@@ -185,7 +223,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return false;
       }
 
-      // Store JWT in-memory only — NEVER written to SharedPreferences or disk
+      // Store JWT in-memory only â€” never written to SharedPreferences or disk
       _ref.read(inMemoryTokenProvider.notifier).state = accessToken;
 
       // Extract user from json["data"]["user"] or fallback
@@ -205,7 +243,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         final profileRes = await _apiClient.getUserProfile();
         if (profileRes.data != null) {
           final resData = profileRes.data!;
-          final profileData = (resData is Map && resData['data'] is Map)
+          final profileData = (resData['data'] is Map)
               ? Map<String, dynamic>.from(resData['data'] as Map)
               : resData;
           profile = UserProfile.fromJson(profileData, fallbackEmail: cleanEmail);
@@ -322,13 +360,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     });
   }
 
-  /// Sign out, revoke session cookie on backend, and clear in-memory JWT.
+  /// Sign out, revoke session cookie on backend, and clear stored session.
   Future<void> signOut() async {
     try {
       await _apiClient.logout();
     } catch (_) {
-      // Ignore network errors on logout — local session is always wiped
+      // Ignore network errors on logout â€” local session is always wiped
     } finally {
+      await _apiClient.clearPersistedSession();
       _ref.read(webSocketProvider.notifier).disconnect();
       _ref.read(inMemoryTokenProvider.notifier).state = null;
       state = const AuthState(isAuthenticated: false);
@@ -337,6 +376,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Triggered on protected 401 session expiry.
   void notifySessionExpired() {
+    _apiClient.clearPersistedSession();
     _ref.read(webSocketProvider.notifier).disconnect();
     _ref.read(inMemoryTokenProvider.notifier).state = null;
     state = const AuthState(

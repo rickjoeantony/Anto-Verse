@@ -1,4 +1,4 @@
-﻿// lib/features/events/presentation/events_screen.dart
+// lib/features/events/presentation/events_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -14,12 +14,38 @@ import 'widgets/event_details_sheet.dart';
 import 'widgets/event_filter_bar.dart';
 // import 'widgets/honeytoken_vault_card.dart';
 
-/// Events screen with iOS-inspired glass styling, search, filter chips, and interactive sheet.
-class EventsScreen extends ConsumerWidget {
+/// Events screen with iOS-inspired glass styling, search, filter chips, interactive sheet, and infinite historical pagination.
+class EventsScreen extends ConsumerStatefulWidget {
   const EventsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<EventsScreen> createState() => _EventsScreenState();
+}
+
+class _EventsScreenState extends ConsumerState<EventsScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300) {
+      ref.read(eventsNotifierProvider.notifier).fetchNextPage();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final theme = Theme.of(context);
     final asyncEvents = ref.watch(filteredEventsProvider);
@@ -36,6 +62,7 @@ class EventsScreen extends ConsumerWidget {
             await ref.read(eventsNotifierProvider.notifier).fetchInitialEvents();
           },
           child: CustomScrollView(
+            controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
             slivers: [
               // iOS Large Title Header
@@ -76,8 +103,6 @@ class EventsScreen extends ConsumerWidget {
                 ),
               ),
 
-
-
               // Status Bar
               SliverToBoxAdapter(
                 child: Padding(
@@ -100,7 +125,7 @@ class EventsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 7),
                       Text(
-                        'Live telemetry stream · Canary sensors active',
+                        'All recorded telemetry · Auto-sync active',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,

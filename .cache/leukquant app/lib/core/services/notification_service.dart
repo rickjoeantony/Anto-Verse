@@ -1,4 +1,4 @@
-﻿// lib/core/services/notification_service.dart
+// lib/core/services/notification_service.dart
 
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
@@ -76,9 +76,9 @@ class NotificationService {
     try {
       final int notifId = event.id.hashCode & 0x7fffffff;
       final typeStr = _formatEventType(event.type.isNotEmpty ? event.type : event.classification);
-      final title = 'âš¡ Attack Alert: $typeStr';
+      final title = 'Critical Alert: $typeStr Ingress';
       final portStr = event.destinationPort.isNotEmpty ? event.destinationPort : (event.protocol.isNotEmpty ? event.protocol : '22');
-      final body = 'Attacker IP: ${event.sourceIp} (${event.country.isNotEmpty ? event.country : "Unknown"}) â€¢ Port: $portStr â€¢ Severity: ${event.severity.name.toUpperCase()}';
+      final body = 'Attacker IP: ${event.sourceIp} (${event.country.isNotEmpty ? event.country : "Unknown"}) · Port: $portStr · Severity: ${event.severity.name.toUpperCase()}';
 
       // 1. Post via native Android bridge
       try {
@@ -93,13 +93,17 @@ class NotificationService {
       // 2. Fallback via FlutterLocalNotificationsPlugin
       if (!_isInitialized) await init();
 
-      final vibrationPattern = Int64List.fromList([0, 300, 150, 300]);
+      final vibrationPattern = Int64List.fromList([0, 500, 200, 500, 200, 500]);
       final androidDetails = AndroidNotificationDetails(
         _channelId,
         _channelName,
         channelDescription: _channelDescription,
         importance: Importance.max,
-        priority: Priority.high,
+        priority: Priority.max,
+        fullScreenIntent: true,
+        visibility: NotificationVisibility.public,
+        category: AndroidNotificationCategory.alarm,
+        audioAttributesUsage: AudioAttributesUsage.alarm,
         ticker: 'Critical Attack Logged',
         icon: '@mipmap/ic_launcher',
         enableVibration: true,
@@ -131,8 +135,8 @@ class NotificationService {
   /// Trigger a live test alert with full sound, vibration, and system tray banner
   Future<void> sendTestNotification([String toneType = 'cyberRadar']) async {
     try {
-      const title = 'âš¡ Test Alert: SSH Decoy Ingress';
-      const body = 'Target: SSH Decoy (Port 22) â€¢ Attacker IP: 192.168.1.105 (US) â€¢ Action: Isolated & Logged';
+      const title = '⚡ Test Alert: SSH Decoy Ingress';
+      const body = 'Target: SSH Decoy (Port 22) • Attacker IP: 192.168.1.105 (US) • Action: Isolated & Logged';
 
       // 1. Dispatch via native Android bridge
       try {
@@ -147,13 +151,17 @@ class NotificationService {
       // 2. Fallback via FlutterLocalNotificationsPlugin
       if (!_isInitialized) await init();
 
-      final vibrationPattern = Int64List.fromList([0, 350, 150, 350]);
+      final vibrationPattern = Int64List.fromList([0, 500, 200, 500, 200, 500]);
       final androidDetails = AndroidNotificationDetails(
         _channelId,
         _channelName,
         channelDescription: _channelDescription,
         importance: Importance.max,
-        priority: Priority.high,
+        priority: Priority.max,
+        fullScreenIntent: true,
+        visibility: NotificationVisibility.public,
+        category: AndroidNotificationCategory.alarm,
+        audioAttributesUsage: AudioAttributesUsage.alarm,
         ticker: 'Test Security Alert',
         icon: '@mipmap/ic_launcher',
         enableVibration: true,
@@ -179,6 +187,43 @@ class NotificationService {
       await playTone(toneType);
     } catch (e) {
       debugPrint('[NotificationService] Send test notification error: $e');
+    }
+  }
+
+  /// Open Android OS System Notification settings for LeukQuant
+  Future<void> openNotificationSettings() async {
+    try {
+      await _nativeChannel.invokeMethod('openNotificationSettings');
+    } catch (e) {
+      debugPrint('[NotificationService] openNotificationSettings error: $e');
+    }
+  }
+
+  /// Open Android OS Battery Optimization settings for LeukQuant (to allow background execution)
+  Future<void> openBatterySettings() async {
+    try {
+      await _nativeChannel.invokeMethod('openBatterySettings');
+    } catch (e) {
+      debugPrint('[NotificationService] openBatterySettings error: $e');
+    }
+  }
+
+  /// Open Android OS Full Screen Notification / Display over apps settings
+  Future<void> openFullScreenSettings() async {
+    try {
+      await _nativeChannel.invokeMethod('openFullScreenSettings');
+    } catch (e) {
+      debugPrint('[NotificationService] openFullScreenSettings error: $e');
+    }
+  }
+
+  /// Check if battery optimization has been disabled / unrestricted
+  Future<bool> isBatteryOptimizationIgnored() async {
+    try {
+      final bool? result = await _nativeChannel.invokeMethod<bool>('isBatteryOptimizationIgnored');
+      return result ?? false;
+    } catch (_) {
+      return false;
     }
   }
 

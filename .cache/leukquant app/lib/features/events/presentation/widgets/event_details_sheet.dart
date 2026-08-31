@@ -1,4 +1,4 @@
-﻿// lib/features/events/presentation/widgets/event_details_sheet.dart
+// lib/features/events/presentation/widgets/event_details_sheet.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -280,11 +280,17 @@ class EventDetailsSheet extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 _buildDetailRow('Timestamp', formattedTime, colors),
-                _buildDetailRow('Source IP', event.sourceIp, colors),
-                _buildDetailRow('Country', '${event.country} (${event.countryCode})', colors),
+                _buildDetailRow('Attacker IP', event.sourceIp, colors),
+                _buildDetailRow('Location', '${event.country} (${event.countryCode})', colors),
+                _buildDetailRow('Target Port & Service', '${event.protocol} / Port ${event.destinationPort}', colors),
                 _buildDetailRow('Threat Level', '${event.threatLevel} / 5', colors),
                 _buildDetailRow('Abuse Score', '${event.abuseScore.toStringAsFixed(1)} %', colors),
-                _buildDetailRow('Honeypot Sensor', event.honeypot, colors),
+                _buildDetailRow('Decoy Sensor', event.honeypot, colors),
+                _buildDetailRow(
+                  'Containment Status',
+                  event.isBlocked ? '✓ Attacker Blocked by Honeypot' : 'Perimeter Drop Rule Enforced',
+                  colors,
+                ),
                 const SizedBox(height: 20),
 
                 // 5. Action: View IP Sessions & Forensics

@@ -41,3 +41,9 @@ migrate_working_dir/
 
 # Coverage
 coverage/
+
+# Web & Build artifacts
+node_modules/
+web_preview/dist/
+*.apk
+*.ipa

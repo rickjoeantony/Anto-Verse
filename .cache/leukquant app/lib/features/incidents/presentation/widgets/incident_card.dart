@@ -157,7 +157,94 @@ class _IncidentCardState extends State<IncidentCard> {
             ),
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
+
+          // ── Attack Telemetry Badges (IP, Port, Blocked) ────────────
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              // Attacker IP & Location
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                decoration: BoxDecoration(
+                  color: colors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: colors.border.withValues(alpha: 0.5)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.public_rounded, size: 12, color: colors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${incident.sourceIp} (${incident.country})',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Port & Protocol
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                decoration: BoxDecoration(
+                  color: colors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: colors.border.withValues(alpha: 0.5)),
+                ),
+                child: Text(
+                  '${incident.protocol}:${incident.targetPort}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: colors.brandPrimary,
+                  ),
+                ),
+              ),
+
+              // Blocked / Contained Badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                decoration: BoxDecoration(
+                  color: incident.isBlocked
+                      ? colors.success.withValues(alpha: 0.12)
+                      : colors.warning.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: incident.isBlocked
+                        ? colors.success.withValues(alpha: 0.4)
+                        : colors.warning.withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      incident.isBlocked ? Icons.gpp_good_rounded : Icons.shield_outlined,
+                      size: 12,
+                      color: incident.isBlocked ? colors.success : colors.warning,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      incident.isBlocked ? 'Honeypot Blocked' : 'Triage Active',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: incident.isBlocked ? colors.success : colors.warning,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
 
           // ── Description ────────────────────────────────────────────
           Text(

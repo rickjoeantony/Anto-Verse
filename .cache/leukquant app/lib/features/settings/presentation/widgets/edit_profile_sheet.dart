@@ -1,14 +1,16 @@
-﻿// lib/features/settings/presentation/widgets/edit_profile_sheet.dart
+// lib/features/settings/presentation/widgets/edit_profile_sheet.dart
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/user_profile.dart';
 import '../../providers/settings_provider.dart';
 import 'user_avatar_widget.dart';
 
-/// Ultra-responsive, premium modal sheet for customizing analyst profile & organization.
+/// Ultra-responsive, premium modal sheet for customizing analyst profile & organization with sticky Save & Continue action.
 class EditProfileSheet extends ConsumerStatefulWidget {
   final UserProfile profile;
 
@@ -23,8 +25,11 @@ class EditProfileSheet extends ConsumerStatefulWidget {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.55),
-      builder: (ctx) => EditProfileSheet(profile: profile),
+      barrierColor: Colors.black.withValues(alpha: 0.6),
+      builder: (ctx) => FractionallySizedBox(
+        heightFactor: 0.90,
+        child: EditProfileSheet(profile: profile),
+      ),
     );
   }
 
@@ -37,6 +42,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
   late final TextEditingController _companyController;
   late String _selectedAvatar;
   bool _isSaving = false;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -47,7 +53,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
           ? widget.profile.organisation!
           : 'Leukquant Enterprise',
     );
-    _selectedAvatar = widget.profile.avatar ?? 'shield';
+    _selectedAvatar = widget.profile.avatar ?? 'anto';
   }
 
   @override
@@ -55,6 +61,34 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
     _nameController.dispose();
     _companyController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      HapticFeedback.lightImpact();
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        maxWidth: 600,
+        maxHeight: 600,
+        imageQuality: 85,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _selectedAvatar = pickedFile.path;
+        });
+        HapticFeedback.mediumImpact();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not access photos: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _handleSave() async {
@@ -82,7 +116,6 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
     setState(() => _isSaving = true);
     HapticFeedback.mediumImpact();
 
-    // Optimistic fast update
     final messenger = ScaffoldMessenger.of(context);
     final nav = Navigator.of(context);
 
@@ -106,7 +139,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
               SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Profile and company updated successfully',
+                  'Profile and custom photo updated successfully',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -130,10 +163,19 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
+    final isCustomPhoto = _selectedAvatar.startsWith('/') ||
+        _selectedAvatar.contains(':\\') ||
+        _selectedAvatar.startsWith('file:');
+
     final activePreset = kCyberAvatarPresets.firstWhere(
       (p) => p.key == _selectedAvatar,
       orElse: () => kCyberAvatarPresets.first,
     );
+
+    final activeLabel = isCustomPhoto ? 'Custom Photo' : activePreset.label;
+
+    final photoPresets = kCyberAvatarPresets.where((p) => p.isPhoto).toList();
+    final iconPresets = kCyberAvatarPresets.where((p) => !p.isPhoto).toList();
 
     return Container(
       decoration: BoxDecoration(
@@ -153,285 +195,459 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
           ),
         ],
       ),
-      padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 1. Drag Handle
-            Center(
-              child: Container(
-                width: 40,
-                height: 4.5,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withValues(alpha: 0.22) : Colors.black.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(10),
-                ),
+      child: Column(
+        children: [
+          // 1. Drag Handle
+          const SizedBox(height: 12),
+          Center(
+            child: Container(
+              width: 40,
+              height: 4.5,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white.withValues(alpha: 0.22) : Colors.black.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
-            const SizedBox(height: 14),
+          ),
+          const SizedBox(height: 10),
 
-            // 2. Header & Live Preview Card
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    activePreset.gradient.first.withValues(alpha: isDark ? 0.18 : 0.08),
-                    activePreset.gradient.last.withValues(alpha: isDark ? 0.08 : 0.02),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: activePreset.gradient.first.withValues(alpha: isDark ? 0.35 : 0.2),
-                ),
-              ),
-              child: Row(
+          // 2. Scrollable Body
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  UserAvatarWidget(
-                    avatarKey: _selectedAvatar,
-                    name: _nameController.text,
-                    size: 54,
-                    showGlow: true,
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  // Header & Live Preview Card
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          activePreset.gradient.first.withValues(alpha: isDark ? 0.18 : 0.08),
+                          activePreset.gradient.last.withValues(alpha: isDark ? 0.08 : 0.02),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: activePreset.gradient.first.withValues(alpha: isDark ? 0.35 : 0.2),
+                      ),
+                    ),
+                    child: Row(
                       children: [
-                        Text(
-                          'CUSTOMIZE PROFILE',
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w800,
-                            color: activePreset.gradient.first,
-                            letterSpacing: 0.8,
+                        UserAvatarWidget(
+                          avatarKey: _selectedAvatar,
+                          name: _nameController.text,
+                          size: 58,
+                          showGlow: true,
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'CUSTOMIZE PROFILE',
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: activePreset.gradient.first,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                activeLabel,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  color: colors.textPrimary,
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                              const SizedBox(height: 1),
+                              Text(
+                                'Analyst identity across alerts & telemetry',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: colors.textSecondary.withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          activePreset.label,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: colors.textPrimary,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        const SizedBox(height: 1),
-                        Text(
-                          'Analyst identity across alerts & telemetry',
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            color: colors.textSecondary.withValues(alpha: 0.8),
-                          ),
+                        IconButton(
+                          icon: Icon(Icons.close_rounded, color: colors.textSecondary, size: 22),
+                          onPressed: () => Navigator.of(context).pop(),
                         ),
                       ],
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.close_rounded, color: colors.textSecondary, size: 22),
-                    onPressed: () => Navigator.of(context).pop(),
+                  const SizedBox(height: 16),
+
+                  // Custom Photo Upload Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _pickImage(ImageSource.gallery),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                            decoration: BoxDecoration(
+                              color: isCustomPhoto ? colors.brandPrimary.withValues(alpha: 0.16) : colors.brandPrimary.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: isCustomPhoto ? colors.brandPrimary : colors.brandPrimary.withValues(alpha: 0.3),
+                                width: isCustomPhoto ? 1.5 : 1.0,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.photo_library_rounded, color: colors.brandPrimary, size: 18),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Choose Photo',
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: colors.brandPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _pickImage(ImageSource.camera),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                            decoration: BoxDecoration(
+                              color: colors.surfaceMuted,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: colors.border),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.camera_alt_rounded, color: colors.textPrimary, size: 18),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Take Photo',
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: colors.textPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 18),
+
+                  // Specialist Photo Portraits Section
+                  Text(
+                    'SPECIALIST PORTRAITS',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: colors.textSecondary.withValues(alpha: 0.7),
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 84,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: photoPresets.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 12),
+                      itemBuilder: (context, index) {
+                        final preset = photoPresets[index];
+                        final isSelected = _selectedAvatar == preset.key;
+
+                        return GestureDetector(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() => _selectedAvatar = preset.key);
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.all(3.5),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isSelected ? colors.brandPrimary : Colors.transparent,
+                                    width: 2.5,
+                                  ),
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: colors.brandPrimary.withValues(alpha: 0.4),
+                                            blurRadius: 10,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: ClipOval(
+                                  child: Image.asset(
+                                    preset.imageAsset!,
+                                    width: 48,
+                                    height: 48,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                preset.label.split('·').first.trim(),
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                                  color: isSelected ? colors.brandPrimary : colors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Tactical Icon Emblems Section
+                  Text(
+                    'TACTICAL EMBLEMS',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: colors.textSecondary.withValues(alpha: 0.7),
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 84,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: iconPresets.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 12),
+                      itemBuilder: (context, index) {
+                        final preset = iconPresets[index];
+                        final isSelected = _selectedAvatar == preset.key;
+
+                        return GestureDetector(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() => _selectedAvatar = preset.key);
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.all(3.5),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isSelected ? colors.brandPrimary : Colors.transparent,
+                                    width: 2.5,
+                                  ),
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: colors.brandPrimary.withValues(alpha: 0.4),
+                                            blurRadius: 10,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      colors: preset.gradient,
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    preset.icon,
+                                    size: 22,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                preset.label.split(' ').first,
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                                  color: isSelected ? colors.brandPrimary : colors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+
+                  // Analyst Name Input Field
+                  Text(
+                    'ANALYST NAME',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: colors.textSecondary.withValues(alpha: 0.7),
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: TextField(
+                      controller: _nameController,
+                      style: TextStyle(
+                        color: colors.textPrimary,
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      decoration: InputDecoration(
+                        icon: Icon(Icons.badge_outlined, color: colors.brandPrimary, size: 20),
+                        border: InputBorder.none,
+                        hintText: 'e.g. Rick Antony',
+                        hintStyle: TextStyle(
+                          color: colors.textSecondary.withValues(alpha: 0.5),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Organization / SOC Company Field
+                  Text(
+                    'ORGANIZATION / SOC TENANT',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: colors.textSecondary.withValues(alpha: 0.7),
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: TextField(
+                      controller: _companyController,
+                      style: TextStyle(
+                        color: colors.textPrimary,
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      decoration: InputDecoration(
+                        icon: Icon(Icons.business_rounded, color: colors.brandPrimary, size: 20),
+                        border: InputBorder.none,
+                        hintText: 'e.g. Leukquant Enterprise',
+                        hintStyle: TextStyle(
+                          color: colors.textSecondary.withValues(alpha: 0.5),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
-            const SizedBox(height: 18),
+          ),
 
-            // 3. Cyber Avatar Preset Selector (Buttery Smooth Horizontal List)
-            Text(
-              'SELECT AVATAR PRESET',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: colors.textSecondary.withValues(alpha: 0.75),
-                letterSpacing: 0.8,
-              ),
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              height: 82,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                itemCount: kCyberAvatarPresets.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
-                  final preset = kCyberAvatarPresets[index];
-                  final isSelected = _selectedAvatar == preset.key;
-
-                  return GestureDetector(
-                    onTap: () {
-                      if (_selectedAvatar != preset.key) {
-                        HapticFeedback.selectionClick();
-                        setState(() => _selectedAvatar = preset.key);
-                      }
-                    },
-                    behavior: HitTestBehavior.opaque,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          padding: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isSelected ? preset.gradient.first : Colors.transparent,
-                              width: isSelected ? 2.5 : 0,
-                            ),
-                          ),
-                          child: UserAvatarWidget(
-                            avatarKey: preset.key,
-                            name: widget.profile.name,
-                            size: 46,
-                            showGlow: isSelected,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          preset.label.split(' ').first,
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                            color: isSelected ? colors.textPrimary : colors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 18),
-
-            // 4. Analyst Name Input Field
-            Text(
-              'ANALYST FULL NAME',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: colors.textSecondary.withValues(alpha: 0.75),
-                letterSpacing: 0.8,
-              ),
-            ),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _nameController,
-              textInputAction: TextInputAction.next,
-              style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.w600, fontSize: 14.5),
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.person_rounded, color: activePreset.gradient.first, size: 20),
-                hintText: 'Enter analyst full name',
-                hintStyle: TextStyle(color: colors.textSecondary.withValues(alpha: 0.45), fontSize: 13.5),
-                filled: true,
-                fillColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(
-                    color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(
-                    color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: activePreset.gradient.first, width: 1.8),
+          // 3. Sticky Bottom Action Bar (Save & Continue)
+          Container(
+            padding: EdgeInsets.fromLTRB(20, 12, 20, 12 + bottomInset + MediaQuery.paddingOf(context).bottom),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+              border: Border(
+                top: BorderSide(
+                  color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-
-            // 5. Company / Organization Input Field
-            Text(
-              'COMPANY / ORGANIZATION',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: colors.textSecondary.withValues(alpha: 0.75),
-                letterSpacing: 0.8,
-              ),
-            ),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _companyController,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => _handleSave(),
-              style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.w600, fontSize: 14.5),
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.business_rounded, color: activePreset.gradient.last, size: 20),
-                hintText: 'e.g. Acme Cybersecurity, Leukquant SOC',
-                hintStyle: TextStyle(color: colors.textSecondary.withValues(alpha: 0.45), fontSize: 13.5),
-                filled: true,
-                fillColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(
-                    color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(
-                    color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: activePreset.gradient.last, width: 1.8),
-                ),
-              ),
-            ),
-            const SizedBox(height: 22),
-
-            // 6. Action Save Button with Tactile Gradient
-            SizedBox(
+            child: SizedBox(
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
                 onPressed: _isSaving ? null : _handleSave,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: activePreset.gradient.first,
+                  backgroundColor: colors.brandPrimary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 2,
+                  shadowColor: colors.brandPrimary.withValues(alpha: 0.4),
                 ),
                 child: _isSaving
                     ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white),
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
                       )
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: const [
-                          Icon(Icons.save_rounded, size: 18),
+                          Icon(Icons.check_circle_rounded, size: 18, color: Colors.white),
                           SizedBox(width: 8),
                           Text(
-                            'Save Profile & Organization',
+                            'Save & Continue',
                             style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.2,
+                              fontSize: 15.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.3,
                             ),
                           ),
                         ],
                       ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

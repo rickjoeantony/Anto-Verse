@@ -7,6 +7,7 @@ import '../../../core/widgets/ambient_background.dart';
 import '../../../core/widgets/floating_3d_wrapper.dart';
 import '../../../core/widgets/leukquant_logo.dart';
 import '../../onboarding/providers/onboarding_provider.dart';
+import '../providers/auth_state_provider.dart';
 
 /// Splash screen displaying official LeukQuant logo and smooth transition.
 class SplashScreen extends ConsumerStatefulWidget {
@@ -33,17 +34,29 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
     );
     _fadeController.forward();
 
-    // Route based on onboarding completion
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) {
-        final hasCompletedOnboarding = ref.read(onboardingProvider);
-        if (hasCompletedOnboarding) {
-          context.go('/login');
-        } else {
-          context.go('/onboarding');
-        }
-      }
-    });
+    // Check existing session on startup
+    _checkInitialAuth();
+  }
+
+  Future<void> _checkInitialAuth() async {
+    await Future.delayed(const Duration(milliseconds: 1200));
+    if (!mounted) return;
+
+    final hasCompletedOnboarding = ref.read(onboardingProvider);
+    if (!hasCompletedOnboarding) {
+      context.go('/onboarding');
+      return;
+    }
+
+    // Attempt silent session recovery via stored refresh token/cookie
+    final isSessionRestored = await ref.read(authProvider.notifier).tryRestoreSession();
+    if (!mounted) return;
+
+    if (isSessionRestored) {
+      context.go('/overview');
+    } else {
+      context.go('/login');
+    }
   }
 
   @override

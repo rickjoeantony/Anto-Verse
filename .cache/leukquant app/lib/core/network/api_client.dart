@@ -1,4 +1,4 @@
-﻿// lib/core/network/api_client.dart
+// lib/core/network/api_client.dart
 
 import 'dart:async';
 import 'dart:convert';
@@ -7,7 +7,9 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
 import 'api_exception.dart';
 import 'api_interceptor.dart';
@@ -90,7 +92,13 @@ class ApiClient {
     if (_dio.httpClientAdapter is IOHttpClientAdapter) {
       (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
         final client = HttpClient();
-        client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+        // Strict security: In release mode, enforce full OS certificate chain verification.
+        // In local debug mode, allow self-signed certificates for local middle-man-3 staging nodes.
+        if (kDebugMode) {
+          client.badCertificateCallback = (X509Certificate cert, String host, int port) {
+            return host.contains('leukquant.com') || host == 'localhost' || host == '10.0.2.2';
+          };
+        }
         return client;
       };
     }
@@ -196,15 +204,18 @@ class ApiClient {
       }
 
       if (newJwt != null && newJwt.isNotEmpty) {
+        await _persistSessionCookies(response);
         _onTokenRefreshed?.call(newJwt);
         _refreshCompleter?.complete(newJwt);
         return newJwt;
       } else {
+        await clearPersistedSession();
         _onSessionExpired?.call();
         _refreshCompleter?.complete(null);
         return null;
       }
     } catch (_) {
+      await clearPersistedSession();
       _onSessionExpired?.call();
       _refreshCompleter?.complete(null);
       return null;
@@ -285,6 +296,9 @@ class ApiClient {
         queryParameters: queryParameters,
         options: options,
       );
+      if (isLogin && response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300) {
+        await _persistSessionCookies(response);
+      }
       _updateReachability(success: true);
       return response;
     } on DioException catch (e) {
@@ -427,13 +441,31 @@ class ApiClient {
   /// GET /api/dashboard/stats
   Future<Response<Map<String, dynamic>>> getDashboardStats() => get<Map<String, dynamic>>('/api/dashboard/stats');
 
-  /// GET /api/dashboard/events?limit=50
-  Future<Response<dynamic>> getDashboardEvents({int limit = 50, int page = 1}) =>
+  /// GET /api/dashboard/events?limit=500
+  Future<Response<dynamic>> getDashboardEvents({int limit = 500, int page = 1}) =>
       get<dynamic>('/api/dashboard/events', queryParameters: {'limit': limit, 'page': page});
 
-  /// GET /api/dashboard/attacks?limit=50
-  Future<Response<dynamic>> getDashboardAttacks({int limit = 50}) =>
+  /// GET /api/dashboard/attacks?limit=500
+  Future<Response<dynamic>> getDashboardAttacks({int limit = 500}) =>
       get<dynamic>('/api/dashboard/attacks', queryParameters: {'limit': limit});
+
+  /// GET /api/events (Complete Historical Log)
+  Future<Response<dynamic>> getHistoricalEvents({int limit = 500, int page = 1}) async {
+    try {
+      return await get<dynamic>('/api/events', queryParameters: {'limit': limit, 'page': page});
+    } catch (_) {
+      return await getDashboardEvents(limit: limit, page: page);
+    }
+  }
+
+  /// GET /api/attacks (Complete Historical Attacks)
+  Future<Response<dynamic>> getHistoricalAttacks({int limit = 500}) async {
+    try {
+      return await get<dynamic>('/api/attacks', queryParameters: {'limit': limit});
+    } catch (_) {
+      return await getDashboardAttacks(limit: limit);
+    }
+  }
 
   /// GET /api/events/:id
   Future<Response<Map<String, dynamic>>> getEventById(String id) => get<Map<String, dynamic>>('/api/events/$id');
@@ -445,10 +477,116 @@ class ApiClient {
   /// GET /api/reports
   Future<Response<dynamic>> getReports() => get<dynamic>('/api/reports');
 
+  /// POST /api/reports/generate or POST /api/reports
+  Future<Response<dynamic>> generateReport({
+    String type = 'weekly',
+    String period = '7d',
+    String format = 'PDF',
+    String? title,
+  }) async {
+    final body = {
+      'type': type,
+      'period': period,
+      'format': format,
+      'title': title ?? 'Threat Intelligence Audit Report ($period)',
+    };
+    try {
+      return await post<dynamic>('/api/reports/regenerate', data: body);
+    } catch (_) {
+      try {
+        return await post<dynamic>('/api/reports/generate', data: body);
+      } catch (_) {
+        return await post<dynamic>('/api/reports', data: body);
+      }
+    }
+  }
+
   /// POST /api/reports/:id/regenerate
   Future<Response<Map<String, dynamic>>> regenerateReport(String id) =>
       post<Map<String, dynamic>>('/api/reports/$id/regenerate');
 
+  /// GET /api/reports/:id/download (Binary PDF Stream)
+  Future<Response<List<int>>> downloadReportPdf(String id) =>
+      _dio.get<List<int>>(
+        '/api/reports/$id/download',
+        options: Options(
+          responseType: ResponseType.bytes,
+          headers: {'Accept': 'application/pdf'},
+        ),
+      );
+
+  /// POST /api/reports/verify (Cryptographic Watermark & HMAC Verification)
+  Future<Response<Map<String, dynamic>>> verifyReportWatermark(String watermark) =>
+      post<Map<String, dynamic>>('/api/reports/verify', data: {
+        'token': watermark,
+        'watermark': watermark,
+      });
+
   /// GET /api/ip/:ip/sessions
   Future<Response<dynamic>> getIpSessions(String ip) => get<dynamic>('/api/ip/$ip/sessions');
+
+  /// GET /api/geo/location
+  Future<Response<dynamic>> getGeoLocation([String? ip]) =>
+      get<dynamic>('/api/geo/location', queryParameters: ip != null ? {'ip': ip} : null);
+
+  // ==========================================
+  // SESSION COOKIE PERSISTENCE HELPERS
+  // ==========================================
+
+  Future<void> _persistSessionCookies(Response response) async {
+    try {
+      final setCookieHeaders = response.headers['set-cookie'];
+      final prefs = await SharedPreferences.getInstance();
+      if (setCookieHeaders != null && setCookieHeaders.isNotEmpty) {
+        await prefs.setStringList('leukquant_session_cookies', setCookieHeaders);
+      }
+
+      final data = response.data;
+      if (data is Map) {
+        final rf = data['refreshToken'] ??
+            data['refresh_token'] ??
+            (data['data'] is Map ? (data['data']['refreshToken'] ?? data['data']['refresh_token']) : null);
+        if (rf != null && rf.toString().isNotEmpty) {
+          _inMemoryRefreshToken = rf.toString();
+          await prefs.setString('leukquant_refresh_token', rf.toString());
+        }
+      }
+    } catch (_) {}
+  }
+
+  /// Restore persisted session cookies from SharedPreferences into CookieJar and refresh token field.
+  Future<bool> restorePersistedCookies() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedCookies = prefs.getStringList('leukquant_session_cookies');
+      final savedRefreshToken = prefs.getString('leukquant_refresh_token');
+
+      bool hasData = false;
+      if (savedCookies != null && savedCookies.isNotEmpty) {
+        final base = _dio.options.baseUrl.isNotEmpty ? _dio.options.baseUrl : 'https://api.leukquant.com';
+        final uri = Uri.parse(base);
+        final cookies = savedCookies.map((str) => Cookie.fromSetCookieValue(str)).toList();
+        await _cookieJar.saveFromResponse(uri, cookies);
+        hasData = true;
+      }
+      if (savedRefreshToken != null && savedRefreshToken.isNotEmpty) {
+        _inMemoryRefreshToken = savedRefreshToken;
+        hasData = true;
+      }
+      return hasData;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Clear persisted session on explicit logout or revocation.
+  Future<void> clearPersistedSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('leukquant_session_cookies');
+      await prefs.remove('leukquant_refresh_token');
+      await _cookieJar.deleteAll();
+      _inMemoryRefreshToken = null;
+    } catch (_) {}
+  }
 }

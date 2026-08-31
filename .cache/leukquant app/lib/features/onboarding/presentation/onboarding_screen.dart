@@ -9,6 +9,7 @@ import '../../../core/widgets/ambient_background.dart';
 import '../../../core/widgets/floating_3d_wrapper.dart';
 import '../../../core/widgets/glass/glass_card.dart';
 import '../../../core/widgets/leukquant_logo.dart';
+import '../../../core/widgets/lockscreen_setup_dialog.dart';
 import '../../../core/widgets/onboarding_illustrations.dart';
 import '../providers/onboarding_provider.dart';
 
@@ -57,10 +58,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Future<void> _finishOnboarding() async {
-    await ref.read(onboardingProvider.notifier).completeOnboarding();
-    if (mounted) {
-      context.go('/login');
-    }
+    // Show mandatory Lock-Screen & Alert Permissions Dialog before entering Login
+    await LockScreenSetupDialog.show(
+      context,
+      onComplete: () async {
+        await ref.read(onboardingProvider.notifier).completeOnboarding();
+        if (mounted) {
+          context.go('/login');
+        }
+      },
+    );
   }
 
   void _nextPage() {

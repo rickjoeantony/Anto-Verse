@@ -13,6 +13,13 @@ class Incident {
   final String scope;
   final String recommendedAction;
   final DateTime createdAt;
+  final String sourceIp;
+  final String country;
+  final String targetPort;
+  final String protocol;
+  final String payload;
+  final bool isBlocked;
+  final double abuseScore;
   final List<IncidentTimelineStage> timeline;
 
   const Incident({
@@ -25,6 +32,13 @@ class Incident {
     required this.scope,
     required this.recommendedAction,
     required this.createdAt,
+    this.sourceIp = '—',
+    this.country = 'Global',
+    this.targetPort = '—',
+    this.protocol = 'TCP',
+    this.payload = '—',
+    this.isBlocked = false,
+    this.abuseScore = 0.0,
     required this.timeline,
   });
 
@@ -38,6 +52,13 @@ class Incident {
     final assignee = (json['assignee'] ?? 'Security Operations Tier 2').toString();
     final scope = (json['scope'] ?? 'Honeynet Segment').toString();
     final action = (json['recommended_action'] ?? 'Review decoy sensor logs and apply ingress drop rules.').toString();
+    final sourceIp = (json['source_ip'] ?? json['sourceIP'] ?? json['src_ip'] ?? '—').toString();
+    final country = (json['country'] ?? 'Global').toString();
+    final targetPort = (json['target_port'] ?? json['destination_port'] ?? json['port'] ?? '—').toString();
+    final protocol = (json['protocol'] ?? 'TCP').toString().toUpperCase();
+    final payload = (json['payload'] ?? json['command'] ?? '—').toString();
+    final bool isBlocked = json['is_blocked'] == true || json['blocked'] == true;
+    final double abuseScore = (json['abuse_score'] is num) ? (json['abuse_score'] as num).toDouble() : 0.0;
 
     DateTime time;
     try {
@@ -75,6 +96,13 @@ class Incident {
       scope: scope,
       recommendedAction: action,
       createdAt: time,
+      sourceIp: sourceIp,
+      country: country,
+      targetPort: targetPort,
+      protocol: protocol,
+      payload: payload,
+      isBlocked: isBlocked,
+      abuseScore: abuseScore,
       timeline: stages,
     );
   }

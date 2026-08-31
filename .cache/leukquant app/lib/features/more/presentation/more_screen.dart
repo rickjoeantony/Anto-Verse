@@ -147,28 +147,88 @@ class MoreScreen extends ConsumerWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        width: 44,
+                        height: 44,
+                        padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: colors.brandPrimary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: colors.brandPrimary.withValues(alpha: 0.25),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                          border: Border.all(
+                            color: colors.brandPrimary.withValues(alpha: 0.3),
+                            width: 1.2,
+                          ),
                         ),
-                        child: Icon(Icons.info_outline_rounded, size: 18, color: colors.brandPrimary),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.asset(
+                            'assets/images/app_logo.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 12),
-                      Text(
-                        'About LeukQuant',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: colors.textPrimary,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  'LeukQuant Alpha',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                    color: colors.textPrimary,
+                                    letterSpacing: -0.3,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: colors.brandPrimary.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: colors.brandPrimary.withValues(alpha: 0.3)),
+                                  ),
+                                  child: Text(
+                                    'ALPHA',
+                                    style: TextStyle(
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: colors.brandPrimary,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Autonomous Threat Intelligence & Decoy Mesh',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color: colors.textSecondary.withValues(alpha: 0.8),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
-                  _buildInfoRow('Version', AppConstants.appVersion, colors),
-                  _buildInfoRow('Engine', 'LeukQuant Autonomous Defense v2026', colors),
-                  _buildInfoRow('Platform', 'iOS-Native Glass Architecture', colors),
+                  const SizedBox(height: 16),
+                  const Divider(height: 1),
+                  const SizedBox(height: 12),
+
+                  _buildInfoRow('Release Tier', 'LeukQuant Alpha v1.0.0 (Build 101)', colors),
+                  _buildInfoRow('Mobile Framework', 'Flutter 3.x · Liquid Glass UI', colors),
                 ],
               ),
             ),
@@ -286,12 +346,18 @@ class MoreScreen extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: TextStyle(fontSize: 12.5, color: colors.textSecondary)),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w600,
-              color: colors.textPrimary,
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: colors.textPrimary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
             ),
           ),
         ],

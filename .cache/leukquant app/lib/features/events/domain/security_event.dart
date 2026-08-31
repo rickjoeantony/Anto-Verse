@@ -40,6 +40,7 @@ class SecurityEvent {
   final String payload; // Sanitized, truncated safe preview
   final double abuseScore;
   final bool reviewed;
+  final bool isBlocked;
   final List<CredentialItem> credentials;
 
   // Compatibility / SOC analysis fields
@@ -63,6 +64,7 @@ class SecurityEvent {
     required this.payload,
     required this.abuseScore,
     required this.reviewed,
+    this.isBlocked = false,
     required this.credentials,
     required this.protocol,
     required this.destinationPort,
@@ -185,8 +187,9 @@ class SecurityEvent {
       abuseScore = (json['abuse_score'] as num).toDouble();
     }
 
-    // 9. Reviewed
+    // 9. Reviewed & Blocked status
     final bool reviewed = json['reviewed'] == true || json['is_reviewed'] == true;
+    final bool isBlocked = json['is_blocked'] == true || json['isBlocked'] == true || json['blocked'] == true;
 
     // 10. Credentials (Masked)
     final List<CredentialItem> credentialsList = [];
@@ -252,6 +255,7 @@ class SecurityEvent {
       payload: payload,
       abuseScore: abuseScore,
       reviewed: reviewed,
+      isBlocked: isBlocked,
       credentials: credentialsList,
       protocol: protocol,
       destinationPort: destinationPort,
@@ -264,6 +268,7 @@ class SecurityEvent {
   /// Create a copy with updated properties (e.g. reviewed status).
   SecurityEvent copyWith({
     bool? reviewed,
+    bool? isBlocked,
     int? threatLevel,
     String? recommendedAction,
   }) {
@@ -281,6 +286,7 @@ class SecurityEvent {
       payload: payload,
       abuseScore: abuseScore,
       reviewed: reviewed ?? this.reviewed,
+      isBlocked: isBlocked ?? this.isBlocked,
       credentials: credentials,
       protocol: protocol,
       destinationPort: destinationPort,

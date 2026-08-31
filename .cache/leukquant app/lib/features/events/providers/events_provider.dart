@@ -1,6 +1,7 @@
-﻿// lib/features/events/providers/events_provider.dart
+// lib/features/events/providers/events_provider.dart
 
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/services/notification_service.dart';
@@ -70,33 +71,55 @@ class EventsNotifier extends StateNotifier<AsyncValue<List<SecurityEvent>>> {
     });
   }
 
-  /// Initial load: GET /api/dashboard/events?limit=50
+  /// Comprehensive initial load: Aggregates all historical attack records across multiple pages and endpoints
   Future<void> fetchInitialEvents() async {
     state = const AsyncValue.loading();
     _currentPage = 1;
     _hasMore = true;
 
-    try {
-      final response = await _apiClient.getDashboardEvents(limit: 50, page: 1);
+    final Map<String, SecurityEvent> eventsMap = {};
 
-      final List<SecurityEvent> events = [];
-      final data = response.data;
-
+    void parseAndAdd(dynamic data) {
       if (data is List) {
         for (final item in data) {
           if (item is Map<String, dynamic>) {
-            events.add(SecurityEvent.fromJson(item));
+            final ev = SecurityEvent.fromJson(item);
+            eventsMap[ev.id] = ev;
           }
         }
-      } else if (data is Map<String, dynamic> && data['events'] is List) {
-        for (final item in data['events'] as List) {
-          if (item is Map<String, dynamic>) {
-            events.add(SecurityEvent.fromJson(item));
+      } else if (data is Map<String, dynamic>) {
+        final list = data['events'] ?? data['attacks'] ?? data['data'] ?? data['items'];
+        if (list is List) {
+          for (final item in list) {
+            if (item is Map<String, dynamic>) {
+              final ev = SecurityEvent.fromJson(item);
+              eventsMap[ev.id] = ev;
+            }
           }
         }
       }
+    }
 
-      state = AsyncValue.data(events);
+    try {
+      // Execute multi-source parallel fetch across all historical pages
+      final results = await Future.wait([
+        _apiClient.getDashboardEvents(limit: 500, page: 1),
+        _apiClient.getDashboardEvents(limit: 500, page: 2).catchError((_) => Response(requestOptions: RequestOptions(path: ''))),
+        _apiClient.getDashboardAttacks(limit: 500).catchError((_) => Response(requestOptions: RequestOptions(path: ''))),
+        _apiClient.getHistoricalEvents(limit: 500, page: 1).catchError((_) => Response(requestOptions: RequestOptions(path: ''))),
+        _apiClient.getHistoricalAttacks(limit: 500).catchError((_) => Response(requestOptions: RequestOptions(path: ''))),
+      ]);
+
+      for (final res in results) {
+        if (res.data != null) {
+          parseAndAdd(res.data);
+        }
+      }
+
+      final allEvents = eventsMap.values.toList()
+        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+      state = AsyncValue.data(allEvents);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -110,7 +133,7 @@ class EventsNotifier extends StateNotifier<AsyncValue<List<SecurityEvent>>> {
     final nextPage = _currentPage + 1;
 
     try {
-      final response = await _apiClient.getDashboardEvents(limit: 50, page: nextPage);
+      final response = await _apiClient.getDashboardEvents(limit: 100, page: nextPage);
 
       final List<SecurityEvent> newEvents = [];
       final data = response.data;
@@ -134,7 +157,14 @@ class EventsNotifier extends StateNotifier<AsyncValue<List<SecurityEvent>>> {
       } else {
         _currentPage = nextPage;
         final currentList = state.valueOrNull ?? [];
-        state = AsyncValue.data([...currentList, ...newEvents]);
+        final combined = [...currentList];
+        for (final item in newEvents) {
+          if (!combined.any((e) => e.id == item.id)) {
+            combined.add(item);
+          }
+        }
+        combined.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        state = AsyncValue.data(combined);
       }
     } catch (_) {
       // Keep existing list on page fetch failure

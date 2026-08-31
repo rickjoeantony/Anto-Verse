@@ -11,6 +11,7 @@ import '../../../core/widgets/ambient_background.dart';
 import '../../../core/widgets/glass/liquid_glass_card.dart';
 import '../../../core/widgets/glass/liquid_glass_button.dart';
 import '../../../core/widgets/leukquant_logo.dart';
+import '../../../core/widgets/lockscreen_setup_dialog.dart';
 import '../providers/auth_state_provider.dart';
 
 /// Liquid Glass login screen with secure credential handling and clear errors.
@@ -373,7 +374,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 18),
+
+                  // Lock-Screen & Notification setup button
+                  Center(
+                    child: InkWell(
+                      onTap: () => LockScreenSetupDialog.show(context),
+                      borderRadius: BorderRadius.circular(10),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.tune_rounded, size: 15, color: colors.brandPrimary),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Lock-Screen & Background Alerts Setup',
+                              style: TextStyle(
+                                color: colors.brandPrimary,
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
 
                   // Secure Enterprise Footer
                   Row(

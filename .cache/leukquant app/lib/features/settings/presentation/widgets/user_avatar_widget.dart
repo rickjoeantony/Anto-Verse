@@ -1,23 +1,66 @@
-﻿// lib/features/settings/presentation/widgets/user_avatar_widget.dart
+// lib/features/settings/presentation/widgets/user_avatar_widget.dart
 
+import 'dart:io';
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
 
 class CyberAvatarPreset {
   final String key;
   final String label;
-  final IconData icon;
+  final IconData? icon;
+  final String? imageAsset;
   final List<Color> gradient;
 
   const CyberAvatarPreset({
     required this.key,
     required this.label,
-    required this.icon,
+    this.icon,
+    this.imageAsset,
     required this.gradient,
   });
+
+  bool get isPhoto => imageAsset != null;
 }
 
 final List<CyberAvatarPreset> kCyberAvatarPresets = [
+  // ── PHOTO AVATARS ───────────────────────────────────────────
+  const CyberAvatarPreset(
+    key: 'anto',
+    label: 'Anto · Lead Architect',
+    imageAsset: 'assets/images/avatars/avatar_anto.png',
+    gradient: [Color(0xFF007AFF), Color(0xFF00D2FF)],
+  ),
+  const CyberAvatarPreset(
+    key: 'soc',
+    label: 'SOC Defense Commander',
+    imageAsset: 'assets/images/avatars/avatar_soc.png',
+    gradient: [Color(0xFF30D158), Color(0xFF64D2FF)],
+  ),
+  const CyberAvatarPreset(
+    key: 'sentinel_photo',
+    label: 'Cyber Sentinel',
+    imageAsset: 'assets/images/avatars/avatar_sentinel.png',
+    gradient: [Color(0xFF5E5CE6), Color(0xFFBF5AF2)],
+  ),
+  const CyberAvatarPreset(
+    key: 'falcon_photo',
+    label: 'Incident Responder',
+    imageAsset: 'assets/images/avatars/avatar_falcon.png',
+    gradient: [Color(0xFFFF3B30), Color(0xFFFF9500)],
+  ),
+  const CyberAvatarPreset(
+    key: 'quantum_photo',
+    label: 'Quantum Specialist',
+    imageAsset: 'assets/images/avatars/avatar_quantum.png',
+    gradient: [Color(0xFF0A84FF), Color(0xFF30B0C7)],
+  ),
+  const CyberAvatarPreset(
+    key: 'operator_photo',
+    label: 'Field Operator',
+    imageAsset: 'assets/images/avatars/avatar_operator.png',
+    gradient: [Color(0xFFFF9500), Color(0xFFFFD60A)],
+  ),
+
+  // ── ICON PRESETS ────────────────────────────────────────────
   const CyberAvatarPreset(
     key: 'shield',
     label: 'Cyber Shield',
@@ -95,7 +138,41 @@ class UserAvatarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isCustomFile = avatarKey != null &&
+        (avatarKey!.startsWith('/') || avatarKey!.contains(':\\') || avatarKey!.startsWith('file:'));
+
     final preset = _resolvePreset(avatarKey);
+
+    Widget innerContent;
+
+    if (isCustomFile) {
+      // User uploaded personal photo
+      final file = File(avatarKey!.replaceFirst('file://', ''));
+      if (file.existsSync()) {
+        innerContent = ClipOval(
+          child: Image.file(
+            file,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+          ),
+        );
+      } else {
+        innerContent = _buildFallbackContent(preset);
+      }
+    } else if (preset.isPhoto) {
+      // Preloaded Photo Portrait
+      innerContent = ClipOval(
+        child: Image.asset(
+          preset.imageAsset!,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+        ),
+      );
+    } else {
+      innerContent = _buildFallbackContent(preset);
+    }
 
     final avatarContent = Container(
       width: size,
@@ -118,26 +195,39 @@ class UserAvatarWidget extends StatelessWidget {
             : null,
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.35),
-          width: 1.5,
+          width: size > 40 ? 2.0 : 1.5,
         ),
       ),
-      child: Center(
-        child: Icon(
-          preset.icon,
-          color: Colors.white,
-          size: size * 0.52,
-        ),
-      ),
+      child: innerContent,
     );
 
     if (onTap != null) {
       return GestureDetector(
         onTap: onTap,
-        behavior: HitTestBehavior.opaque,
         child: avatarContent,
       );
     }
 
     return avatarContent;
+  }
+
+  Widget _buildFallbackContent(CyberAvatarPreset preset) {
+    return Center(
+      child: preset.icon != null
+          ? Icon(
+              preset.icon,
+              size: size * 0.52,
+              color: Colors.white,
+            )
+          : Text(
+              name.isNotEmpty ? name[0].toUpperCase() : 'A',
+              style: TextStyle(
+                fontSize: size * 0.44,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: -0.5,
+              ),
+            ),
+    );
   }
 }

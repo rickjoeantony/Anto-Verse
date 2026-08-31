@@ -1,4 +1,4 @@
-﻿import '../../../core/services/notification_service.dart';
+import '../../../core/services/notification_service.dart';
 // lib/features/overview/presentation/overview_screen.dart
 
 import 'dart:math' as math;
@@ -16,6 +16,7 @@ import '../../../core/theme/theme_controller.dart';
 import '../../../core/websocket/websocket_service.dart';
 import '../../../core/widgets/animated_metric_card.dart';
 import '../../../core/widgets/error_state_view.dart';
+import '../../../core/widgets/leukquant_logo.dart';
 import '../../../core/widgets/responsive_layout.dart';
 import '../../../core/widgets/security_posture_hero.dart';
 import '../../../core/widgets/shimmer_skeleton.dart';
@@ -32,6 +33,7 @@ import '../../settings/presentation/widgets/edit_profile_sheet.dart';
 import 'widgets/analytics_charts.dart';
 import 'widgets/recent_activity_list.dart';
 import 'widgets/recommended_action_card.dart';
+import 'widgets/threat_map_card.dart';
 
 /// Clean Warm Minimalist Security Overview Screen for LeukQuant.
 String _formatRelativeTime(DateTime dt) {
@@ -531,6 +533,16 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
 
             const SizedBox(height: 14),
 
+            // Live Global Geolocation Threat Radar
+            RepaintBoundary(
+              child: const ThreatMapCard()
+                  .animate(target: isReducedMotion ? 0 : 1)
+                  .fadeIn(duration: 400.ms, delay: 270.ms)
+                  .slideY(begin: 0.05, end: 0, duration: 400.ms),
+            ),
+
+            const SizedBox(height: 14),
+
             RepaintBoundary(
               child: RecentActivityList(
                 activities: () {
@@ -544,7 +556,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                         protocol: e.protocol,
                         timestamp: timeStr,
                         severity: e.severity,
-                        description: '${e.sourceIp} â€¢ ${e.country}',
+                        description: '${e.sourceIp} · ${e.country.isNotEmpty ? e.country : 'Local Network'}',
                       );
                     }).toList();
                   }

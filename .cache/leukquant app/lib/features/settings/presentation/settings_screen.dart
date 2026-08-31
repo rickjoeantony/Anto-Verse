@@ -10,6 +10,7 @@ import '../../../core/theme/theme_controller.dart';
 import '../../../core/widgets/custom_app_bar.dart';
 import '../../../core/widgets/glass/liquid_glass_card.dart';
 import '../../../core/widgets/ios26_switch.dart';
+import '../../../core/widgets/lockscreen_setup_dialog.dart';
 import '../../auth/providers/auth_state_provider.dart';
 import '../providers/settings_provider.dart';
 import 'widgets/profile_card.dart';
@@ -207,31 +208,76 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 14),
+                  const Divider(height: 1),
+                  const SizedBox(height: 14),
+
+                  // Lock-Screen & Alarm Setup Trigger
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: BorderSide(color: colors.brandPrimary.withValues(alpha: 0.5), width: 1.2),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      onPressed: () => LockScreenSetupDialog.show(context),
+                      icon: Icon(Icons.screen_lock_portrait_rounded, size: 18, color: colors.brandPrimary),
+                      label: Text(
+                        'Configure Lock-Screen & Background Alerts',
+                        style: TextStyle(
+                          color: colors.brandPrimary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ).animate().fadeIn(duration: 350.ms, delay: 100.ms),
             const SizedBox(height: 14),
 
-            // Application Information
+            // Application Information (LeukQuant Alpha Version)
             LiquidGlassCard(
               cornerRadius: 24.0,
               padding: const EdgeInsets.all(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Application Information',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: colors.textPrimary,
-                      fontSize: 15,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Application Information',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: colors.textPrimary,
+                          fontSize: 15,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
+                        decoration: BoxDecoration(
+                          color: colors.brandPrimary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: colors.brandPrimary.withValues(alpha: 0.3)),
+                        ),
+                        child: Text(
+                          'ALPHA PREVIEW',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: colors.brandPrimary,
+                            letterSpacing: 0.6,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  _buildInfoRow('Version', AppConstants.appVersion, colors, theme),
-                  _buildInfoRow('Platform', 'Android First · Material 3', colors, theme),
-                  _buildInfoRow('Engine Mode', 'Real Staging API Client', colors, theme),
-                  _buildInfoRow('Admin Portal', 'Web Portal Only (Restricted)', colors, theme),
+                  const SizedBox(height: 14),
+                  _buildInfoRow('Release Tier', 'LeukQuant Alpha v1.0.0 (Build 101)', colors, theme),
+                  _buildInfoRow('Mobile Framework', 'Flutter 3.x · Liquid Glass UI', colors, theme),
                 ],
               ),
             ).animate().fadeIn(duration: 350.ms, delay: 150.ms),
@@ -296,11 +342,17 @@ class SettingsScreen extends ConsumerWidget {
               color: colors.textSecondary,
             ),
           ),
-          Text(
-            value,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colors.textPrimary,
-              fontWeight: FontWeight.w600,
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              value,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colors.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
             ),
           ),
         ],
