@@ -6,6 +6,8 @@ void main() {
     test('Correctly parses strings into SeverityLevel enum', () {
       expect(SeverityLevel.fromString('critical'), equals(SeverityLevel.critical));
       expect(SeverityLevel.fromString('HIGH'), equals(SeverityLevel.high));
+      expect(SeverityLevel.fromString('medium'), equals(SeverityLevel.warning));
+      expect(SeverityLevel.fromString('med'), equals(SeverityLevel.warning));
       expect(SeverityLevel.fromString('warning'), equals(SeverityLevel.warning));
       expect(SeverityLevel.fromString('warn'), equals(SeverityLevel.warning));
       expect(SeverityLevel.fromString('info'), equals(SeverityLevel.info));

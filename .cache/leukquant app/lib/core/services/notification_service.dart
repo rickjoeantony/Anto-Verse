@@ -1,12 +1,14 @@
 // lib/core/services/notification_service.dart
 
-import 'dart:typed_data';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../features/events/domain/security_event.dart';
+import '../../features/events/domain/severity_level.dart';
 
-/// Service managing real-time Android system push & local notifications with audio alert chimes.
+/// Service managing real-time cross-platform (Android & iOS) push & local notifications
+/// with loud audio alert chimes, lockscreen banners, and background wake capabilities.
 class NotificationService {
   NotificationService._();
   static final NotificationService instance = NotificationService._();
@@ -15,44 +17,91 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
 
-  static const String _channelId = 'leukquant_threat_telemetry_v10';
-  static const String _channelName = 'Critical Security Alerts';
-  static const String _channelDescription =
-      'Real-time audible alerts when honeypot sensors or decoy traps detect unauthorized ingress.';
+  static const String _criticalChannelId = 'leukquant_critical_telemetry_v11';
+  static const String _criticalChannelName = '🚨 Critical & High Security Alerts';
+  static const String _criticalChannelDescription =
+      'Real-time loud alerts for Critical and High risk intrusion attempts that wake the lock screen.';
+
+  static const String _mediumChannelId = 'leukquant_medium_telemetry_v11';
+  static const String _mediumChannelName = '🔶 Medium Risk Security Alerts';
+  static const String _mediumChannelDescription =
+      'Immediate notifications for Medium risk intrusion events, honeypot probes, and decoy touches.';
 
   Future<void> init() async {
     if (_isInitialized) return;
 
     try {
       const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-      const initSettings = InitializationSettings(android: androidSettings);
+      const darwinSettings = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+        requestCriticalPermission: true,
+        defaultPresentAlert: true,
+        defaultPresentSound: true,
+        defaultPresentBadge: true,
+      );
+
+      const initSettings = InitializationSettings(
+        android: androidSettings,
+        iOS: darwinSettings,
+        macOS: darwinSettings,
+      );
 
       await _plugin.initialize(
         initSettings,
         onDidReceiveNotificationResponse: (details) {
-          // In-app deep link or navigation
+          // Navigation or deep linking when notification is clicked
         },
       );
 
+      // Android Notification Channels Configuration
       final androidImpl = _plugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
 
       if (androidImpl != null) {
         await androidImpl.requestNotificationsPermission();
 
-        final vibrationPattern = Int64List.fromList([0, 300, 150, 300]);
-        final channel = AndroidNotificationChannel(
-          _channelId,
-          _channelName,
-          description: _channelDescription,
+        final criticalVibration = Int64List.fromList([0, 500, 200, 500, 200, 500]);
+        final criticalChannel = AndroidNotificationChannel(
+          _criticalChannelId,
+          _criticalChannelName,
+          description: _criticalChannelDescription,
           importance: Importance.max,
           enableVibration: true,
-          vibrationPattern: vibrationPattern,
+          vibrationPattern: criticalVibration,
           playSound: true,
           enableLights: true,
           showBadge: true,
         );
-        await androidImpl.createNotificationChannel(channel);
+
+        final mediumVibration = Int64List.fromList([0, 300, 150, 300]);
+        final mediumChannel = AndroidNotificationChannel(
+          _mediumChannelId,
+          _mediumChannelName,
+          description: _mediumChannelDescription,
+          importance: Importance.high,
+          enableVibration: true,
+          vibrationPattern: mediumVibration,
+          playSound: true,
+          enableLights: true,
+          showBadge: true,
+        );
+
+        await androidImpl.createNotificationChannel(criticalChannel);
+        await androidImpl.createNotificationChannel(mediumChannel);
+      }
+
+      // iOS Permission Request
+      final iosImpl = _plugin.resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
+      if (iosImpl != null) {
+        await iosImpl.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+          critical: true,
+        );
       }
     } catch (e) {
       debugPrint('[NotificationService] Init error: $e');
@@ -61,50 +110,97 @@ class NotificationService {
     _isInitialized = true;
   }
 
-  /// Play audible alert sound via native Android audio bridge
+  /// Play audible alert sound via native audio bridge or platform fallback
   Future<void> playTone(String type) async {
     try {
       await _nativeChannel.invokeMethod('playAlertTone', {'type': type});
     } catch (_) {
-      await SystemSound.play(SystemSoundType.alert);
-      await HapticFeedback.heavyImpact();
+      try {
+        await SystemSound.play(SystemSoundType.alert);
+        await HapticFeedback.heavyImpact();
+      } catch (_) {}
     }
   }
 
   /// Trigger real-time mobile notification when an attack is logged
+  /// Optimized for Medium, High, and Critical Risk attacks on locked screens & closed apps.
   Future<void> showAttackNotification(SecurityEvent event) async {
     try {
       final int notifId = event.id.hashCode & 0x7fffffff;
       final typeStr = _formatEventType(event.type.isNotEmpty ? event.type : event.classification);
-      final title = 'Critical Alert: $typeStr Ingress';
-      final portStr = event.destinationPort.isNotEmpty ? event.destinationPort : (event.protocol.isNotEmpty ? event.protocol : '22');
-      final body = 'Attacker IP: ${event.sourceIp} (${event.country.isNotEmpty ? event.country : "Unknown"}) · Port: $portStr · Severity: ${event.severity.name.toUpperCase()}';
+      final portStr = event.destinationPort.isNotEmpty
+          ? event.destinationPort
+          : (event.protocol.isNotEmpty ? event.protocol : '22');
 
-      // 1. Post via native Android bridge
+      final bool isCritical = event.severity == SeverityLevel.critical || event.threatLevel >= 4;
+      final bool isHigh = event.severity == SeverityLevel.high || event.threatLevel == 3;
+      final bool isMedium = event.severity == SeverityLevel.warning || event.threatLevel == 2;
+
+      String title;
+      String toneType;
+      String channelId;
+      String channelName;
+      String channelDesc;
+
+      if (isCritical) {
+        title = '🚨 CRITICAL ATTACK: $typeStr Ingress';
+        toneType = 'cyberRadar';
+        channelId = _criticalChannelId;
+        channelName = _criticalChannelName;
+        channelDesc = _criticalChannelDescription;
+      } else if (isHigh) {
+        title = '⚠️ HIGH-RISK ALERT: $typeStr Detected';
+        toneType = 'tacticalPulse';
+        channelId = _criticalChannelId;
+        channelName = _criticalChannelName;
+        channelDesc = _criticalChannelDescription;
+      } else if (isMedium) {
+        title = '🔶 MEDIUM-RISK: $typeStr Logged';
+        toneType = 'enterprisePing';
+        channelId = _mediumChannelId;
+        channelName = _mediumChannelName;
+        channelDesc = _mediumChannelDescription;
+      } else {
+        title = '🛡️ LeukQuant Alert: $typeStr';
+        toneType = 'enterprisePing';
+        channelId = _mediumChannelId;
+        channelName = _mediumChannelName;
+        channelDesc = _mediumChannelDescription;
+      }
+
+      final body =
+          'Source IP: ${event.sourceIp} (${event.country.isNotEmpty ? event.country : "Unknown"}) · Port: $portStr · Severity: ${event.severity.displayName.toUpperCase()}';
+
+      // 1. Try native platform bridge (handles screen wakeup and alarm stream)
       try {
         await _nativeChannel.invokeMethod('postAlertNotification', {
           'id': notifId,
           'title': title,
           'body': body,
+          'severity': event.severity.name,
+          'isCritical': isCritical || isHigh,
         });
         return;
       } catch (_) {}
 
-      // 2. Fallback via FlutterLocalNotificationsPlugin
+      // 2. Fallback via FlutterLocalNotificationsPlugin with Lock-Screen & Background setup
       if (!_isInitialized) await init();
 
-      final vibrationPattern = Int64List.fromList([0, 500, 200, 500, 200, 500]);
+      final vibrationPattern = isCritical || isHigh
+          ? Int64List.fromList([0, 500, 200, 500, 200, 500])
+          : Int64List.fromList([0, 300, 150, 300]);
+
       final androidDetails = AndroidNotificationDetails(
-        _channelId,
-        _channelName,
-        channelDescription: _channelDescription,
-        importance: Importance.max,
-        priority: Priority.max,
+        channelId,
+        channelName,
+        channelDescription: channelDesc,
+        importance: isCritical || isHigh ? Importance.max : Importance.high,
+        priority: isCritical || isHigh ? Priority.max : Priority.high,
         fullScreenIntent: true,
         visibility: NotificationVisibility.public,
         category: AndroidNotificationCategory.alarm,
         audioAttributesUsage: AudioAttributesUsage.alarm,
-        ticker: 'Critical Attack Logged',
+        ticker: title,
         icon: '@mipmap/ic_launcher',
         enableVibration: true,
         vibrationPattern: vibrationPattern,
@@ -114,19 +210,33 @@ class NotificationService {
         styleInformation: BigTextStyleInformation(
           body,
           contentTitle: title,
-          summaryText: 'LeukQuant Autonomous SOC',
+          summaryText: 'LeukQuant SOC Security Alert',
         ),
+      );
+
+      final darwinDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        interruptionLevel: (isCritical || isHigh)
+            ? InterruptionLevel.critical
+            : InterruptionLevel.timeSensitive,
+        subtitle: isCritical ? 'CRITICAL SOC ALERT' : (isHigh ? 'HIGH RISK ALERT' : 'MEDIUM RISK ALERT'),
       );
 
       await _plugin.show(
         notifId,
         title,
         body,
-        NotificationDetails(android: androidDetails),
+        NotificationDetails(
+          android: androidDetails,
+          iOS: darwinDetails,
+          macOS: darwinDetails,
+        ),
         payload: event.id,
       );
 
-      await playTone('cyberRadar');
+      await playTone(toneType);
     } catch (e) {
       debugPrint('[NotificationService] Show attack notification error: $e');
     }
@@ -138,12 +248,14 @@ class NotificationService {
       const title = '⚡ Test Alert: SSH Decoy Ingress';
       const body = 'Target: SSH Decoy (Port 22) • Attacker IP: 192.168.1.105 (US) • Action: Isolated & Logged';
 
-      // 1. Dispatch via native Android bridge
+      // 1. Dispatch via native bridge
       try {
         await _nativeChannel.invokeMethod('postAlertNotification', {
           'id': 88888,
           'title': title,
           'body': body,
+          'severity': 'high',
+          'isCritical': true,
         });
         return;
       } catch (_) {}
@@ -153,9 +265,9 @@ class NotificationService {
 
       final vibrationPattern = Int64List.fromList([0, 500, 200, 500, 200, 500]);
       final androidDetails = AndroidNotificationDetails(
-        _channelId,
-        _channelName,
-        channelDescription: _channelDescription,
+        _criticalChannelId,
+        _criticalChannelName,
+        channelDescription: _criticalChannelDescription,
         importance: Importance.max,
         priority: Priority.max,
         fullScreenIntent: true,
@@ -176,11 +288,23 @@ class NotificationService {
         ),
       );
 
+      const darwinDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        interruptionLevel: InterruptionLevel.timeSensitive,
+        subtitle: 'Test Security Alert',
+      );
+
       await _plugin.show(
         88888,
         title,
         body,
-        NotificationDetails(android: androidDetails),
+        NotificationDetails(
+          android: androidDetails,
+          iOS: darwinDetails,
+          macOS: darwinDetails,
+        ),
         payload: 'test_alert',
       );
 

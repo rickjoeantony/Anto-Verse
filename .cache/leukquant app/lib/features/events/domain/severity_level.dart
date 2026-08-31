@@ -17,6 +17,8 @@ enum SeverityLevel {
         return SeverityLevel.critical;
       case 'high':
         return SeverityLevel.high;
+      case 'medium':
+      case 'med':
       case 'warning':
       case 'warn':
         return SeverityLevel.warning;

@@ -22,8 +22,8 @@ dependencies:
   shared_preferences: ^2.3.3
   google_fonts: ^6.2.1
   flutter_local_notifications: ^17.2.3
-  path_provider: ^2.1.5
-  share_plus: ^10.1.4
+  path_provider: ^2.1.6
+  share_plus: ^13.3.0
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
   image_picker: ^1.1.2

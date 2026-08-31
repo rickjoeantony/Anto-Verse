@@ -18,24 +18,23 @@ class AppConfig {
   AppConfig._();
 
   /// REST API Base URL injected via --dart-define=API_BASE_URL=...
-  /// Defaults to empty string to prevent accidental connections in development builds.
+  /// Defaults to production backend: https://api.leukquant.com
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: '',
+    defaultValue: 'https://api.leukquant.com',
   );
 
   /// WebSocket Stream Base URL injected via --dart-define=WS_BASE_URL=...
-  /// Defaults to empty string to prevent accidental connections in development builds.
+  /// Defaults to production websocket: wss://api.leukquant.com
   static const String wsBaseUrl = String.fromEnvironment(
     'WS_BASE_URL',
-    defaultValue: '',
+    defaultValue: 'wss://api.leukquant.com',
   );
 
   /// Explicit environment string injected via --dart-define=APP_ENV=...
-  /// Defaults to empty string to prevent accidental local mode in release builds.
   static const String appEnv = String.fromEnvironment(
     'APP_ENV',
-    defaultValue: '',
+    defaultValue: 'production',
   );
 
   /// Effective environment considering build mode:

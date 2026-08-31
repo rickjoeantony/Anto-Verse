@@ -28,7 +28,8 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.leukquant.app/audio_alerts"
-    private val NOTIF_CHANNEL_ID = "leukquant_threat_telemetry_v10"
+    private val NOTIF_CRITICAL_CHANNEL_ID = "leukquant_critical_telemetry_v11"
+    private val NOTIF_MEDIUM_CHANNEL_ID = "leukquant_medium_telemetry_v11"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +56,7 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        createHighPriorityNotificationChannel()
+        createNotificationChannels()
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
@@ -65,10 +66,12 @@ class MainActivity : FlutterActivity() {
                     result.success(true)
                 }
                 "postAlertNotification" -> {
-                    val title = call.argument<String>("title") ?: "⚡ Critical Attack Detected"
-                    val body = call.argument<String>("body") ?: "Unauthorized decoy ingress detected."
+                    val title = call.argument<String>("title") ?: "⚡ Security Alert Detected"
+                    val body = call.argument<String>("body") ?: "Decoy sensor activity detected."
                     val notifId = call.argument<Int>("id") ?: 99991
-                    postNativeNotification(notifId, title, body)
+                    val isCritical = call.argument<Boolean>("isCritical") ?: true
+                    val severity = call.argument<String>("severity") ?: "high"
+                    postNativeNotification(notifId, title, body, isCritical, severity)
                     result.success(true)
                 }
                 "openNotificationSettings" -> {
@@ -164,24 +167,32 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun createHighPriorityNotificationChannel() {
+    private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+            val alarmSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
                 ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-            val audioAttributes = AudioAttributes.Builder()
+            val notifSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+
+            val alarmAudioAttributes = AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_ALARM)
                 .build()
 
-            val channel = NotificationChannel(
-                NOTIF_CHANNEL_ID,
-                "LeukQuant Critical Ingress Telemetry",
+            val notifAudioAttributes = AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                .build()
+
+            // 1. Critical & High Alert Channel
+            val criticalChannel = NotificationChannel(
+                NOTIF_CRITICAL_CHANNEL_ID,
+                "🚨 Critical & High Telemetry Ingress",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Audible high-priority alerts for honeypot intrusions and canary access that wake screen."
+                description = "Loud audible alarm alerts for Critical and High risk honeypot intrusions and canary breaches."
                 enableVibration(true)
                 vibrationPattern = longArrayOf(0, 500, 200, 500, 200, 500)
-                setSound(soundUri, audioAttributes)
+                setSound(alarmSoundUri, alarmAudioAttributes)
                 enableLights(true)
                 lightColor = android.graphics.Color.RED
                 setShowBadge(true)
@@ -189,8 +200,25 @@ class MainActivity : FlutterActivity() {
                 setBypassDnd(true)
             }
 
+            // 2. Medium Alert Channel
+            val mediumChannel = NotificationChannel(
+                NOTIF_MEDIUM_CHANNEL_ID,
+                "🔶 Medium-Risk Telemetry Ingress",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Immediate alerts for Medium risk decoy reconnaissance, port scans, and telemetry spikes."
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 300, 150, 300)
+                setSound(notifSoundUri, notifAudioAttributes)
+                enableLights(true)
+                lightColor = android.graphics.Color.YELLOW
+                setShowBadge(true)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            }
+
             val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            manager.createNotificationChannel(channel)
+            manager.createNotificationChannel(criticalChannel)
+            manager.createNotificationChannel(mediumChannel)
         }
     }
 
@@ -232,7 +260,7 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun postNativeNotification(id: Int, title: String, body: String) {
+    private fun postNativeNotification(id: Int, title: String, body: String, isCritical: Boolean, severity: String) {
         try {
             // 1. Wake up the locked screen immediately
             val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -256,10 +284,25 @@ class MainActivity : FlutterActivity() {
                 PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
             )
 
-            val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-                ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            val channelId = if (isCritical || severity.equals("critical", true) || severity.equals("high", true)) {
+                NOTIF_CRITICAL_CHANNEL_ID
+            } else {
+                NOTIF_MEDIUM_CHANNEL_ID
+            }
 
-            val builder = NotificationCompat.Builder(applicationContext, NOTIF_CHANNEL_ID)
+            val soundUri = if (isCritical) {
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+            } else {
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            }
+
+            val vibrationPattern = if (isCritical) {
+                longArrayOf(0, 500, 200, 500, 200, 500)
+            } else {
+                longArrayOf(0, 300, 150, 300)
+            }
+
+            val builder = NotificationCompat.Builder(applicationContext, channelId)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title)
                 .setContentText(body)
@@ -268,7 +311,7 @@ class MainActivity : FlutterActivity() {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setSound(soundUri)
-                .setVibrate(longArrayOf(0, 500, 200, 500, 200, 500))
+                .setVibrate(vibrationPattern)
                 .setFullScreenIntent(pendingIntent, true)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
@@ -276,8 +319,8 @@ class MainActivity : FlutterActivity() {
             val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.notify(id, builder.build())
 
-            // 3. Play loud audible alarm tone
-            playNativeAlertTone("cyberRadar")
+            // 3. Play audible tone
+            playNativeAlertTone(if (isCritical) "cyberRadar" else "enterprisePing")
         } catch (e: Exception) {
             e.printStackTrace()
         }

@@ -111,7 +111,7 @@ class ApiClient {
   CookieJar get cookieJar => _cookieJar;
 
   void _checkConfiguration() {
-    if (!AppConfig.isConfigured) {
+    if (_dio.options.baseUrl.isEmpty || !AppConfig.isConfigured) {
       throw ApiException(
         message: AppConfig.configurationError ?? AppConfig.notConfiguredNotice,
         errorType: ApiErrorCode.backendUnavailable,
